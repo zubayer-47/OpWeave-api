@@ -1,7 +1,6 @@
 import { compare } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { sign } from 'jsonwebtoken'
-import { checkDir, upload } from 'src/libs/file'
 import {
   getUserByUsername
 } from 'src/repos/user'
@@ -55,7 +54,7 @@ class UserController extends BaseController {
    */
   public routes() {
     // auth
-    this.router.post('/signup', checkDir, upload.single('avater'), this._create)
+    this.router.post('/signup', this._create)
     this.router.post('/signin', this._login)
 
     // this._showRoutes()
