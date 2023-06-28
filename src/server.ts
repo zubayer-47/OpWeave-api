@@ -1,15 +1,14 @@
-import cookieParser from 'cookie-parser'
-import express, { NextFunction, Request, Response } from 'express'
-import cors from 'cors'
-import helmet from 'helmet'
 import compression from 'compression'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
+import express, { NextFunction, Request, Response } from 'express'
+import helmet from 'helmet'
 import hpp from 'hpp'
-import corsOptions from './libs/cors'
-import { createHttpTerminator, HttpTerminator } from 'http-terminator'
-import { createServer, Server as HttpServer } from 'http'
-import userController from './controllers/user.controller'
-import chatController from './controllers/chat.controller'
+import { Server as HttpServer, createServer } from 'http'
+import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
+import userController from './controllers/user.controller'
+import corsOptions from './libs/cors'
 
 class ExpressServer {
   public express: express.Application
@@ -46,7 +45,6 @@ class ExpressServer {
     })
 
     this.express.use('/v1/users/', userController.router)
-    this.express.use('/v1/chats/', chatController.router)
   }
 
   private _errorRoutes(): void {
