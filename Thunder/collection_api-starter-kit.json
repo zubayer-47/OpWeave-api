@@ -1,0 +1,104 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "api-starter-kit",
+    "dateExported": "2023-07-07T01:36:48.139Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "65d92ff3-5dac-432e-8691-4c2a1598b1bc",
+            "name": "User",
+            "containerId": "",
+            "created": "2023-07-06T22:52:24.987Z",
+            "sortNum": 10000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "22384209-a87a-4c94-a09f-7bb75fea41f6",
+            "colId": "3cdab2b1-b136-414e-9419-b32509174c19",
+            "containerId": "65d92ff3-5dac-432e-8691-4c2a1598b1bc",
+            "name": "Create User",
+            "url": "/users/signup",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-07-06T22:46:22.991Z",
+            "modified": "2023-07-07T01:13:05.694Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"fullname\":\"{{#name}}\",\n  \"username\":\"{{#name}}_{{#number}}\",\n  \"email\":\"{{#email}}\",\n  \"password\":\"password\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "cookie._token",
+                    "action": "setto",
+                    "value": "{{token}}"
+                }
+            ]
+        },
+        {
+            "_id": "d4ab2030-d54d-4196-93a9-88f1338bf8c4",
+            "colId": "3cdab2b1-b136-414e-9419-b32509174c19",
+            "containerId": "65d92ff3-5dac-432e-8691-4c2a1598b1bc",
+            "name": "Login",
+            "url": "/users/signin",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-07-06T22:46:08.745Z",
+            "modified": "2023-07-07T01:14:00.013Z",
+            "headers": [
+                {
+                    "name": "Content-Type",
+                    "value": "application/json"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\":\"Cruickshank_964623\",\n  \"password\":\"password\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "cookie._token",
+                    "action": "setto",
+                    "value": "{{token}}"
+                }
+            ]
+        },
+        {
+            "_id": "94f05136-cfe4-44c0-9011-e33f94728776",
+            "colId": "3cdab2b1-b136-414e-9419-b32509174c19",
+            "containerId": "65d92ff3-5dac-432e-8691-4c2a1598b1bc",
+            "name": "Profile",
+            "url": "/users",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-07-07T01:20:40.613Z",
+            "modified": "2023-07-07T01:26:11.278Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        }
+    ],
+    "settings": {
+        "options": {
+            "baseUrl": "{{base_uri}}"
+        },
+        "envId": "f3838406-1c91-49a9-87b5-50331f6443dd"
+    }
+}
