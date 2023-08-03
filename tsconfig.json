@@ -7,7 +7,6 @@
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "importHelpers": true,
-    "jsx": "react",
     "alwaysStrict": true,
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
@@ -21,6 +20,8 @@
     "noImplicitThis": false,
     "strictNullChecks": false,
     "outDir": "./build",
+    "removeComments": true,
+    "noEmitOnError": true,
     "baseUrl": "./",
     "paths": {
       "src/*": ["src/*"],
