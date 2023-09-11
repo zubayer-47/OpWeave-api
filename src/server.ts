@@ -9,6 +9,7 @@ import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
 import userController from './controllers/user.controller'
 import corsOptions from './libs/cors'
+import { sysLog } from './libs/logger'
 
 class ExpressServer {
   public express: express.Application
@@ -60,20 +61,26 @@ class ExpressServer {
       }
       res.status(500).send('Server not responding')
 
-      if (process.env.NODE_ENV !== 'production') console.log('Error encountered:', err.stack || err)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('Error encountered:', err.stack || err)
+      } else {
+        sysLog.error(err.stack || err)
+      }
       if (err?.message === 'cors') return res.end('Not allowed by CORS')
       //   return next(err)
     })
 
-    this.express.use((_err: Error, _req: Request, _res: Response) => {
+    this.express.use((err: Error, _req: Request, _res: Response) => {
       // Your error handler ...
-      console.log('Error XYZ:', _err.message || _err)
+      sysLog.warn(err.message || err)
+      // console.log('Error XYZ:', _err.message || _err)
     })
   }
 
   public start(): void {
     this.server.listen(this.express.get('port'), () => {
-      console.log(`Server listening on http://localhost:${this.express.get('port')}`)
+      // console.log(`Server listening on http://localhost:${this.express.get('port')}`)
+      sysLog.info(`Server listening on http://localhost:${this.express.get('port')}`)
     })
   }
 }
