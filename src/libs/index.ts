@@ -13,3 +13,21 @@ export const verifyToken = (token: string): JWTType => {
   const decode: unknown = verify(token, process.env?.JWT_SECRET)
   return decode as JWTType
 }
+
+export const randomToken = (length = 11) => {
+  const alpha = 'abcdefghijklmnopqrstuvwxyz'
+  const numaric = '0123456789'
+  const special = '_-'
+
+  const characters1 = alpha + alpha.toUpperCase() + numaric
+  const characters2 = alpha + special + alpha.toUpperCase() + numaric
+  let token = ''
+  for (let i = 0; i < length; i++) {
+    if (i === 0) {
+      token += characters1.charAt(Math.floor(Math.random() * characters1.length))
+    } else {
+      token += characters2.charAt(Math.floor(Math.random() * characters2.length))
+    }
+  }
+  return token.replace(/-$/, characters1.charAt(Math.floor(Math.random() * characters1.length)))
+}
