@@ -2,7 +2,7 @@ import prismadb from 'src/libs/prismadb'
 
 export const checkUniqueUsername = (username: string) =>
   prismadb.user.findFirst({
-    select: { id: true },
+    select: { user_id: true },
     where: {
       username
     }
@@ -10,7 +10,7 @@ export const checkUniqueUsername = (username: string) =>
 
 export const checkUniqueEmail = (email: string) =>
   prismadb.user.findFirst({
-    select: { id: true },
+    select: { user_id: true },
     where: {
       email
     }
@@ -18,7 +18,7 @@ export const checkUniqueEmail = (email: string) =>
 
 export const getUserByUsername = (username: string) =>
   prismadb.user.findFirst({
-    select: { id: true, password: true },
+    select: { user_id: true, password: true },
     where: {
       username
     }
@@ -30,14 +30,14 @@ export const getAvaterByUserId = (userId: string) =>
       avatar: true
     },
     where: {
-      id: userId
+      user_id: userId
     }
   })
 
 export const getCurrentUser = (userId: string) =>
   prismadb.user.findFirst({
     where: {
-      id: userId
+      user_id: userId
     },
     select: {
       fullname: true,

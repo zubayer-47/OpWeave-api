@@ -71,16 +71,16 @@ class UserController extends BaseController {
           password: hashedPassword
         },
         select: {
-          id: true
+          user_id: true
         }
       })
-      const token = sign({ aud: user?.id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
+      const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
       // response the final data
-      res.json({ id: user.id, ...data, token })
+      res.json({ id: user.user_id, ...data, token })
     } catch (error: any) {
       next(error)
     }
@@ -107,14 +107,14 @@ class UserController extends BaseController {
         return
       }
 
-      const profile = await getCurrentUser(user.id)
-      const token = sign({ aud: user?.id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
+      const profile = await getCurrentUser(user.user_id)
+      const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
 
-      res.json({ id: user?.id, ...profile, token })
+      res.json({ id: user?.user_id, ...profile, token })
     } catch (error) {
       next(error)
     }
