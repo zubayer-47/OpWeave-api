@@ -1,12 +1,14 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
 
-export default class BaseController {
+export default abstract class BaseController {
   public router: Router
 
   constructor() {
     this.router = Router()
   }
+
+  abstract configureRoutes(): void
 
   protected _showRoutes() {
     let routePaths = []

@@ -10,7 +10,7 @@ import BaseController from './base.controller'
 class UserController extends BaseController {
   constructor() {
     super()
-    this.routes()
+    this.configureRoutes()
   }
 
   private _create = async (req: Request, res: Response, next: NextFunction) => {
@@ -133,7 +133,7 @@ class UserController extends BaseController {
   /**
    * configure router
    */
-  public routes() {
+  public configureRoutes() {
     // auth
     this.router.post('/signup', this._create)
     this.router.post('/signin', this._login)
