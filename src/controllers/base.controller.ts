@@ -24,14 +24,16 @@ export default class BaseController {
     const token = req.body.token || req.query.token || req.headers['authorization'] || req.headers['x-access-token']
 
     if (!token) {
-      res.status(403).send('Unauthorized!')
+      res.status(401).send('Unauthorized!')
       return
     }
     try {
       const decoded = verifyToken(token)
       req.user = decoded.aud
     } catch (err) {
-      res.status(401).send('Invalid Token')
+      console.log(JSON.stringify(err), 'eerrr')
+
+      res.status(403).send('Invalid Token')
       return
     }
     next()

@@ -12,14 +12,139 @@ datasource db {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  fullname       String   @db.VarChar(100)
-  username       String   @unique @db.VarChar(100)
-  email          String   @unique
-  hashedPassword String
-  avater         String?
-  isActive       Boolean  @default(true)
-  createdAt      DateTime @default(now())
+  id       String  @id @default(uuid())
+  fullname String  @db.VarChar(100)
+  username String  @unique @db.VarChar(100)
+  email    String  @unique
+  password String
+  gender   Gender
+  avatar   String?
+  token    String?
+
+  members Member[]
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
 
   @@index([username])
+}
+
+model Community {
+  id    String @id @default(uuid())
+  title String
+  desc  String
+  rules String // discuss about it
+
+  members Member[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime
+}
+
+model Member {
+  id String @id @default(uuid())
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  community   Community @relation(fields: [communityId], references: [id])
+  communityId String
+
+  role     MemberRole @default(ADMIN)
+  scopes   Scopes     @default(ROOT)
+  isActive Boolean    @default(true)
+
+  posts         Post[]
+  reacts        React[]
+  comments      Comment[]
+  user_comments UserComment[]
+
+  joinedAt DateTime @default(now())
+  leavedAt DateTime
+}
+
+model Post {
+  id String @id @default(uuid())
+
+  member   Member @relation(fields: [memberId], references: [id])
+  memberId String
+
+  title     String
+  body      String
+  hasActive Boolean @default(true)
+
+  reacts   React[]
+  comments Comment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model React {
+  id String @id @default(uuid())
+
+  member   Member @relation(fields: [memberId], references: [id])
+  memberId String
+
+  post   Post   @relation(fields: [postId], references: [id])
+  postId String
+
+  react_type ReactType
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Comment {
+  id String @id @default(uuid())
+
+  member   Member @relation(fields: [memberId], references: [id])
+  memberId String
+
+  post          Post          @relation(fields: [postId], references: [id])
+  postId        String
+  user_comments UserComment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserComment {
+  id String @id @default(uuid())
+
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId String
+
+  member   Member @relation(fields: [memberId], references: [id])
+  memberId String
+
+  content   String
+  status    CommentStatus @default(MAIN)
+  createdAt DateTime      @default(now())
+}
+
+enum CommentStatus {
+  MAIN
+  REPLY
+}
+
+enum ReactType {
+  LIKE
+  UNLIKE
+}
+
+enum Scopes {
+  ROOT
+  EDITOR
+  VIEWER
+}
+
+enum MemberRole {
+  ADMIN
+  MEMBER
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

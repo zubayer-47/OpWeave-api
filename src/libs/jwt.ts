@@ -59,7 +59,6 @@ export const verifyOptions: VerifyOptions = {
 export interface TokenPayload {
   jti: string
   scopes: string[]
-  rights: string
   iat: number
   exp?: number
   aud: string
@@ -69,18 +68,16 @@ export interface TokenPayload {
 /**
  * It signs a JWT access token with the user's id, rights and scopes, and stores it in Redis
  * @param {number} userId - The user's id
- * @param {string} rights - string - This is the rights that the user has.
  * @param {string[]} scopes - string[] = []
  * @returns A promise that resolves to a token
  */
-export const signAccessToken = (userId: string, rights: string, scopes: string[] = []): Promise<any> => {
+export const signAccessToken = (userId: string, scopes: string[] = []): Promise<any> => {
   return new Promise((resolve, reject) => {
     const payload: TokenPayload = {
       jti: uuid(),
       iat: Math.floor(Date.now() / 1000) - 30,
       scopes: [...scopes],
-      aud: `${userId}`,
-      rights
+      aud: `${userId}`
     }
     const options: SignOptions = {
       algorithm: 'RS256',
@@ -106,19 +103,17 @@ export const signAccessToken = (userId: string, rights: string, scopes: string[]
 /**
  * It signs a JWT refresh token with the user's id, rights, and scopes, and then stores it in Redis
  * @param {number} userId - The user's ID
- * @param {string} rights - string - the rights of the user
  * @param {string[]} scopes - string[] = [] - an array of scopes that the user has access to.
  * @returns A promise that resolves to a token.
  */
-export const signRefreshToken = (userId: string, rights: string, scopes: string[] = []): Promise<any> => {
+export const signRefreshToken = (userId: string, scopes: string[] = []): Promise<any> => {
   return new Promise((resolve, reject) => {
     // cirtificate token
     //   const privateKey: string = readPrivateKey(false)!;
     const payload = {
       jti: uuid(),
       scopes: [...scopes],
-      user: userId,
-      rights
+      user: userId
     }
     const options: SignOptions = {
       algorithm: 'RS256',

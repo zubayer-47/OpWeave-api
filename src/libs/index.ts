@@ -16,11 +16,11 @@ export const verifyToken = (token: string): JWTType => {
 
 export const randomToken = (length = 11) => {
   const alpha = 'abcdefghijklmnopqrstuvwxyz'
-  const numaric = '0123456789'
+  const numeric = '0123456789'
   const special = '_-'
 
-  const characters1 = alpha + alpha.toUpperCase() + numaric
-  const characters2 = alpha + special + alpha.toUpperCase() + numaric
+  const characters1 = alpha + alpha.toUpperCase() + numeric
+  const characters2 = alpha + special + alpha.toUpperCase() + numeric
   let token = ''
   for (let i = 0; i < length; i++) {
     if (i === 0) {

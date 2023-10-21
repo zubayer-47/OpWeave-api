@@ -18,7 +18,7 @@ export const checkUniqueEmail = (email: string) =>
 
 export const getUserByUsername = (username: string) =>
   prismadb.user.findFirst({
-    select: { id: true, hashedPassword: true },
+    select: { id: true, password: true },
     where: {
       username
     }
@@ -27,7 +27,7 @@ export const getUserByUsername = (username: string) =>
 export const getAvaterByUserId = (userId: string) =>
   prismadb.user.findFirst({
     select: {
-      avater: true
+      avatar: true
     },
     where: {
       id: userId
@@ -43,7 +43,7 @@ export const getCurrentUser = (userId: string) =>
       fullname: true,
       username: true,
       email: true,
-      avater: true,
+      avatar: true,
       createdAt: true
     }
   })
