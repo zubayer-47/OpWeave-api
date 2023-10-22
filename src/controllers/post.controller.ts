@@ -7,33 +7,22 @@ class PostController extends BaseController {
     this.configureRoutes()
   }
 
-  private _createPost = async (req: Request, res: Response, next: NextFunction) => {}
+  private _createPost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _getPostByPostId = async (req: Request, res: Response, next: NextFunction) => {}
+  private _getPost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _getPostsByMemberId = async (req: Request, res: Response, next: NextFunction) => {}
+  private _updatePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _getPostsByPagination = async (req: Request, res: Response, next: NextFunction) => {}
-
-  private _updatePostsByPostId = async (req: Request, res: Response, next: NextFunction) => {}
-
-  private _deletePostByPostId = async (req: Request, res: Response, next: NextFunction) => {}
+  private _deletePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
   public configureRoutes = () => {
-    this.router.post('/posts/new', this._auth, this._createPost)
-
-    //   GET: queries: (page,limit)
-    this.router.get('/posts', this._auth, this._getPostsByPagination)
-    this.router.get('/posts/:postId', this._auth, this._getPostByPostId)
-
-    //   GET: queries: (page,limit)
-    this.router.get('/posts/:memberId', this._auth, this._getPostsByMemberId)
+    this.router.post('/new', this._auth, this._createPost)
+    this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
-    this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._updatePostsByPostId)
-
+    this.router.patch('/:c_id/:m_id/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
-    this.router.delete('/posts/:postId', this._auth, this._checkRoles, this._deletePostByPostId)
+    this.router.delete('/:c_id/:m_id/:postId', this._auth, this._checkRoles, this._deletePost)
   }
 }
 

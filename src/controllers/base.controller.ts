@@ -33,8 +33,6 @@ export default abstract class BaseController {
       const decoded = verifyToken(token)
       req.user = decoded.aud
     } catch (err) {
-      console.log(JSON.stringify(err), 'eerrr')
-
       res.status(403).send('Invalid Token')
       return
     }
@@ -42,7 +40,8 @@ export default abstract class BaseController {
   }
 
   // check user's role whether user is ADMIN/USER;
-  protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
+  protected _checkRoles = async (req: Request, _res: Response, next: NextFunction) => {
+    // get member_id from params and check on db
     console.log(req, 'from base controller')
 
     next()

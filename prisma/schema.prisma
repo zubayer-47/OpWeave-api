@@ -30,15 +30,16 @@ model user {
 
 model community {
   community_id String @id @default(uuid())
-  title        String
-  desc         String
+  name         String @unique
+  bio          String
   rules        String // discuss about it
 
   members member[]
+  posts   post[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  deletedAt DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model member {
@@ -58,12 +59,15 @@ model member {
   comments      comment[]
   user_comments userComment[]
 
-  joinedAt DateTime @default(now())
-  leavedAt DateTime
+  joinedAt DateTime  @default(now())
+  leavedAt DateTime?
 }
 
 model post {
   post_id String @id @default(uuid())
+
+  community    community @relation(fields: [community_id], references: [community_id])
+  community_id String
 
   member    member @relation(fields: [member_id], references: [member_id])
   member_id String
@@ -75,8 +79,9 @@ model post {
   reacts   react[]
   comments comment[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 }
 
 model react {

@@ -7,6 +7,8 @@ import hpp from 'hpp'
 import { Server as HttpServer, createServer } from 'http'
 import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
+import authController from './controllers/auth.controller'
+import communityController from './controllers/community.controller'
 import userController from './controllers/user.controller'
 import corsOptions from './libs/cors'
 import { sysLog } from './libs/logger'
@@ -45,7 +47,9 @@ class ExpressServer {
       res.send('All Ok !')
     })
 
+    this.express.use('/v1/auth/', authController.router)
     this.express.use('/v1/users/', userController.router)
+    this.express.use('/v1/c/', communityController.router)
   }
 
   private _errorRoutes(): void {
