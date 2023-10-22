@@ -40,4 +40,11 @@ export default abstract class BaseController {
     }
     next()
   }
+
+  // check user's role whether user is ADMIN/USER;
+  protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
+    console.log(req, 'from base controller')
+
+    next()
+  }
 }

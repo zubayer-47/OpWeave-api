@@ -130,6 +130,16 @@ class UserController extends BaseController {
     }
   }
 
+  private _createPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userId = req.user
+      const profile = await getCurrentUser(userId)
+      res.json({ id: userId, ...profile })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   /**
    * configure router
    */
@@ -138,6 +148,7 @@ class UserController extends BaseController {
     this.router.post('/signup', this._create)
     this.router.post('/signin', this._login)
     this.router.get('/', this._auth, this._profile)
+    this.router.get('/posts/new', this._auth, this._createPost)
 
     // this._showRoutes()
   }

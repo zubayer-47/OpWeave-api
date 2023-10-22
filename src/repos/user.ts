@@ -24,7 +24,7 @@ export const getUserByUsername = (username: string) =>
     }
   })
 
-export const getAvaterByUserId = (userId: string) =>
+export const getAvatarByUserId = (userId: string) =>
   prismadb.user.findFirst({
     select: {
       avatar: true
