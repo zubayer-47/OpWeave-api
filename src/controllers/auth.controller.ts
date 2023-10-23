@@ -31,13 +31,16 @@ class AuthController extends BaseController {
 
       // 2nd layer validation
       if (!errors?.fullname && fullname.length < 4) errors.fullname = 'Fullname at least 4 characters'
+      else if (!errors.fullname && fullname.match(/[;]$/g)) errors.fullname = "You can't provide semicolon(;)"
+
       if (!errors?.username && username.length < 4) errors.username = 'Username at least 4 characters'
+      else if (!errors.username && username.match(/[;]$/g)) errors.username = "You can't provide semicolon(;)"
       // if (!errors?.gender && gender_tuple.indexOf(gender) === -1)
       if (!errors?.gender && gender.match(/male|female/gi) === null) {
         errors.gender = 'Gender should have MALE/FEMALE'
       }
 
-      if (password && password.length < 8) errors.password = 'Password should contains at least 8 characters'
+      if (!errors.password && password.length < 8) errors.password = 'Password should contains 8 characters at least'
       if (email && !emailReg.test(email)) errors.email = 'Email is not valid!'
 
       // db check & it's called 3rd layer validation
@@ -80,7 +83,7 @@ class AuthController extends BaseController {
       // set token to response cookie
       setJWT(token, res)
       // response the final data
-      res.json({ id: user.user_id, ...data, token })
+      res.json({ id: user.user_id, ...data, token }).end()
     } catch (error: any) {
       next(error)
     }
@@ -114,7 +117,7 @@ class AuthController extends BaseController {
       // set token to response cookie
       setJWT(token, res)
 
-      res.json({ id: user?.user_id, ...profile, token })
+      res.json({ id: user?.user_id, ...profile, token }).end()
     } catch (error) {
       next(error)
     }
