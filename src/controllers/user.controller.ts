@@ -12,7 +12,7 @@ class UserController extends BaseController {
     try {
       const userId = req.user
       const profile = await getCurrentUser(userId)
-      res.json({ id: userId, ...profile })
+      res.json({ id: userId, ...profile }).end()
     } catch (error) {
       next(error)
     }
