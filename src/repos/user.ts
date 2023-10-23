@@ -1,5 +1,13 @@
 import prismadb from 'src/libs/prismadb'
 
+export const checkUserExist = (user_id: string) =>
+  prismadb.user.findFirst({
+    select: { user_id: true },
+    where: {
+      user_id
+    }
+  })
+
 export const checkUniqueUsername = (username: string) =>
   prismadb.user.findFirst({
     select: { user_id: true },
