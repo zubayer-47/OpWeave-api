@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
-import { isValidUUId } from 'src/libs/varifyuuid'
+import { isValidUUId } from 'src/libs/verifyuuid'
 import { checkIsCommunityExistById, checkIsCommunityExistByName } from 'src/repos/community'
 import { checkUserExist } from 'src/repos/user'
 import BaseController from './base.controller'
