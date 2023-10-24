@@ -1,5 +1,6 @@
-// import { NextFunction, Request, Response } from 'express'
-// import prismadb from 'src/libs/prismadb'
+import { NextFunction, Request, Response } from 'express'
+import { isValidUUId } from 'src/libs/verifyuuid'
+import { getCommunityPostsByMemberId, getPaginatedCommunityPostsByMemberId } from 'src/repos/member'
 import BaseController from './base.controller'
 
 class MemberController extends BaseController {
@@ -7,30 +8,37 @@ class MemberController extends BaseController {
     super()
     this.configureRoutes()
   }
+  private _getCommunityPostsByMember = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors: { [index: string]: string } = {}
+      const { page, limit } = req.query
+      const { mId } = req.params
+      // grab community_id from uri
+      const cId = req.originalUrl.match(
+        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
+      )[0]
 
-  //   private _getCommunities = async (req: Request, res: Response, next: NextFunction) => {
-  //     try {
-  //       const { u_id } = req.params
+      if (!cId || !isValidUUId(mId)) errors.content = 'Content missing'
 
-  //         // should be relation with user and community table to show user's communities in user profile
-  //       const communities = await prismadb.user.findMany({
-  //         where: {
-  //           user_id: u_id
-  //         },
-  //         select: {
-  //           user_id: true,
-  //           : true
-  //         }
-  //       })
+      if (!Object.keys(errors).length) {
+        let posts
+        if (page && limit) {
+          posts = await getPaginatedCommunityPostsByMemberId(cId, mId, +page, +limit)
+        } else {
+          posts = await getCommunityPostsByMemberId(cId, mId)
+        }
 
-  //       res.status(200).json(communities)
-  //     } catch (error) {
-  //       next(error)
-  //     }
-  //   }
+        res.status(200).json({ posts }).end()
+      } else {
+        res.status(400).json(errors).end()
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
 
   public configureRoutes(): void {
-    // this.router.get('/:u_id', this._getCommunities)
+    this.router.get('/:mId', this._auth, this._getCommunityPostsByMember)
   }
 }
 

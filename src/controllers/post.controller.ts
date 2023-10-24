@@ -56,9 +56,9 @@ class PostController extends BaseController {
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
-    this.router.patch('/:cId/:mId/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:mId/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
-    this.router.delete('/:cId/:mId/:postId', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:mId/:postId', this._auth, this._checkRoles, this._deletePost)
   }
 }
 

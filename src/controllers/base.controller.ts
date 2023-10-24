@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
+import prismadb from 'src/libs/prismadb'
+import { isValidUUId } from 'src/libs/verifyuuid'
 
 export default abstract class BaseController {
   public router: Router
@@ -40,10 +42,34 @@ export default abstract class BaseController {
   }
 
   // check user's role whether user is ADMIN/USER;
-  protected _checkRoles = async (req: Request, _res: Response, next: NextFunction) => {
-    // get member_id from params and check on db
-    console.log(req, 'from base controller')
+  protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors: { [index: string]: string } = {}
 
-    next()
+      const { mId } = req.params
+      // grab community_id from uri
+      const cId = req.originalUrl.match(
+        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
+      )[0]
+
+      if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
+
+      const member = await prismadb.member.findFirst({
+        where: {
+          AND: [{ member_id: mId }, { community_id: cId }]
+        },
+        select: {
+          member_id: true,
+          role: true
+        }
+      })
+
+      if (!member) errors.member = 'Member not exist'
+
+      if (!Object.keys(errors).length) next()
+      else res.status(400).json(errors)
+    } catch (error) {
+      next(error)
+    }
   }
 }

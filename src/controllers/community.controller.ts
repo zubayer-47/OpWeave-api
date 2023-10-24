@@ -6,6 +6,7 @@ import { checkMemberIsExist } from 'src/repos/member'
 import { checkUserExist } from 'src/repos/user'
 import BaseController from './base.controller'
 import postController from './post.controller'
+import memberController from './member.controller'
 
 class CommunityController extends BaseController {
   constructor() {
@@ -140,7 +141,7 @@ class CommunityController extends BaseController {
 
     this.router.use('/:cId/p/', postController.router)
 
-    // this.router.use('/:cId/m/', memberController.router)
+    this.router.use('/:cId/m/', memberController.router)
   }
 }
 
