@@ -1,11 +1,12 @@
 import prismadb from 'src/libs/prismadb'
 
-export const checkMemberIsExist = async (member_id: string) =>
+export const checkMemberIsExist = async (userId: string, community_id: string) =>
   await prismadb.member.findFirst({
     where: {
-      member_id
+      AND: [{ userId }, { community_id }]
     },
     select: {
-      member_id: true
+      member_id: true,
+      community_id: true
     }
   })

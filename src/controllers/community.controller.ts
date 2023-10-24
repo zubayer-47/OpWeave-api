@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import { isValidUUId } from 'src/libs/verifyuuid'
 import { checkIsCommunityExistById, checkIsCommunityExistByName } from 'src/repos/community'
+import { checkMemberIsExist } from 'src/repos/member'
 import { checkUserExist } from 'src/repos/user'
 import BaseController from './base.controller'
 import postController from './post.controller'
@@ -88,25 +89,39 @@ class CommunityController extends BaseController {
   private _addMember = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-      const { c_id } = req.params
+      const { community_id } = req.body
 
-      if (!c_id || (c_id && !isValidUUId(c_id))) errors.error = 'Something is wrong. Please try again'
+      if (!community_id || (community_id && !isValidUUId(community_id)))
+        errors.error = 'Something is wrong. Please try again'
 
-      const community = await checkIsCommunityExistById(c_id)
-      if (!community) errors.community = 'Community does not exist'
-
+      // check whether user exist or not
       const user = await checkUserExist(req.user)
       if (!user) errors.user = 'User not exist'
 
+      // check whether community exist or not where user wants to add
+      const community = await checkIsCommunityExistById(community_id)
+      if (!community) errors.community = 'Community does not exist'
+
+      // check whether member exist or not already
+      const isMemberExist = await checkMemberIsExist(req.user, community_id)
+      if (isMemberExist?.member_id) errors.member = 'Member Already Exist'
+
       if (!Object.keys(errors).length) {
-        await prismadb.member.create({
+        const createdMember = await prismadb.member.create({
           data: {
             userId: req.user,
-            community_id: c_id
+            community_id: community_id
+          },
+          select: {
+            member_id: true,
+            community_id: true
           }
         })
 
-        res.status(200).json({ message: 'Member Created Successfully' }).end()
+        res
+          .status(200)
+          .json({ message: 'Member Created Successfully', member: { ...createdMember } })
+          .end()
       } else {
         res.status(400).json(errors).end()
       }
@@ -117,15 +132,15 @@ class CommunityController extends BaseController {
 
   public configureRoutes(): void {
     this.router.post('/new', this._auth, this._createCommunity)
-    this.router.get('/:c_id', this._auth, this._getCommunityPosts)
+    this.router.get('/:cId', this._auth, this._getCommunityPosts)
     // add member
-    this.router.post('/:c_id', this._auth, this._addMember)
+    this.router.post('/', this._auth, this._addMember)
     //   GET: queries: (page,limit)
-    this.router.get('/:c_id/:m_id', this._auth, this._getMemberPosts)
+    this.router.get('/:cId/:mId', this._auth, this._getMemberPosts)
 
-    this.router.use('/:c_id/p/', postController.router)
+    this.router.use('/:cId/p/', postController.router)
 
-    // this.router.use('/:c_id/m/', memberController.router)
+    // this.router.use('/:cId/m/', memberController.router)
   }
 }
 

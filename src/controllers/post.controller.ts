@@ -12,7 +12,7 @@ class PostController extends BaseController {
   private _createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-      const c_id = req.originalUrl.replace(/^(\/v1\/c\/)|(\/p\/new)$/g, '')
+      const cId = req.originalUrl.replace(/^(\/v1\/c\/)|(\/p\/new)$/g, '')
       const { title, body } = req.body
 
       // 1st layer
@@ -22,15 +22,13 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await checkMemberIsExist(req.user)
+      const member = await checkMemberIsExist(req.user, cId)
       if (!member) errors.member = `You're not a member of this community`
 
       if (!Object.keys(errors).length) {
-        console.log({ member: member.member_id, c_id })
-
         const post = await prismadb.post.create({
           data: {
-            community_id: c_id,
+            community_id: cId,
             member_id: member.member_id,
             title,
             body
@@ -58,9 +56,9 @@ class PostController extends BaseController {
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
-    this.router.patch('/:c_id/:m_id/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:cId/:mId/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
-    this.router.delete('/:c_id/:m_id/:postId', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:cId/:mId/:postId', this._auth, this._checkRoles, this._deletePost)
   }
 }
 
