@@ -110,14 +110,14 @@ class AuthController extends BaseController {
         return
       }
 
-      const profile = await getCurrentUser(user.user_id)
+      const { password: pwd, ...rest } = await getCurrentUser(user.user_id)
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
 
-      res.json({ id: user?.user_id, ...profile, token }).end()
+      res.json({ id: user?.user_id, ...rest, token }).end()
     } catch (error) {
       next(error)
     }
