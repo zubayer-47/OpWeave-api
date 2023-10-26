@@ -1,12 +1,17 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import { isValidUUId } from 'src/libs/verifyuuid'
-import { checkIsCommunityExistById, checkIsCommunityExistByName } from 'src/repos/community'
+import {
+  checkIsCommunityExistById,
+  checkIsCommunityExistByName,
+  getCommunityPosts,
+  getPaginatedCommunityPosts
+} from 'src/repos/community'
 import { checkMemberIsExist } from 'src/repos/member'
 import { checkUserExist } from 'src/repos/user'
 import BaseController from './base.controller'
-import postController from './post.controller'
 import memberController from './member.controller'
+import postController from './post.controller'
 
 class CommunityController extends BaseController {
   constructor() {
@@ -83,7 +88,35 @@ class CommunityController extends BaseController {
     }
   }
 
-  private _getCommunityPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
+  private _getCommunityPosts = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors: { [index: string]: string } = {}
+      const { cId } = req.params
+      const { page, limit } = req.query
+
+      const isValidId = isValidUUId(cId)
+      if (!isValidId) errors.community_id = 'content missing'
+
+      // check whether community exist or not
+      const community = await checkIsCommunityExistById(cId)
+      if (!community) errors.community = 'Community does not exist'
+
+      if (!Object.keys(errors).length) {
+        let posts
+        if (page && limit) {
+          posts = await getPaginatedCommunityPosts(cId, +page, +limit)
+        } else {
+          posts = await getCommunityPosts(cId)
+        }
+
+        res.status(200).json({ posts }).end()
+      } else {
+        res.status(400).json(errors).end()
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
 
   private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
