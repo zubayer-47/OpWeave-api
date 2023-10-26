@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
+import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
 import { isValidUUId } from 'src/libs/verifyuuid'
 
@@ -48,9 +49,7 @@ export default abstract class BaseController {
 
       const { mId } = req.params
       // grab community_id from uri
-      const cId = req.originalUrl.match(
-        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
-      )[0]
+      const cId = getUUIDByURL(req.originalUrl)
 
       if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
 
