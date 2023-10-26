@@ -7,7 +7,8 @@ export const checkMemberIsExist = async (userId: string, community_id: string) =
     },
     select: {
       member_id: true,
-      community_id: true
+      community_id: true,
+      role: true
     }
   })
 
