@@ -63,6 +63,7 @@ class ExpressServer {
       if (res.headersSent) {
         return next(err)
       }
+
       res.status(500).send('Server not responding')
 
       if (process.env.NODE_ENV !== 'production') {
