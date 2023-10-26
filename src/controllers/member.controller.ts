@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
+import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import { isValidUUId } from 'src/libs/verifyuuid'
 import { getCommunityPostsByMemberId, getPaginatedCommunityPostsByMemberId } from 'src/repos/member'
 import BaseController from './base.controller'
@@ -14,9 +15,7 @@ class MemberController extends BaseController {
       const { page, limit } = req.query
       const { mId } = req.params
       // grab community_id from uri
-      const cId = req.originalUrl.match(
-        /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/
-      )[0]
+      const cId = getUUIDByURL(req.originalUrl)
 
       if (!cId || !isValidUUId(mId)) errors.content = 'Content missing'
 
