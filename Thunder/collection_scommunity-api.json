@@ -1,0 +1,292 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "scommunity",
+    "dateExported": "2023-10-26T13:43:03.476Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "a90d15fb-4ee8-468e-b8fa-da2d0cb3886d",
+            "name": "auth",
+            "containerId": "",
+            "created": "2023-10-13T12:55:04.562Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "0b58864a-c76a-4a80-b4f8-00fe8f077927",
+            "name": "community",
+            "containerId": "",
+            "created": "2023-10-13T14:02:26.428Z",
+            "sortNum": 20000
+        },
+        {
+            "_id": "de1bed1c-d4ef-4a1d-8d4e-0421e42d4d41",
+            "name": "post",
+            "containerId": "0b58864a-c76a-4a80-b4f8-00fe8f077927",
+            "created": "2023-10-22T13:14:05.079Z",
+            "sortNum": 40000
+        },
+        {
+            "_id": "1ed5b765-2373-4a79-97d3-c4b429a587a2",
+            "name": "member",
+            "containerId": "0b58864a-c76a-4a80-b4f8-00fe8f077927",
+            "created": "2023-10-23T14:57:27.514Z",
+            "sortNum": 50000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "9cca2821-12ba-4b1a-bbcc-5391afd79ca9",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "a90d15fb-4ee8-468e-b8fa-da2d0cb3886d",
+            "name": "signin",
+            "url": "{{BaseUrl}}/auth/signin/",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-10-13T12:55:09.650Z",
+            "modified": "2023-10-24T09:02:18.032Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"franecki\",\n  \"password\": \"pass1234\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "48a6aece-3f96-434c-8061-7b1cdc8b0350",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "a90d15fb-4ee8-468e-b8fa-da2d0cb3886d",
+            "name": "signup",
+            "url": "{{BaseUrl}}/auth/signup",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-10-13T12:55:33.874Z",
+            "modified": "2023-10-23T15:54:28.594Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{ \n  \"fullname\": \"{{#name}}\",\n  \"username\": \"{{#name}}\",\n  \"email\": \"{{#email}}\",\n  \"password\": \"pass1234\",\n  \"gender\": \"male\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "014bb37d-9c91-4966-8247-363593030ba4",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "a90d15fb-4ee8-468e-b8fa-da2d0cb3886d",
+            "name": "GET User",
+            "url": "{{BaseUrl}}/users/",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-10-13T12:56:13.012Z",
+            "modified": "2023-10-22T16:12:23.314Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "8088e8e7-124f-407c-826c-be8bf3521f79",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "0b58864a-c76a-4a80-b4f8-00fe8f077927",
+            "name": "create community",
+            "url": "{{BaseUrl}}/c/new",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2023-10-13T14:02:32.714Z",
+            "modified": "2023-10-23T14:44:48.133Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \";{{#name}}\",\n  \"bio\": \"{{#string}}\",\n  \"rules\": [\"{{#string}}\",\"{{#string}}\"]\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "40e6bedd-4a9e-40b6-b5d7-05a346bac1cf",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "0b58864a-c76a-4a80-b4f8-00fe8f077927",
+            "name": "get community posts",
+            "url": "{{BaseUrl}}/c/2a839916-25fe-4a4c-ae05-17750091cd6e?page=1&limit=10",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2023-10-13T14:05:41.784Z",
+            "modified": "2023-10-26T10:13:11.192Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [
+                {
+                    "name": "page",
+                    "value": "1",
+                    "isPath": false
+                },
+                {
+                    "name": "limit",
+                    "value": "10",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "5c3a998a-1db2-4f97-96e4-6faf6a59c8d7",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "de1bed1c-d4ef-4a1d-8d4e-0421e42d4d41",
+            "name": "create post",
+            "url": "{{BaseUrl}}/c/9ff17e13-43ee-45f0-a0c1-46f6efd5eaf9/p/new",
+            "method": "POST",
+            "sortNum": 70000,
+            "created": "2023-10-22T13:14:12.435Z",
+            "modified": "2023-10-26T11:27:38.247Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"title\": \"{{#string}}\",\n  \"body\": \"{{#string}}\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "5df866f6-689a-4245-975d-c618217bd80c",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "1ed5b765-2373-4a79-97d3-c4b429a587a2",
+            "name": "get communities",
+            "url": "{{BaseUrl}}/c/2a839916-25fe-4a4c-ae05-17750091cd6e/m/9c03e4cc-03d3-4f6c-b463-7e2daa3f8114",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2023-10-23T14:57:54.593Z",
+            "modified": "2023-10-23T15:05:40.898Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "a3f12885-be74-4e7a-9808-19c186a919bc",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "1ed5b765-2373-4a79-97d3-c4b429a587a2",
+            "name": "add member",
+            "url": "{{BaseUrl}}/c/",
+            "method": "POST",
+            "sortNum": 90000,
+            "created": "2023-10-23T16:20:21.087Z",
+            "modified": "2023-10-26T11:28:23.464Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"community_id\": \"9ff17e13-43ee-45f0-a0c1-46f6efd5eaf9\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "40651d13-3fa7-4159-b606-d0a29d1333af",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "1ed5b765-2373-4a79-97d3-c4b429a587a2",
+            "name": "getCommunityPostsByMember",
+            "url": "{{BaseUrl}}/c/2a839916-25fe-4a4c-ae05-17750091cd6e/m/437ae9ad-6dea-456a-9772-2ae40fdacd34?page=1&limit=10",
+            "method": "GET",
+            "sortNum": 100000,
+            "created": "2023-10-24T13:16:29.477Z",
+            "modified": "2023-10-24T15:59:05.907Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [
+                {
+                    "name": "page",
+                    "value": "1",
+                    "isPath": false
+                },
+                {
+                    "name": "limit",
+                    "value": "10",
+                    "isPath": false
+                }
+            ],
+            "tests": []
+        },
+        {
+            "_id": "b369376f-661d-4973-9c81-73aaf0e1e9bf",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "de1bed1c-d4ef-4a1d-8d4e-0421e42d4d41",
+            "name": "get post",
+            "url": "{{BaseUrl}}/c/2a839916-25fe-4a4c-ae05-17750091cd6e/p/02731308-1495-45d8-ab72-5555a5d86f9d",
+            "method": "GET",
+            "sortNum": 110000,
+            "created": "2023-10-26T10:34:59.821Z",
+            "modified": "2023-10-26T11:21:34.879Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "68a131c6-001b-432c-8e5e-bc24818fd1c9",
+            "colId": "c3457da9-8b44-4245-a59a-7db09c3b56fb",
+            "containerId": "a90d15fb-4ee8-468e-b8fa-da2d0cb3886d",
+            "name": "update user",
+            "url": "{{BaseUrl}}/users/",
+            "method": "PATCH",
+            "sortNum": 120000,
+            "created": "2023-10-26T11:39:53.670Z",
+            "modified": "2023-10-26T13:30:47.486Z",
+            "headers": [
+                {
+                    "name": "Authorization",
+                    "value": "{{token}}"
+                }
+            ],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"gender\": \"male\"\n}",
+                "form": []
+            },
+            "tests": []
+        }
+    ],
+    "settings": {
+        "envId": "6fd284a6-787c-43f1-940c-441a26e82705"
+    }
+}
