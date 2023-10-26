@@ -1,3 +1,4 @@
+import { Gender } from '@prisma/client'
 import prismadb from 'src/libs/prismadb'
 
 export const checkUserExist = (user_id: string) =>
@@ -51,7 +52,27 @@ export const getCurrentUser = (userId: string) =>
       fullname: true,
       username: true,
       email: true,
+      password: true,
+      gender: true,
       avatar: true,
       createdAt: true
+    }
+  })
+
+export const updateUser = (
+  user_id: string,
+  user: { fullname: string; username: string; email: string; gender: Gender; password: string }
+) =>
+  prismadb.user.update({
+    where: {
+      user_id
+    },
+    data: user,
+    select: {
+      user_id: true,
+      fullname: true,
+      username: true,
+      email: true,
+      gender: true
     }
   })
