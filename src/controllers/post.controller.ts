@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from 'express'
+import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
+import { isValidUUId } from 'src/libs/verifyuuid'
+import { checkIsCommunityExistById } from 'src/repos/community'
 import { checkMemberIsExist } from 'src/repos/member'
+import { getPostByPostId } from 'src/repos/post'
 import BaseController from './base.controller'
 
 class PostController extends BaseController {
@@ -12,7 +16,7 @@ class PostController extends BaseController {
   private _createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-      const cId = req.originalUrl.replace(/^(\/v1\/c\/)|(\/p\/new)$/g, '')
+      const cId = getUUIDByURL(req.originalUrl)
       const { title, body } = req.body
 
       // 1st layer
@@ -31,12 +35,13 @@ class PostController extends BaseController {
             community_id: cId,
             member_id: member.member_id,
             title,
-            body
+            body,
+            hasPublished: member.role === 'ADMIN'
           },
-          select: { post_id: true }
+          select: { post_id: true, hasPublished: true }
         })
 
-        res.json({ post_id: post.post_id, title, body }).end()
+        res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished }).end()
       } else {
         res.status(400).json(errors).end()
       }
@@ -45,7 +50,34 @@ class PostController extends BaseController {
     }
   }
 
-  private _getPost = async (_req: Request, _res: Response, _next: NextFunction) => {}
+  private _getPost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const errors: { [index: string]: string } = {}
+      const { postId } = req.params
+      const cId = getUUIDByURL(req.originalUrl)
+
+      if (!isValidUUId(postId) || !isValidUUId(cId)) errors.error = 'Content missing'
+
+      // check whether community exist or not where user wants to add
+      const community = await checkIsCommunityExistById(cId)
+      if (!community) errors.community = 'Community does not exist'
+
+      if (!Object.keys(errors).length) {
+        const post = await getPostByPostId(cId, postId)
+
+        if (post === null) {
+          res.status(404).json('Post Not Found').end()
+          return
+        }
+
+        res.status(200).json({ post }).end()
+      } else {
+        res.status(400).json(errors).end()
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
 
   private _updatePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
