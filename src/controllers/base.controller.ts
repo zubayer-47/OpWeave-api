@@ -34,7 +34,7 @@ export default abstract class BaseController {
     }
     try {
       const decoded = verifyToken(token)
-      req.user = decoded.aud
+      req.user.id = decoded.aud
     } catch (err) {
       res.status(403).send('Invalid Token')
       return

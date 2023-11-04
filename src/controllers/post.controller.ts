@@ -26,7 +26,7 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await checkMemberIsExist(req.user, cId)
+      const member = await checkMemberIsExist(req.user.id, cId)
       if (!member) errors.member = `You're not a member of this community`
 
       if (!Object.keys(errors).length) {
