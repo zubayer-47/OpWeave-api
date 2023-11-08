@@ -3,7 +3,7 @@ import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
 import { isValidUUId } from 'src/libs/verifyuuid'
 import { checkIsCommunityExistById } from 'src/repos/community'
-import { checkMemberIsExist, getMember } from 'src/repos/member'
+import { checkMemberIsExist } from 'src/repos/member'
 import { getPostByPostId } from 'src/repos/post'
 import BaseController from './base.controller'
 
@@ -84,49 +84,61 @@ class PostController extends BaseController {
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // member can delete and admins can delete also
-      const errors: { [index: string]: string } = {}
-      const { community_id, member_id, post_id } = req.body
+      // const errors: { [index: string]: string } = {}
+      const userId = req.user.userId
+      const postId = req.params?.postId
+      // const communityId = req.query?.cid as string
 
-      if (isValidUUId(community_id) || isValidUUId(member_id) || isValidUUId(post_id))
-        errors.message = 'Content missing'
+      // if (isValidUUId(community_id) || isValidUUId(member_id) || isValidUUId(postId))
+      //   errors.message = 'Content missing'
 
       // 1st phase: validate member
-      const member = await getMember(community_id, member_id)
-      if (!member) errors.member = "Member doesn't exist"
+      // const member = await getMember(community_id, member_id)
+      // if (!member) errors.member = "Member doesn't exist"
+
+      // check post authority
+      // const author = await prismadb.post.findFirst()
+
+      // check post community authority
+      // const author = await prismadb.
 
       const postInfo = await prismadb.post.findFirst({
         where: {
-          AND: [{ community_id }, { post_id }, { member_id }]
+          // community_id: communityId,
+          post_id: postId,
+          member: {
+            userId
+          },
+          deletedAt: null
         },
         select: {
           post_id: true
         }
       })
-      if (!postInfo && member.role !== 'ADMIN') errors.member = "You're not a post owner or admin"
 
-      if (!Object.keys(errors).length) {
-        // 2nd phase: if exist and if the selected post owner is the current member then can be deletable otherwise through an error
-        const deletedPost = await prismadb.post.update({
-          where: {
-            post_id: postInfo.post_id
-          },
-          data: {
-            deletedAt: Date.now().toString()
-          },
-          select: {
-            deletedAt: true
-          }
-        })
-
-        res.status(200).json({
-          message: 'post deleted successfully',
-          ...deletedPost
-        })
-        // 3rd phase: if exist and if the selected post owner is not the current member then check whether current user admin of that community or not.
-        // 4th phase: update deletedAt property
-      } else {
-        res.status(400).json(errors)
+      if (!postInfo) {
+        res.status(404).json('Post not found!')
+        return
       }
+      // 2nd phase: if exist and if the selected post owner is the current member then can be deletable otherwise through an error
+      await prismadb.post.update({
+        where: {
+          post_id: postInfo.post_id
+        },
+        data: {
+          deletedAt: new Date()
+        },
+        select: {
+          post_id: true
+        }
+      })
+
+      res.status(200).json({
+        message: 'post deleted successfully',
+        postId
+      })
+      // 3rd phase: if exist and if the selected post owner is not the current member then check whether current user admin of that community or not.
+      // 4th phase: update deletedAt property
     } catch (error) {
       next(error)
     }
@@ -137,9 +149,9 @@ class PostController extends BaseController {
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
-    this.router.patch('/:mId/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:memberId/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
-    this.router.delete('/:postId', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:postId', this._auth, this._deletePost)
   }
 }
 
