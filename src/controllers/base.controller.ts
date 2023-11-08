@@ -25,7 +25,7 @@ export default abstract class BaseController {
     console.table(routePaths, ['controller', 'method', 'path'])
   }
 
-  protected _auth = async (req: Request, res: Response, next: NextFunction) => {
+  protected _auth = async (req: Request, res: Response, _next: NextFunction) => {
     const token = req.body.token || req.query.token || req.headers['authorization'] || req.headers['x-access-token']
 
     if (!token) {
@@ -34,15 +34,18 @@ export default abstract class BaseController {
     }
     try {
       const decoded = verifyToken(token)
-      req.user.userId = decoded.aud
+      console.log({ user: req.user, decoded })
+      // req.user.userId = decoded.aud
+      res.status(404).json({ decoded, mm: 'nice' })
     } catch (err) {
+      // console.log({ err })
       res.status(403).send('Invalid Token')
       return
     }
-    next()
+    // next()
   }
 
-  // check user's role whether user is ADMIN/USER;
+  // check user's role whether user is ADMIN or USER;
   protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
