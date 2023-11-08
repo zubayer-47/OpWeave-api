@@ -52,3 +52,15 @@ export const getCommunityPostsByMemberId = (community_id: string, member_id: str
     },
     orderBy: { createdAt: 'asc' }
   })
+
+export const getMember = async (community_id: string, member_id: string) =>
+  prismadb.member.findFirst({
+    where: {
+      AND: [{ community_id }, { member_id }]
+    },
+    select: {
+      userId: true,
+      member_id: true,
+      role: true
+    }
+  })

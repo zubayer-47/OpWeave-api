@@ -34,7 +34,7 @@ export default abstract class BaseController {
     }
     try {
       const decoded = verifyToken(token)
-      req.user = decoded.aud
+      req.user.userId = decoded.aud
     } catch (err) {
       res.status(403).send('Invalid Token')
       return
@@ -62,11 +62,16 @@ export default abstract class BaseController {
           role: true
         }
       })
-
       if (!member) errors.member = 'Member not exist'
 
-      if (!Object.keys(errors).length) next()
-      else res.status(400).json(errors)
+      if (!Object.keys(errors).length) {
+        req.user.role = member.role
+
+        next()
+      } else {
+        res.status(400).json(errors)
+        return
+      }
     } catch (error) {
       next(error)
     }

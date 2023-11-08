@@ -12,7 +12,7 @@ class UserController extends BaseController {
 
   private _profile = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user
+      const userId = req.user.userId
       const { password, ...rest } = await getCurrentUser(userId)
       res.json({ id: userId, ...rest }).end()
     } catch (error) {
@@ -25,7 +25,7 @@ class UserController extends BaseController {
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
-      const user = await getCurrentUser(req.user)
+      const user = await getCurrentUser(req.user.userId)
       if (!user) {
         res.status(404).json('user not found!').end()
         return
@@ -65,12 +65,12 @@ class UserController extends BaseController {
       if (!Object.keys(errors).length) {
         const hashedPassword: string | null = password ? await hash(password, 12) : null
 
-        const updatedUser = await updateUser(req.user, {
+        const updatedUser = await updateUser(req.user.userId, {
           fullname: fullname || user.fullname,
           username: username || user.username,
           password: hashedPassword || user.password,
           email: email || user.email,
-          gender: gender.toUpperCase() || user.gender
+          gender: gender?.toUpperCase() || user.gender
         })
 
         res.status(200).json({ message: 'User updated successfully', user: updatedUser }).end()
@@ -78,7 +78,6 @@ class UserController extends BaseController {
         res.status(400).json(errors).end()
       }
     } catch (error) {
-      console.log({ error }, 'sss')
       next(error)
     }
   }

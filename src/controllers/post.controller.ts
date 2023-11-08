@@ -3,7 +3,7 @@ import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
 import { isValidUUId } from 'src/libs/verifyuuid'
 import { checkIsCommunityExistById } from 'src/repos/community'
-import { checkMemberIsExist } from 'src/repos/member'
+import { checkMemberIsExist, getMember } from 'src/repos/member'
 import { getPostByPostId } from 'src/repos/post'
 import BaseController from './base.controller'
 
@@ -26,7 +26,7 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await checkMemberIsExist(req.user, cId)
+      const member = await checkMemberIsExist(req.user.userId, cId)
       if (!member) errors.member = `You're not a member of this community`
 
       if (!Object.keys(errors).length) {
@@ -34,7 +34,7 @@ class PostController extends BaseController {
           data: {
             community_id: cId,
             member_id: member.member_id,
-            title,
+            title: title?.trim(),
             body,
             hasPublished: member.role === 'ADMIN'
           },
@@ -81,7 +81,56 @@ class PostController extends BaseController {
 
   private _updatePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _deletePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
+  private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // member can delete and admins can delete also
+      const errors: { [index: string]: string } = {}
+      const { community_id, member_id, post_id } = req.body
+
+      if (isValidUUId(community_id) || isValidUUId(member_id) || isValidUUId(post_id))
+        errors.message = 'Content missing'
+
+      // 1st phase: validate member
+      const member = await getMember(community_id, member_id)
+      if (!member) errors.member = "Member doesn't exist"
+
+      const postInfo = await prismadb.post.findFirst({
+        where: {
+          AND: [{ community_id }, { post_id }, { member_id }]
+        },
+        select: {
+          post_id: true
+        }
+      })
+      if (!postInfo && member.role !== 'ADMIN') errors.member = "You're not a post owner or admin"
+
+      if (!Object.keys(errors).length) {
+        // 2nd phase: if exist and if the selected post owner is the current member then can be deletable otherwise through an error
+        const deletedPost = await prismadb.post.update({
+          where: {
+            post_id: postInfo.post_id
+          },
+          data: {
+            deletedAt: Date.now().toString()
+          },
+          select: {
+            deletedAt: true
+          }
+        })
+
+        res.status(200).json({
+          message: 'post deleted successfully',
+          ...deletedPost
+        })
+        // 3rd phase: if exist and if the selected post owner is not the current member then check whether current user admin of that community or not.
+        // 4th phase: update deletedAt property
+      } else {
+        res.status(400).json(errors)
+      }
+    } catch (error) {
+      next(error)
+    }
+  }
 
   public configureRoutes = () => {
     this.router.post('/new', this._auth, this._createPost)
@@ -90,7 +139,7 @@ class PostController extends BaseController {
     // check whether current user applicable to update or not;
     this.router.patch('/:mId/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
-    this.router.delete('/:mId/:postId', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:postId', this._auth, this._checkRoles, this._deletePost)
   }
 }
 

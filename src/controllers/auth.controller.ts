@@ -99,7 +99,7 @@ class AuthController extends BaseController {
       }
 
       const user = await getUserByUsername(username)
-      console.log({ user })
+      // console.log({ user })
       if (!user) {
         res.status(400).json({ message: "User doesn't exist" }).end()
         return

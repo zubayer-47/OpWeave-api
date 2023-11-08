@@ -3,7 +3,15 @@ import prismadb from 'src/libs/prismadb'
 export const getPostByPostId = async (community_id: string, post_id: string) =>
   prismadb.post.findFirst({
     where: {
-      AND: [{ community_id }, { post_id }]
+      AND: [
+        { community_id },
+        { post_id },
+        {
+          deletedAt: {
+            equals: null
+          }
+        }
+      ]
     },
     select: {
       post_id: true,

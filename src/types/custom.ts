@@ -3,4 +3,7 @@ export type JWTType = {
   iat: number
   exp: number
 }
-export type UserAuthReq = string
+export type UserAuthReq = {
+  userId: string
+  role: string
+}
