@@ -11,6 +11,7 @@ export const emailReg =
 
 export const verifyToken = (token: string): JWTType => {
   const decode: unknown = verify(token, process.env?.JWT_SECRET)
+  // console.log({ secret: process.env?.JWT_SECRET, })
   return decode as JWTType
 }
 

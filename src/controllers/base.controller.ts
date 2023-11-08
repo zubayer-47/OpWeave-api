@@ -25,25 +25,25 @@ export default abstract class BaseController {
     console.table(routePaths, ['controller', 'method', 'path'])
   }
 
-  protected _auth = async (req: Request, res: Response, _next: NextFunction) => {
+  protected _auth = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.body.token || req.query.token || req.headers['authorization'] || req.headers['x-access-token']
 
     if (!token) {
       res.status(401).send('Unauthorized!')
       return
     }
+
     try {
       const decoded = verifyToken(token)
-      // console.log({ user: req.user, decoded })
-      // req.user.userId = decoded.aud
-      res.status(404).json({ decoded, mm: 'nice' })
-      
-      // req.user.id = decoded.aud
+      console.log({ decoded })
+      req.user = {
+        userId: decoded.aud
+      }
     } catch (err) {
       res.status(403).send('Invalid Token')
       return
     }
-    // next()
+    next()
   }
 
   // check user's role whether user is ADMIN or USER;
@@ -69,7 +69,7 @@ export default abstract class BaseController {
       if (!member) errors.member = 'Member not exist'
 
       if (!Object.keys(errors).length) {
-        req.user.role = member.role
+        req.user = { role: member.role }
 
         next()
       } else {

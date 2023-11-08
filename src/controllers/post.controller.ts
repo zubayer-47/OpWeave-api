@@ -83,28 +83,11 @@ class PostController extends BaseController {
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // member can delete and admins can delete also
-      // const errors: { [index: string]: string } = {}
       const userId = req.user.userId
       const postId = req.params?.postId
-      // const communityId = req.query?.cid as string
-
-      // if (isValidUUId(community_id) || isValidUUId(member_id) || isValidUUId(postId))
-      //   errors.message = 'Content missing'
-
-      // 1st phase: validate member
-      // const member = await getMember(community_id, member_id)
-      // if (!member) errors.member = "Member doesn't exist"
-
-      // check post authority
-      // const author = await prismadb.post.findFirst()
-
-      // check post community authority
-      // const author = await prismadb.
 
       const postInfo = await prismadb.post.findFirst({
         where: {
-          // community_id: communityId,
           post_id: postId,
           member: {
             userId
@@ -120,7 +103,6 @@ class PostController extends BaseController {
         res.status(404).json('Post not found!')
         return
       }
-      // 2nd phase: if exist and if the selected post owner is the current member then can be deletable otherwise through an error
       await prismadb.post.update({
         where: {
           post_id: postInfo.post_id
@@ -137,8 +119,6 @@ class PostController extends BaseController {
         message: 'post deleted successfully',
         postId
       })
-      // 3rd phase: if exist and if the selected post owner is not the current member then check whether current user admin of that community or not.
-      // 4th phase: update deletedAt property
     } catch (error) {
       next(error)
     }

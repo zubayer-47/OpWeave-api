@@ -10,8 +10,6 @@ import {
 import { checkMemberIsExist } from 'src/repos/member'
 import { checkUserExist } from 'src/repos/user'
 import BaseController from './base.controller'
-import memberController from './member.controller'
-import postController from './post.controller'
 
 class CommunityController extends BaseController {
   constructor() {
@@ -163,6 +161,30 @@ class CommunityController extends BaseController {
     }
   }
 
+  private _deletePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+
+    // delete post by community based validation
+    const errors: { [index: string]: string } = {}
+
+    //
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public configureRoutes(): void {
     this.router.post('/new', this._auth, this._createCommunity)
     this.router.get('/:cId', this._auth, this._getCommunityPosts)
@@ -171,9 +193,11 @@ class CommunityController extends BaseController {
     //   GET: queries: (page,limit)
     this.router.get('/:cId/:mId', this._auth, this._getMemberPosts)
 
-    this.router.use('/:cId/p/', postController.router)
+    this.router.delete('/:communityId', this._auth, this._deletePost)
 
-    this.router.use('/:cId/m/', memberController.router)
+    // this.router.use('/:cId/p/', postController.router)
+
+    // this.router.use('/:cId/m/', memberController.router)
   }
 }
 

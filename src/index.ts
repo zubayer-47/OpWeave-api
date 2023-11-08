@@ -38,6 +38,5 @@ export const APP_ENV = {
 const keyGen = new JWTKey()
 keyGen.generate()
 
-
 // redisClient.connect()
 ExpressServer.start()
