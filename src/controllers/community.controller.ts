@@ -43,9 +43,8 @@ class CommunityController extends BaseController {
         if (existCommunity) errors.name = `community "${existCommunity.name}" already exist`
       }
       // check whether user exist or not
-      if (req.user.id) {
-        const userExist = await checkUserExist(req.user.id)
-
+      if (req.user.userId) {
+        const userExist = await checkUserExist(req.user.userId)
         if (!userExist) errors.user = 'User is not valid'
       }
 
@@ -66,7 +65,7 @@ class CommunityController extends BaseController {
         // auto create member as admin of created community;
         await prismadb.member.create({
           data: {
-            userId: req.user.id,
+            userId: req.user.userId,
             community_id: community.community_id,
             role: 'ADMIN',
             scopes: 'ROOT'
@@ -120,7 +119,7 @@ class CommunityController extends BaseController {
 
   private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _addMember = async (req: Request, res: Response, next: NextFunction) => {
+  private _joinMember = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
       const { community_id } = req.body
@@ -129,7 +128,7 @@ class CommunityController extends BaseController {
         errors.error = 'Something is wrong. Please try again'
 
       // check whether user exist or not
-      const user = await checkUserExist(req.user.id)
+      const user = await checkUserExist(req.user.userId)
       if (!user) errors.user = 'User not exist'
 
       // check whether community exist or not where user wants to add
@@ -137,13 +136,13 @@ class CommunityController extends BaseController {
       if (!community) errors.community = 'Community does not exist'
 
       // check whether member exist or not already
-      const isMemberExist = await checkMemberIsExist(req.user.id, community_id)
+      const isMemberExist = await checkMemberIsExist(req.user.userId, community_id)
       if (isMemberExist?.member_id) errors.member = 'Member Already Exist'
 
       if (!Object.keys(errors).length) {
         const createdMember = await prismadb.member.create({
           data: {
-            userId: req.user.id,
+            userId: req.user.userId,
             community_id: community_id
           },
           select: {
@@ -168,7 +167,7 @@ class CommunityController extends BaseController {
     this.router.post('/new', this._auth, this._createCommunity)
     this.router.get('/:cId', this._auth, this._getCommunityPosts)
     // add member
-    this.router.post('/', this._auth, this._addMember)
+    this.router.post('/', this._auth, this._joinMember)
     //   GET: queries: (page,limit)
     this.router.get('/:cId/:mId', this._auth, this._getMemberPosts)
 

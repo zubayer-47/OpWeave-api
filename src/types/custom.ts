@@ -4,6 +4,6 @@ export type JWTType = {
   exp: number
 }
 export type UserAuthReq = {
-  id?: string
-  role?: 'ADMIN' | 'MEMBER'
+  userId?: string
+  role?: string
 }
