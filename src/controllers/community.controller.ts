@@ -45,7 +45,6 @@ class CommunityController extends BaseController {
       // check whether user exist or not
       if (req.user.userId) {
         const userExist = await checkUserExist(req.user.userId)
-
         if (!userExist) errors.user = 'User is not valid'
       }
 

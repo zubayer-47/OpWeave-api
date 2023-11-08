@@ -1,4 +1,4 @@
-import { UserAuthReq } from '../custom'
+import { UserAuthReq, UserRoleReq } from '../custom'
 
 export {}
 
