@@ -104,6 +104,7 @@ class CommunityController extends BaseController {
     try {
       let posts
       if (page && limit) {
+        // in production grab posts which has true on hasPublished
         posts = await getPaginatedCommunityPosts(communityId, +page, +limit)
       } else {
         posts = await getCommunityPosts(communityId)
