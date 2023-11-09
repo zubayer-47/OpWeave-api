@@ -1,8 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
-import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
-import { isValidUUId } from 'src/libs/verifyuuid'
 
 export default abstract class BaseController {
   public router: Router
@@ -35,7 +33,7 @@ export default abstract class BaseController {
 
     try {
       const decoded = verifyToken(token)
-      console.log({ decoded })
+      // console.log({ decoded })
       req.user = {
         userId: decoded.aud
       }
@@ -50,16 +48,24 @@ export default abstract class BaseController {
   protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-
-      const { mId } = req.params
+      console.log('first')
+      const { memberId, communityId } = req.params
+      // debugger
       // grab community_id from uri
-      const cId = getUUIDByURL(req.originalUrl)
+      // const cId = getUUIDByURL(req.originalUrl)
 
-      if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
+      // if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
+
+      console.log({ memberId, communityId })
+      if (!memberId || !communityId) {
+        res.status(400).json({ message: 'content missing' })
+        return
+      }
 
       const member = await prismadb.member.findFirst({
         where: {
-          AND: [{ member_id: mId }, { community_id: cId }]
+          member_id: memberId,
+          community_id: communityId
         },
         select: {
           member_id: true,
@@ -68,16 +74,16 @@ export default abstract class BaseController {
       })
       if (!member) errors.member = 'Member not exist'
 
-      if (!Object.keys(errors).length) {
-        req.user = { role: member.role }
-
-        next()
-      } else {
+      if (Object.keys(errors).length) {
         res.status(400).json(errors)
         return
       }
+
+      req.user = { role: member.role }
     } catch (error) {
       next(error)
+      return
     }
+    next()
   }
 }
