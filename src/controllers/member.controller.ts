@@ -1,6 +1,4 @@
 import { NextFunction, Request, Response } from 'express'
-import { getUUIDByURL } from 'src/libs/getUUIDByURL'
-import { isValidUUId } from 'src/libs/verifyuuid'
 import { getCommunityPostsByMemberId, getPaginatedCommunityPostsByMemberId } from 'src/repos/member'
 import BaseController from './base.controller'
 
@@ -13,18 +11,16 @@ class MemberController extends BaseController {
     try {
       const errors: { [index: string]: string } = {}
       const { page, limit } = req.query
-      const { mId } = req.params
-      // grab community_id from uri
-      const cId = getUUIDByURL(req.originalUrl)
+      const { communityId, memberId } = req.params
 
-      if (!cId || !isValidUUId(mId)) errors.content = 'Content missing'
+      if (!communityId || !memberId) errors.content = 'Content missing'
 
       if (!Object.keys(errors).length) {
         let posts
         if (page && limit) {
-          posts = await getPaginatedCommunityPostsByMemberId(cId, mId, +page, +limit)
+          posts = await getPaginatedCommunityPostsByMemberId(communityId, memberId, +page, +limit)
         } else {
-          posts = await getCommunityPostsByMemberId(cId, mId)
+          posts = await getCommunityPostsByMemberId(communityId, memberId)
         }
 
         res.status(200).json({ posts }).end()
@@ -36,8 +32,32 @@ class MemberController extends BaseController {
     }
   }
 
+  private _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: { [index: string]: string } = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public configureRoutes(): void {
-    this.router.get('/:mId', this._auth, this._getCommunityPostsByMember)
+    this.router.get('/:communityId/:memberId', this._auth, this._getCommunityPostsByMember)
+
+    // make them
+    // get community members
+    this.router.get('/:communityId', this._auth, this._getMembers)
   }
 }
 
