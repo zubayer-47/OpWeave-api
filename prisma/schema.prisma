@@ -145,6 +145,7 @@ enum Scopes {
 
 enum MemberRole {
   ADMIN
+  MODERATOR
   MEMBER
 }
 
