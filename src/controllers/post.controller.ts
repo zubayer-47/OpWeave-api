@@ -38,6 +38,8 @@ class PostController extends BaseController {
           select: { post_id: true, hasPublished: true }
         })
 
+        //TODO: if hasPublished returns false -> send a notification to admin
+
         res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished }).end()
       } else {
         res.status(400).json(errors).end()
