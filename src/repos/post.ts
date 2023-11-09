@@ -1,17 +1,11 @@
 import prismadb from 'src/libs/prismadb'
 
-export const getPostByPostId = async (community_id: string, post_id: string) =>
+export const getPostByPostId = async (post_id: string) =>
   prismadb.post.findFirst({
     where: {
-      AND: [
-        { community_id },
-        { post_id },
-        {
-          deletedAt: {
-            equals: null
-          }
-        }
-      ]
+      post_id,
+      hasPublished: true,
+      deletedAt: null
     },
     select: {
       post_id: true,

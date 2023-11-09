@@ -9,6 +9,7 @@ import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
 import authController from './controllers/auth.controller'
 import communityController from './controllers/community.controller'
+import memberController from './controllers/member.controller'
 import postController from './controllers/post.controller'
 import userController from './controllers/user.controller'
 import corsOptions from './libs/cors'
@@ -50,8 +51,9 @@ class ExpressServer {
 
     this.express.use('/v1/auth/', authController.router)
     this.express.use('/v1/users/', userController.router)
-    this.express.use('/v1/c/', communityController.router)
+    this.express.use('/v1/communities/', communityController.router)
     this.express.use('/v1/posts/', postController.router)
+    this.express.use('/v1/members/', memberController.router)
   }
 
   private _errorRoutes(): void {

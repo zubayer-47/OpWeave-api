@@ -28,7 +28,8 @@ export const getPaginatedCommunityPosts = (community_id: string, page: number, l
       title: true,
       body: true,
       createdAt: true,
-      updatedAt: true
+      updatedAt: true,
+      deletedAt: true
     },
     orderBy: { createdAt: 'asc' },
     skip: (page - 1) * limit,
@@ -47,7 +48,8 @@ export const getCommunityPosts = (community_id: string) =>
       title: true,
       body: true,
       createdAt: true,
-      updatedAt: true
+      updatedAt: true,
+      deletedAt: true
     },
     orderBy: { createdAt: 'asc' }
   })
