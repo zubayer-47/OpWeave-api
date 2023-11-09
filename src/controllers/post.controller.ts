@@ -1,8 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { getUUIDByURL } from 'src/libs/getUUIDByURL'
 import prismadb from 'src/libs/prismadb'
-import { isValidUUId } from 'src/libs/verifyuuid'
-import { checkIsCommunityExistById } from 'src/repos/community'
 import { checkMemberIsExist } from 'src/repos/member'
 import { getPostByPostId } from 'src/repos/post'
 import BaseController from './base.controller'
@@ -16,7 +13,7 @@ class PostController extends BaseController {
   private _createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-      const cId = getUUIDByURL(req.originalUrl)
+      const communityId = req.params?.communityId
       const { title, body } = req.body
 
       // 1st layer
@@ -26,13 +23,13 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await checkMemberIsExist(req.user.userId, cId)
+      const member = await checkMemberIsExist(req.user.userId, communityId)
       if (!member) errors.member = `You're not a member of this community`
 
       if (!Object.keys(errors).length) {
         const post = await prismadb.post.create({
           data: {
-            community_id: cId,
+            community_id: communityId,
             member_id: member.member_id,
             title: title?.trim(),
             body,
@@ -52,28 +49,35 @@ class PostController extends BaseController {
 
   private _getPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const errors: { [index: string]: string } = {}
+      // const errors: { [index: string]: string } = {}
       const { postId } = req.params
-      const cId = getUUIDByURL(req.originalUrl)
+      // const cId = getUUIDByURL(req.originalUrl)
 
-      if (!isValidUUId(postId) || !isValidUUId(cId)) errors.error = 'Content missing'
-
-      // check whether community exist or not where user wants to add
-      const community = await checkIsCommunityExistById(cId)
-      if (!community) errors.community = 'Community does not exist'
-
-      if (!Object.keys(errors).length) {
-        const post = await getPostByPostId(cId, postId)
-
-        if (post === null) {
-          res.status(404).json('Post Not Found').end()
-          return
-        }
-
-        res.status(200).json({ post }).end()
-      } else {
-        res.status(400).json(errors).end()
+      // if (!isValidUUId(postId) || !isValidUUId(cId)) errors.error = 'Content missing'
+      if (!postId) {
+        res.status(400).json('Content missing')
+        return
       }
+
+      // check whether community exist or not where user wants to get
+      // const community = await checkIsCommunityExistById(cId)
+      // if (!community) errors.community = 'Community does not exist'
+
+      // if (!Object.keys(errors).length) {
+      // console.log({ postId })
+      const post = await getPostByPostId(postId)
+      if (!post) {
+        res.status(404).json({ message: 'Post Not Found' })
+        return
+      }
+
+      res
+        .status(200)
+        .json({ ...post })
+        .end()
+      // } else {
+      //   res.status(400).json(errors).end()
+      // }
     } catch (error) {
       next(error)
     }
@@ -82,27 +86,28 @@ class PostController extends BaseController {
   private _updatePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user.userId
-      const postId = req.params?.postId
+    const userId = req.user?.userId
+    const postId = req.params?.postId
 
-      const postInfo = await prismadb.post.findFirst({
-        where: {
-          post_id: postId,
-          member: {
-            userId
-          },
-          deletedAt: null
+    const postInfo = await prismadb.post.findFirst({
+      where: {
+        post_id: postId,
+        member: {
+          userId
         },
-        select: {
-          post_id: true
-        }
-      })
-
-      if (!postInfo) {
-        res.status(404).json('Post not found!')
-        return
+        deletedAt: null
+      },
+      select: {
+        post_id: true
       }
+    })
+
+    if (!postInfo) {
+      res.status(404).json('Post not found!')
+      return
+    }
+
+    try {
       await prismadb.post.update({
         where: {
           post_id: postInfo.post_id
@@ -125,7 +130,7 @@ class PostController extends BaseController {
   }
 
   public configureRoutes = () => {
-    this.router.post('/new', this._auth, this._createPost)
+    this.router.post('/:communityId/new', this._auth, this._createPost)
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
