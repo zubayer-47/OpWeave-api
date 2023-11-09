@@ -48,15 +48,12 @@ export default abstract class BaseController {
   protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
-      console.log('first')
       const { memberId, communityId } = req.params
       // debugger
       // grab community_id from uri
       // const cId = getUUIDByURL(req.originalUrl)
 
       // if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
-
-      console.log({ memberId, communityId })
       if (!memberId || !communityId) {
         res.status(400).json({ message: 'content missing' })
         return
