@@ -115,7 +115,7 @@ class CommunityController extends BaseController {
     }
   }
 
-  private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
+  // private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
   private _joinMember = async (req: Request, res: Response, next: NextFunction) => {
     const errors: { [index: string]: string } = {}
@@ -159,10 +159,27 @@ class CommunityController extends BaseController {
     }
   }
 
+  // private _changeRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   /**
+  //    * scopes:
+  //    * ADMIN: ['ROOT']
+  //    * MODERATOR: ['REPORT','HIDE_POST', 'ACTION_REQ']
+  //    * MEMBER: ['READ_ONLY', 'SELF_POST_OWNER']
+  //    */
+
+  //   const {} = req.params
+  //   const {} = req.body
+  //   const {} = req.query
+  //   try {
+  //     // Your async code gose here...
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
+
   private _deletePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
+    const userRole = req.user?.role
+    const { communityId, postId } = req.params
     /**
      * Validation
      */
@@ -170,14 +187,36 @@ class CommunityController extends BaseController {
     // delete post by community based validation
     const errors: { [index: string]: string } = {}
 
-    //
+    // check user admin or moderator
+
+    if (!communityId || !postId) errors.message = 'content missing'
+
+    // 1st: if not admin then through an error
+    if (userRole !== 'ADMIN') {
+      res.status(400).json({ message: 'you are not an Admin. Report post if you are a moderator' })
+
+      return
+    }
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
     try {
-      // Your async code gose here...
+      // 2nd: if admin then can be delete directly
+      await prismadb.post.update({
+        where: {
+          post_id: postId
+        },
+        data: {
+          deletedAt: new Date()
+        },
+        select: {
+          post_id: true
+        }
+      })
+
+      res.status(200).json({ message: 'post deleted successfully', postId })
     } catch (error) {
       next(error)
     }
@@ -193,7 +232,6 @@ class CommunityController extends BaseController {
      */
     const errors: { [index: string]: string } = {}
 
-    console.log({ userRole })
     if (userRole === 'ADMIN') {
       res.status(400).json('You are Admin of this community')
       return
@@ -254,22 +292,67 @@ class CommunityController extends BaseController {
     }
   }
 
+  // refactor it before send production (add pagination where needs)
+  private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const cid = req.query?.cid as string
+
+    if (!cid) {
+      res.status(400).json({ message: 'content missing' })
+    }
+
+    try {
+      const communityInfo = await prismadb.community.findFirst({
+        where: {
+          community_id: cid
+        },
+        select: {
+          community_id: true,
+          name: true,
+          rules: true,
+          bio: true,
+          members: {
+            select: {
+              member_id: true,
+              community_id: true,
+              role: true,
+              scopes: true
+            }
+          },
+          posts: {
+            select: {
+              post_id: true,
+              member_id: true,
+              title: true,
+              body: true,
+              hasPublished: true
+            }
+          }
+        }
+      })
+
+      res.status(200).json(communityInfo)
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public configureRoutes(): void {
     this.router.post('/new', this._auth, this._createCommunity)
     this.router.get('/:communityId', this._auth, this._getCommunityPosts)
+    // make get community
+
     // add member
     this.router.post('/:communityId', this._auth, this._joinMember)
-    //   GET: queries: (page,limit)
-    this.router.get('/:communityId/:memberId', this._auth, this._getMemberPosts)
+    //   GET: queries: (page,limit, cid)
+    // this.router.get('/:memberId', this._auth, this._getMemberPosts)
 
     // delete post
-    this.router.delete('/:communityId/:postId', this._auth, this._deletePost)
+    this.router.delete('/:communityId/:memberId/:postId', this._auth, this._checkRoles, this._deletePost)
     // leave
-    this.router.delete('/:communityId/:memberId', this._auth, this._leaveMember)
+    this.router.post('/:communityId/:memberId', this._auth, this._checkRoles, this._leaveMember)
 
-    // this.router.use('/:cId/p/', postController.router)
-
-    // this.router.use('/:cId/m/', memberController.router)
+    // community info (query: communityId) -> testing purpose route
+    this.router.get('/', this._auth, this._communityInfo)
   }
 }
 
