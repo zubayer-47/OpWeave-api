@@ -4,7 +4,7 @@ import { sign } from 'jsonwebtoken'
 import { emailReg } from 'src/libs'
 import { setJWT } from 'src/libs/cookie'
 import prismadb from 'src/libs/prismadb'
-import { checkUniqueEmail, checkUniqueUsername, getCurrentUser, getUserByUsername } from 'src/repos/user'
+import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
 class AuthController extends BaseController {
@@ -45,12 +45,12 @@ class AuthController extends BaseController {
 
       // db check & it's called 3rd layer validation
       if (!errors.username) {
-        const checkUsername = await checkUniqueUsername(username)
-        if (checkUsername) errors.username = 'Username already taken!'
+        const user = await userRepo.isUnique(username)
+        if (user) errors.username = 'Username already taken!'
       }
       if (!errors.email) {
-        const checkEmail = await checkUniqueEmail(email)
-        if (checkEmail) errors.email = 'Email address already taken!'
+        const isEmailExist = await userRepo.isUnique(email, 'email')
+        if (isEmailExist) errors.email = 'Email address already taken!'
       }
 
       if (Object.keys(errors).length) {
@@ -91,6 +91,7 @@ class AuthController extends BaseController {
 
   private _login = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = req.user?.userId
       const { username, password } = req.body
       //validation
       if (!username || !password || (password && password.length < 8)) {
@@ -98,7 +99,7 @@ class AuthController extends BaseController {
         return
       }
 
-      const user = await getUserByUsername(username)
+      const user = await userRepo.getUser(username)
       // console.log({ user })
       if (!user) {
         res.status(400).json({ message: "User doesn't exist" }).end()
@@ -110,14 +111,14 @@ class AuthController extends BaseController {
         return
       }
 
-      const { password: pwd, ...rest } = await getCurrentUser(user.user_id)
+      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(userId)
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
 
-      res.json({ id: user?.user_id, ...rest, token }).end()
+      res.json({ id: user?.user_id, ...currentUser, token }).end()
     } catch (error) {
       next(error)
     }
