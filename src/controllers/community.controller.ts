@@ -7,7 +7,7 @@ import {
   getPaginatedCommunityPosts
 } from 'src/repos/community'
 import { checkMemberIsExist } from 'src/repos/member'
-import { checkUserExist } from 'src/repos/user'
+import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
 class CommunityController extends BaseController {
@@ -18,6 +18,8 @@ class CommunityController extends BaseController {
 
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
     const errors: { [index: string]: string } = {}
+    const userId = req.user?.userId
+    // const userRole = req.user?.role
 
     const { name, bio, rules } = req.body
 
@@ -39,8 +41,8 @@ class CommunityController extends BaseController {
       if (existCommunity) errors.name = `community "${existCommunity.name}" already exist`
     }
     // check whether user exist or not
-    if (req.user.userId) {
-      const userExist = await checkUserExist(req.user.userId)
+    if (userId) {
+      const userExist = await userRepo.isExists(userId)
       if (!userExist) errors.user = 'User is not valid'
     }
 
@@ -66,7 +68,7 @@ class CommunityController extends BaseController {
       // auto create member as admin of created community;
       await prismadb.member.create({
         data: {
-          userId: req.user.userId,
+          user_id: userId,
           community_id: community.community_id,
           role: 'ADMIN',
           scopes: 'ROOT'
@@ -120,12 +122,13 @@ class CommunityController extends BaseController {
 
   private _joinMember = async (req: Request, res: Response, next: NextFunction) => {
     const errors: { [index: string]: string } = {}
+    const userId = req.user?.userId
     const communityId = req.params?.communityId
 
     if (!communityId) errors.message = 'Content missing'
 
     // check whether user exist or not
-    const user = await checkUserExist(req.user.userId)
+    const user = await userRepo.isExists(userId)
     if (!user) errors.user = 'User does not exist'
 
     // check whether community exist or not where user wants to add
@@ -144,7 +147,7 @@ class CommunityController extends BaseController {
     try {
       const joinedMember = await prismadb.member.create({
         data: {
-          userId: req.user.userId,
+          user_id: userId,
           community_id: communityId
         },
         select: {
@@ -247,7 +250,7 @@ class CommunityController extends BaseController {
     // check whether member exist or not
     const member = await prismadb.member.findFirst({
       where: {
-        userId,
+        user_id: userId,
         community_id: communityId,
         leavedAt: null
       },
