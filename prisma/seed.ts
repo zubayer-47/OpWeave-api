@@ -67,7 +67,7 @@ async function main() {
         //   Mousuf -> unnoyon community
         member_id: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7',
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
-        userId: 'ed318213-a230-425a-bc93-00dyw7ee58d6',
+        user_id: 'ed318213-a230-425a-bc93-00dyw7ee58d6',
         role: 'ADMIN',
         scopes: 'ROOT',
         joinedAt: new Date()
@@ -76,7 +76,7 @@ async function main() {
         //   A B M Zubayer -> unnoyon community
         member_id: 'd4397974-b70b-4f00-8e39-5719a8adf56d',
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
-        userId: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
+        user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
         role: 'MEMBER',
         scopes: 'VIEWER',
         joinedAt: new Date()
@@ -85,7 +85,7 @@ async function main() {
         //   Zubayer -> dev community
         member_id: '784ce74a-e5b8-4160-9309-74ae3b2332cc',
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
-        userId: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
+        user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
         role: 'ADMIN',
         scopes: 'ROOT',
         joinedAt: new Date()
@@ -94,7 +94,7 @@ async function main() {
         //   Rasel -> dev community
         member_id: 'e8759b7f-7471-4adf-a251-73dd4e6ec79b',
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
-        userId: '69a5a201-a855-412e-9f3e-8b8beba94194',
+        user_id: '69a5a201-a855-412e-9f3e-8b8beba94194',
         role: 'MEMBER',
         scopes: 'VIEWER',
         joinedAt: new Date()
