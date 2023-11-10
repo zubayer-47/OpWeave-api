@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { emailReg } from 'src/libs'
-import { checkUniqueEmail, checkUniqueUsername, getCurrentUser, updateUser } from 'src/repos/user'
+import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
 class UserController extends BaseController {
@@ -13,8 +13,8 @@ class UserController extends BaseController {
   private _profile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.userId
-      const { password, ...rest } = await getCurrentUser(userId)
-      res.json({ id: userId, ...rest }).end()
+      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(userId)
+      res.json({ id: userId, ...currentUser }).end()
     } catch (error) {
       next(error)
     }
@@ -22,10 +22,12 @@ class UserController extends BaseController {
 
   private _updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = req.user.userId
+
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
-      const user = await getCurrentUser(req.user.userId)
+      const user = await userRepo.getCurrentUser(userId)
       if (!user) {
         res.status(404).json('user not found!').end()
         return
@@ -45,15 +47,16 @@ class UserController extends BaseController {
       // check email and username are unique or not
       if (username) {
         // check whether username exist or not
-        const duplicateUserName = await checkUniqueUsername(username)
+        const user = await userRepo.isUnique(username)
+        // console.log({ user })
 
-        if (duplicateUserName?.user_id) errors.username = 'duplicate username, try different username'
+        if (user) errors.username = 'duplicate username, try different username'
       }
       if (email) {
         // check whether username exist or not
-        const duplicateEmail = await checkUniqueEmail(email)
+        const isEmailExist = await userRepo.isUnique(email, 'email')
 
-        if (duplicateEmail?.user_id) errors.username = 'This email already exist, try different email'
+        if (isEmailExist) errors.username = 'This email already exist, try different email'
       }
 
       if (user) {
@@ -65,7 +68,7 @@ class UserController extends BaseController {
       if (!Object.keys(errors).length) {
         const hashedPassword: string | null = password ? await hash(password, 12) : null
 
-        const updatedUser = await updateUser(req.user.userId, {
+        const updatedUser = await userRepo.updateUser(userId, {
           fullname: fullname || user.fullname,
           username: username || user.username,
           password: hashedPassword || user.password,
