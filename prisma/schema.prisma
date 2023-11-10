@@ -46,8 +46,8 @@ model community {
 model member {
   member_id String @id @default(uuid())
 
-  user   user   @relation(fields: [userId], references: [user_id])
-  userId String
+  user    user   @relation(fields: [user_id], references: [user_id])
+  user_id String
 
   community    community @relation(fields: [community_id], references: [community_id])
   community_id String
