@@ -95,7 +95,7 @@ class PostController extends BaseController {
       where: {
         post_id: postId,
         member: {
-          userId
+          user_id: userId
         },
         deletedAt: null
       },
