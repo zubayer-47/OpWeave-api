@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
-import { getCommunityPostsByMemberId, getPaginatedCommunityPostsByMemberId } from 'src/repos/member'
+import postRepo from 'src/repos/post.repo'
 import BaseController from './base.controller'
 
 class MemberController extends BaseController {
@@ -7,6 +7,7 @@ class MemberController extends BaseController {
     super()
     this.configureRoutes()
   }
+
   private _getCommunityPostsByMember = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const errors: { [index: string]: string } = {}
@@ -18,9 +19,9 @@ class MemberController extends BaseController {
       if (!Object.keys(errors).length) {
         let posts
         if (page && limit) {
-          posts = await getPaginatedCommunityPostsByMemberId(communityId, memberId, +page, +limit)
+          posts = await postRepo.getCommunityPosts(communityId, memberId, +page, +limit)
         } else {
-          posts = await getCommunityPostsByMemberId(communityId, memberId)
+          posts = await postRepo.getCommunityPosts(communityId, memberId)
         }
 
         res.status(200).json({ posts }).end()

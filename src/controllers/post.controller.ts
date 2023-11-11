@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
-import { checkMemberIsExist } from 'src/repos/member'
-import { getPostByPostId } from 'src/repos/post'
+import memberRepo from 'src/repos/member.repo'
+import postRepo from 'src/repos/post.repo'
 import BaseController from './base.controller'
 
 class PostController extends BaseController {
@@ -12,6 +12,8 @@ class PostController extends BaseController {
 
   private _createPost = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = req.user.userId
+
       const errors: { [index: string]: string } = {}
       const communityId = req.params?.communityId
       const { title, body } = req.body
@@ -23,7 +25,7 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await checkMemberIsExist(req.user.userId, communityId)
+      const member = await memberRepo.isExist(userId, communityId)
       if (!member) errors.member = `You're not a member of this community`
 
       if (!Object.keys(errors).length) {
@@ -67,7 +69,7 @@ class PostController extends BaseController {
 
       // if (!Object.keys(errors).length) {
       // console.log({ postId })
-      const post = await getPostByPostId(postId)
+      const post = await postRepo.get(postId)
       if (!post) {
         res.status(404).json({ message: 'Post Not Found' })
         return

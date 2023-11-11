@@ -6,7 +6,7 @@ import {
   getCommunityPosts,
   getPaginatedCommunityPosts
 } from 'src/repos/community'
-import { checkMemberIsExist } from 'src/repos/member'
+import memberRepo from 'src/repos/member.repo'
 import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
@@ -136,7 +136,7 @@ class CommunityController extends BaseController {
     if (!community) errors.community = 'Community does not exist'
 
     // check whether member exist or not already
-    const member = await checkMemberIsExist(req.user.userId, communityId)
+    const member = await memberRepo.isExist(userId, communityId)
     if (member) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
