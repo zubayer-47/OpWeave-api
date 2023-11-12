@@ -1,12 +1,8 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
-import {
-  checkIsCommunityExistById,
-  checkIsCommunityExistByName,
-  getCommunityPosts,
-  getPaginatedCommunityPosts
-} from 'src/repos/community'
+import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
+import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
@@ -36,7 +32,7 @@ class CommunityController extends BaseController {
 
     // 3rd layer, check db
     if (!errors.name) {
-      const existCommunity = await checkIsCommunityExistByName(name)
+      const existCommunity = await communityRepo.isExist(name)
 
       if (existCommunity) errors.name = `community "${existCommunity.name}" already exist`
     }
@@ -95,7 +91,7 @@ class CommunityController extends BaseController {
     if (!communityId) errors.community_id = 'content missing'
 
     // check whether community exist or not
-    const community = await checkIsCommunityExistById(communityId)
+    const community = await communityRepo.isExist(communityId, 'community_id')
     if (!community) errors.community = 'Community does not exist'
 
     if (Object.keys(errors).length) {
@@ -107,9 +103,9 @@ class CommunityController extends BaseController {
       let posts
       if (page && limit) {
         // in production grab posts which has true on hasPublished
-        posts = await getPaginatedCommunityPosts(communityId, +page, +limit)
+        posts = await postRepo.getCommunityPosts(communityId, null, +page, +limit)
       } else {
-        posts = await getCommunityPosts(communityId)
+        posts = await postRepo.getCommunityPosts(communityId)
       }
 
       res.status(200).json({ posts }).end()
@@ -132,12 +128,13 @@ class CommunityController extends BaseController {
     if (!user) errors.user = 'User does not exist'
 
     // check whether community exist or not where user wants to add
-    const community = await checkIsCommunityExistById(communityId)
+    const community = await communityRepo.isExist(communityId, 'community_id')
     if (!community) errors.community = 'Community does not exist'
 
     // check whether member exist or not already
     const member = await memberRepo.isExist(userId, communityId)
-    if (member) errors.member = 'Member Already Exist'
+    console.log({ member })
+    if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors).end()
@@ -145,10 +142,29 @@ class CommunityController extends BaseController {
     }
 
     try {
-      const joinedMember = await prismadb.member.create({
+      if (!member) {
+        const joinedMember = await prismadb.member.create({
+          data: {
+            user_id: userId,
+            community_id: communityId
+          },
+          select: {
+            community_id: true,
+            member_id: true,
+            role: true
+          }
+        })
+
+        res.status(200).json({ message: 'Member Created Successfully', member: joinedMember })
+        return
+      }
+
+      const joinedMember = await prismadb.member.update({
+        where: {
+          member_id: member.member_id
+        },
         data: {
-          user_id: userId,
-          community_id: communityId
+          leavedAt: null
         },
         select: {
           community_id: true,
@@ -157,7 +173,7 @@ class CommunityController extends BaseController {
         }
       })
 
-      res.status(200).json({ message: 'Member Created Successfully', joinedMember }).end()
+      res.status(200).json({ message: 'Member Created Successfully', member: joinedMember }).end()
     } catch (error) {
       next(error)
     }
@@ -183,6 +199,7 @@ class CommunityController extends BaseController {
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
+    // const userId = req.user?.userId
     const { communityId, postId } = req.params
     /**
      * Validation
@@ -191,21 +208,16 @@ class CommunityController extends BaseController {
     // delete post by community based validation
     const errors: { [index: string]: string } = {}
 
-    // check user admin or moderator
-
     if (!communityId || !postId) errors.message = 'content missing'
 
     // 1st: if not admin then through an error
-    if (userRole !== 'ADMIN') {
-      res.status(400).json({ message: 'you are not an Admin. Report post if you are a moderator' })
-
-      return
-    }
+    if (userRole !== 'ADMIN') errors.role = 'you are not an Admin. Report post if you are a moderator'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
+
     try {
       // 2nd: if admin then can be delete directly
       await prismadb.post.update({
@@ -237,12 +249,12 @@ class CommunityController extends BaseController {
     const errors: { [index: string]: string } = {}
 
     if (userRole === 'ADMIN') {
-      res.status(400).json('You are Admin of this community')
+      res.status(400).json('You are Admin of this community. you cannot perform leave action')
       return
     }
 
     // check whether community exist or not
-    const community = await checkIsCommunityExistById(communityId)
+    const community = await communityRepo.isExist(communityId, 'community_id')
     if (!community) {
       res.status(404).json('Community not found')
       return
@@ -272,7 +284,7 @@ class CommunityController extends BaseController {
 
     try {
       // update leavedAt property of this member
-      await prismadb.member.update({
+      const leavedMember = await prismadb.member.update({
         where: {
           member_id: member?.member_id
         },
@@ -283,6 +295,8 @@ class CommunityController extends BaseController {
           member_id: true
         }
       })
+
+      console.log({ leavedMember })
 
       res
         .status(200)
@@ -351,9 +365,9 @@ class CommunityController extends BaseController {
     // this.router.get('/:memberId', this._auth, this._getMemberPosts)
 
     // delete post
-    this.router.delete('/:communityId/:memberId/:postId', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:communityId/:postId', this._auth, this._checkRoles, this._deletePost)
     // leave
-    this.router.post('/:communityId/:memberId', this._auth, this._checkRoles, this._leaveMember)
+    this.router.post('/:communityId/leave', this._auth, this._checkRoles, this._leaveMember)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/', this._auth, this._communityInfo)
