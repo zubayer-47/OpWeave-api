@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
-import prismadb from 'src/libs/prismadb'
+import memberRepo from 'src/repos/member.repo'
 
 export default abstract class BaseController {
   public router: Router
@@ -47,28 +47,20 @@ export default abstract class BaseController {
   // check user's role whether user is ADMIN or USER;
   protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = req.user?.userId
       const errors: { [index: string]: string } = {}
-      const { memberId, communityId } = req.params
+      const { communityId } = req.params
       // debugger
       // grab community_id from uri
       // const cId = getUUIDByURL(req.originalUrl)
 
       // if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
-      if (!memberId || !communityId) {
+      if (!communityId) {
         res.status(400).json({ message: 'content missing' })
         return
       }
 
-      const member = await prismadb.member.findFirst({
-        where: {
-          member_id: memberId,
-          community_id: communityId
-        },
-        select: {
-          member_id: true,
-          role: true
-        }
-      })
+      const member = await memberRepo.isExist(userId, communityId)
       if (!member) errors.member = 'Member not exist'
 
       if (Object.keys(errors).length) {
@@ -76,7 +68,8 @@ export default abstract class BaseController {
         return
       }
 
-      req.user = { role: member.role }
+      // req.user = { ...req.user, role: member.role }
+      req.user.role = member.role
     } catch (error) {
       next(error)
       return
