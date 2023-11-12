@@ -14,6 +14,8 @@ class PostController extends BaseController {
     try {
       const userId = req.user.userId
 
+      console.log({ userId })
+
       const errors: { [index: string]: string } = {}
       const communityId = req.params?.communityId
       const { title, body } = req.body
@@ -64,7 +66,7 @@ class PostController extends BaseController {
       }
 
       // check whether community exist or not where user wants to get
-      // const community = await checkIsCommunityExistById(cId)
+      // const community = await communityRepo.isExist(cId, 'community_id')
       // if (!community) errors.community = 'Community does not exist'
 
       // if (!Object.keys(errors).length) {
@@ -87,7 +89,58 @@ class PostController extends BaseController {
     }
   }
 
-  private _updatePost = async (_req: Request, _res: Response, _next: NextFunction) => {}
+  private _updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.userId
+    const { communityId, postId } = req.params
+
+    const { title, body } = req.body
+    /**
+     * Validation
+     */
+    const errors: { [index: string]: string } = {}
+
+    if (!communityId || !postId) errors.message = 'content missing'
+
+    // 1st layer
+    if (!title) errors.title = 'title is required!'
+    if (!body) errors.body = 'body is required!'
+
+    // 2nd layer
+    if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
+
+    const postInfo = await postRepo.getCurrentMemberPost(userId, communityId, postId)
+    // console.log({ posts, userId, postId, communityId })
+    if (!postInfo) errors.post = 'This post is not yours'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const updatedPost = await prismadb.post.update({
+        where: {
+          post_id: postId
+        },
+        data: {
+          title,
+          body
+        },
+        select: {
+          post_id: true,
+          member_id: true,
+          title: true,
+          body: true,
+          hasPublished: true,
+          community_id: true
+        }
+      })
+
+      res.status(200).json({ message: 'Post successfully updated', updatedPost })
+    } catch (error) {
+      next(error)
+    }
+  }
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId
@@ -102,16 +155,36 @@ class PostController extends BaseController {
         deletedAt: null
       },
       select: {
-        post_id: true
+        post_id: true,
+        hasPublished: true
       }
     })
 
+    // console.log({ postInfo })
+
     if (!postInfo) {
-      res.status(404).json('Post not found!')
+      res.status(404).json('Post not found to delete by you')
       return
     }
 
     try {
+      // permanently delete post if request before admin's approve
+      if (!postInfo.hasPublished) {
+        await prismadb.post.delete({
+          where: {
+            post_id: postId
+          },
+          select: {
+            post_id: true
+          }
+        })
+
+        res.status(200).json({ message: 'Post deleted Successfully' })
+
+        return
+      }
+
+      // if it's a approved post by admin then update deletedAt prop for soft deletion
       await prismadb.post.update({
         where: {
           post_id: postInfo.post_id
@@ -138,7 +211,7 @@ class PostController extends BaseController {
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;
-    this.router.patch('/:memberId/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:communityId/:postId', this._auth, this._checkRoles, this._updatePost)
     // check whether current user applicable to delete or not;
     this.router.delete('/:postId', this._auth, this._deletePost)
   }
