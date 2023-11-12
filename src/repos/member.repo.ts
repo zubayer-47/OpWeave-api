@@ -18,13 +18,13 @@ class MemberRepo {
     return this.member.findFirst({
       where: {
         user_id,
-        community_id,
-        leavedAt: null
+        community_id
       },
       select: {
         member_id: true,
         community_id: true,
-        role: true
+        role: true,
+        leavedAt: true
       }
     })
   }
