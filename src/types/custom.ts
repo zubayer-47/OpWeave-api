@@ -7,3 +7,14 @@ export type UserAuthReq = {
   userId?: string
   role?: 'ADMIN' | 'MEMBER' | 'MODERATOR'
 }
+
+type OptionTypes = {
+  orderBy: { createdAt: 'asc' | 'desc' }
+  skip: number
+  take: number
+}
+export type PaginationTypes =
+  | OptionTypes
+  | {
+      orderBy: { createdAt: 'asc' | 'desc' }
+    }
