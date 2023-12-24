@@ -6,7 +6,7 @@ class AdminActionController extends BaseController {
     super()
     this.configureRoutes()
   }
-  private methodName = async (req: Request, res: Response, next: NextFunction) => {
+  private methodName = async (_req: Request, _res: Response, next: NextFunction) => {
     try {
       // your code gose here
     } catch (error) {

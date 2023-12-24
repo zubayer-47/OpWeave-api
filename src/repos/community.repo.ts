@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
+import { PaginationTypes } from 'src/types/custom'
 
 class CommunityRepo {
   private community: Prisma.communityDelegate<DefaultArgs>
@@ -25,62 +26,44 @@ class CommunityRepo {
     })
   }
 
+  /**
+   * get community posts via pagination or all posts
+   * @param community_id this should community_id
+   * @param member_id -> member_id but if next params exist -> falsy value
+   * @param page optional filed
+   * @param limit optional field
+   * @returns community_id member_id title body createdAt updatedAt
+   */
+  public getCommunityPosts(community_id: string, page?: number, limit?: number) {
+    const paginationOptions: PaginationTypes =
+      !page || !limit
+        ? { orderBy: { createdAt: 'asc' } }
+        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
+
+    return this.community.findMany({
+      where: {
+        community_id,
+        deletedAt: null
+      },
+      select: {
+        posts: {
+          select: {
+            post_id: true,
+            community_id: true,
+            member_id: true,
+            title: true,
+            body: true,
+            createdAt: true,
+            updatedAt: true
+          }
+        }
+      },
+      ...paginationOptions
+    })
+  }
+
   // public gets() {
   //   return this.community.findMany()
   // }
 }
 export default new CommunityRepo()
-
-// export const checkIsCommunityExistByName = (name: string) =>
-//   prismadb.community.findFirst({
-//     where: { name },
-//     select: {
-//       name: true
-//     }
-//   })
-
-// export const checkIsCommunityExistById = (community_id: string) =>
-//   prismadb.community.findFirst({
-//     where: { community_id },
-//     select: {
-//       community_id: true
-//     }
-//   })
-
-// export const getPaginatedCommunityPosts = (community_id: string, page: number, limit: number) =>
-//   prismadb.post.findMany({
-//     where: {
-//       community_id
-//     },
-//     select: {
-//       post_id: true,
-//       community_id: true,
-//       member_id: true,
-//       title: true,
-//       body: true,
-//       createdAt: true,
-//       updatedAt: true,
-//       deletedAt: true
-//     },
-//     orderBy: { createdAt: 'asc' },
-//     skip: (page - 1) * limit,
-//     take: limit
-//   })
-
-// export const getCommunityPosts = (community_id: string) =>
-//   prismadb.post.findMany({
-//     where: {
-//       community_id
-//     },
-//     select: {
-//       post_id: true,
-//       community_id: true,
-//       member_id: true,
-//       title: true,
-//       body: true,
-//       createdAt: true,
-//       updatedAt: true,
-//       deletedAt: true
-//     },
-//     orderBy: { createdAt: 'asc' }
-//   })

@@ -90,15 +90,14 @@ class AuthController extends BaseController {
   }
 
   private _login = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user?.userId
-      const { username, password } = req.body
-      //validation
-      if (!username || !password || (password && password.length < 8)) {
-        res.status(400).json({ message: 'Incorrect login credentials!' }).end()
-        return
-      }
+    const { username, password } = req.body
+    //validation
+    if (!username || !password || (password && password.length < 8)) {
+      res.status(400).json({ message: 'Incorrect login credentials!' }).end()
+      return
+    }
 
+    try {
       const user = await userRepo.getUser(username)
       // console.log({ user })
       if (!user) {
@@ -111,7 +110,7 @@ class AuthController extends BaseController {
         return
       }
 
-      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(userId)
+      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(user.user_id)
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })

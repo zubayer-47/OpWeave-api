@@ -24,6 +24,8 @@ class UserController extends BaseController {
     try {
       const userId = req.user.userId
 
+      console.log({ userId })
+
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
@@ -65,6 +67,8 @@ class UserController extends BaseController {
         if (comparedPass) errors.password = 'your current password and given password are same'
       }
 
+      console.log(Object.keys(errors).length, { errors })
+
       if (!Object.keys(errors).length) {
         const hashedPassword: string | null = password ? await hash(password, 12) : null
 
@@ -76,9 +80,9 @@ class UserController extends BaseController {
           gender: gender?.toUpperCase() || user.gender
         })
 
-        res.status(200).json({ message: 'User updated successfully', user: updatedUser }).end()
+        res.status(200).json({ message: 'User updated successfully', user: updatedUser })
       } else {
-        res.status(400).json(errors).end()
+        res.status(400).json(errors)
       }
     } catch (error) {
       next(error)

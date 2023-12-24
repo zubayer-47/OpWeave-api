@@ -2,7 +2,6 @@ import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
-import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
@@ -102,10 +101,9 @@ class CommunityController extends BaseController {
     try {
       let posts
       if (page && limit) {
-        // in production grab posts which has true on hasPublished
-        posts = await postRepo.getCommunityPosts(communityId, null, +page, +limit)
+        posts = await communityRepo.getCommunityPosts(communityId, +page, +limit)
       } else {
-        posts = await postRepo.getCommunityPosts(communityId)
+        posts = await communityRepo.getCommunityPosts(communityId)
       }
 
       res.status(200).json({ posts }).end()
@@ -273,7 +271,11 @@ class CommunityController extends BaseController {
       }
     })
 
-    console.log({ member })
+    // const updatedPost = await prismadb.post.updateMany({
+    //   where: {
+    //     member_id: member?.member_id,
+    //   }
+    // })
 
     if (!member) errors.member = 'You are not a member of this community'
 

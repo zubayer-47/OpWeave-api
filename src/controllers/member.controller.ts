@@ -9,25 +9,37 @@ class MemberController extends BaseController {
   }
 
   private _getCommunityPostsByMember = async (req: Request, res: Response, next: NextFunction) => {
+    const { page, limit } = req.query
+    const { memberId } = req.params
+
+    if (!memberId) {
+      res.status(400).json('Content missing').end()
+      return
+    }
+
     try {
-      const errors: { [index: string]: string } = {}
-      const { page, limit } = req.query
-      const { communityId, memberId } = req.params
-
-      if (!communityId || !memberId) errors.content = 'Content missing'
-
-      if (!Object.keys(errors).length) {
-        let posts: unknown
-        if (page && limit) {
-          posts = await postRepo.getCommunityPosts(communityId, memberId, +page, +limit)
-        } else {
-          posts = await postRepo.getCommunityPosts(communityId)
-        }
-
-        res.status(200).json({ posts }).end()
+      let posts: unknown
+      if (page && limit) {
+        posts = await postRepo.getPostByMember(memberId, +page, +limit)
       } else {
-        res.status(400).json(errors).end()
+        posts = await postRepo.getPostByMember(memberId)
       }
+
+      res.status(200).json({ posts }).end()
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { memberId } = req.params
+    const { name } = req.body
+    const {} = req.query
+
+    console.log({ memberId, name })
+
+    res.status(405).json({ memberId, name })
+    try {
     } catch (error) {
       next(error)
     }
@@ -54,7 +66,8 @@ class MemberController extends BaseController {
   // }
 
   public configureRoutes(): void {
-    this.router.get('/:communityId/:memberId', this._auth, this._getCommunityPostsByMember)
+    this.router.get('/:memberId', this._auth, this._getCommunityPostsByMember)
+    this.router.post('/:memberId', this._auth, this._post)
 
     // make them
     // get community members

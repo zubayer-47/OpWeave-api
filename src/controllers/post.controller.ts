@@ -146,28 +146,27 @@ class PostController extends BaseController {
     const userId = req.user?.userId
     const postId = req.params?.postId
 
-    const postInfo = await prismadb.post.findFirst({
-      where: {
-        post_id: postId,
-        member: {
-          user_id: userId
-        },
-        deletedAt: null
-      },
-      select: {
-        post_id: true,
-        hasPublished: true
-      }
-    })
-
-    // console.log({ postInfo })
-
-    if (!postInfo) {
-      res.status(404).json('Post not found to delete by you')
-      return
-    }
-
     try {
+      const post = await postRepo.get(postId)
+      const postInfo = await prismadb.post.findFirst({
+        where: {
+          post_id: postId,
+          member: {
+            user_id: userId
+          },
+          deletedAt: null
+        },
+        select: {
+          post_id: true,
+          hasPublished: true
+        }
+      })
+
+      if (post && !postInfo) {
+        res.status(400).json("You don't have rights to delete this post")
+        return
+      }
+
       // permanently delete post if request before admin's approve
       if (!postInfo.hasPublished) {
         await prismadb.post.delete({

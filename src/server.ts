@@ -7,6 +7,9 @@ import hpp from 'hpp'
 import { Server as HttpServer, createServer } from 'http'
 import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
+import { Server } from 'socket.io'
+
+import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 import authController from './controllers/auth.controller'
 import communityController from './controllers/community.controller'
 import memberController from './controllers/member.controller'
@@ -18,14 +21,21 @@ import { sysLog } from './libs/logger'
 class ExpressServer {
   public express: express.Application
   public server: HttpServer
+  public io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
   public httpTerminator: HttpTerminator
 
   constructor() {
     this.express = express()
     this.server = createServer(this.express)
+    this.io = new Server(this.server, {
+      cors: {
+        origin: 'http://localhost:5173/'
+      }
+    })
     this.httpTerminator = createHttpTerminator({ server: this.server })
     this._configure()
     this._routes()
+    this._sockets()
     this._errorRoutes()
   }
 
@@ -54,6 +64,13 @@ class ExpressServer {
     this.express.use('/v1/communities/', communityController.router)
     this.express.use('/v1/posts/', postController.router)
     this.express.use('/v1/members/', memberController.router)
+  }
+
+  private _sockets() {
+    console.log('first')
+    this.io.on('connection', (socket) => {
+      console.log('client connected: ', socket.id)
+    })
   }
 
   private _errorRoutes(): void {

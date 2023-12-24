@@ -42,13 +42,7 @@ class PostRepo {
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
    */
-  public getCommunityPosts(community_id: string, member_id?: string, page?: number, limit?: number) {
-    // types for this method only
-    type CommunityType = { community_id: string }
-    type WhereType = CommunityType | { community_id: string; member_id: string }
-
-    const where: WhereType = !member_id ? { community_id } : { community_id, member_id }
-
+  public getPostByMember(member_id: string, page?: number, limit?: number) {
     const paginationOptions: PaginationTypes =
       !page || !limit
         ? { orderBy: { createdAt: 'asc' } }
@@ -56,7 +50,7 @@ class PostRepo {
 
     return this.post.findMany({
       where: {
-        ...where,
+        member_id,
         hasPublished: true,
         deletedAt: null
       },
