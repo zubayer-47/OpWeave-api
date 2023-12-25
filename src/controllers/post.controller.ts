@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
+import adminRepo from 'src/repos/admin.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
+import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class PostController extends BaseController {
@@ -14,9 +16,9 @@ class PostController extends BaseController {
     try {
       const userId = req.user.userId
 
-      console.log({ userId })
+      // console.log({ userId })
 
-      const errors: { [index: string]: string } = {}
+      const errors: ErrorType = {}
       const communityId = req.params?.communityId
       const { title, body } = req.body
 
@@ -37,7 +39,7 @@ class PostController extends BaseController {
             member_id: member.member_id,
             title: title?.trim(),
             body,
-            hasPublished: member.role === 'ADMIN'
+            hasPublished: member.role === 'ADMIN' || member.role === 'MODERATOR'
           },
           select: { post_id: true, hasPublished: true }
         })
@@ -48,6 +50,43 @@ class PostController extends BaseController {
       } else {
         res.status(400).json(errors).end()
       }
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _approvePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const errors: ErrorType = {}
+
+    const userId = req.user?.userId
+    const { postId } = req.params
+
+    // check whether post exist or not
+    const post = await adminRepo.getPost(postId)
+    if (!post) {
+      res.status(404).json({ message: 'Post Not Found' })
+      return
+    }
+
+    if (post.hasPublished) {
+      res.status(400).json({ message: 'Post already been approved!' })
+
+      return
+    }
+
+    // check whether request user admin/moderator or not
+    const admin = await adminRepo.isExist(post.community_id, userId)
+    if (admin?.role === 'MEMBER') errors.message = "You're not an Admin/Moderator"
+
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      const approvedPost = await adminRepo.approvePost(postId)
+
+      res.status(200).json({ message: 'Post approved successfully', post: { ...approvedPost } })
     } catch (error) {
       next(error)
     }
@@ -97,7 +136,7 @@ class PostController extends BaseController {
     /**
      * Validation
      */
-    const errors: { [index: string]: string } = {}
+    const errors: ErrorType = {}
 
     if (!communityId || !postId) errors.message = 'content missing'
 
@@ -207,6 +246,10 @@ class PostController extends BaseController {
 
   public configureRoutes = () => {
     this.router.post('/:communityId/new', this._auth, this._createPost)
+
+    // approve post
+    this.router.post('/:postId', this._auth, this._approvePost)
+
     this.router.get('/:postId', this._auth, this._getPost)
 
     // check whether current user applicable to update or not;

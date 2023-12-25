@@ -18,3 +18,5 @@ export type PaginationTypes =
   | {
       orderBy: { createdAt: 'asc' | 'desc' }
     }
+
+export type ErrorType = { [index: string]: string }
