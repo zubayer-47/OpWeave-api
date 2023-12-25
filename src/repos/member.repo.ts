@@ -30,6 +30,19 @@ class MemberRepo {
   }
 
   /**
+   *
+   * @param {String} community_id Community ID
+   * @returns {Promise<Number>}
+   */
+  public numOfMembersByCommunity(community_id: string): Promise<number> {
+    return this.member.count({
+      where: {
+        community_id
+      }
+    })
+  }
+
+  /**
    * Get Member
    * @param community_id this should communityId
    * @param member_id this should memberId

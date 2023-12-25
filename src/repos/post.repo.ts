@@ -18,7 +18,7 @@ class PostRepo {
     return this.post.findFirst({
       where: {
         post_id,
-        // hasPublished: true,
+        hasPublished: true,
         deletedAt: null
       },
       select: {
@@ -80,6 +80,52 @@ class PostRepo {
       select: {
         member_id: true,
         hasPublished: true
+      }
+    })
+  }
+
+  /**
+   * get community posts via pagination or all posts
+   * @param community_id this should community_id
+   * @param member_id -> member_id but if next params exist -> falsy value
+   * @param page optional filed
+   * @param limit optional field
+   * @returns community_id member_id title body createdAt updatedAt
+   */
+  public getPostsByCommunity(community_id: string, page?: number, limit?: number) {
+    const paginationOptions: PaginationTypes =
+      !page || !limit
+        ? { orderBy: { createdAt: 'asc' } }
+        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
+
+    return this.post.findMany({
+      where: {
+        community_id,
+        hasPublished: true,
+        deletedAt: null
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        title: true,
+        body: true,
+        createdAt: true,
+        updatedAt: true
+      },
+      ...paginationOptions
+    })
+  }
+
+  /**
+   *
+   * @param {String} community_id Community ID
+   * @returns {Promise<Number>}
+   */
+  public numOfPostsByCommunity(community_id: string): Promise<number> {
+    return this.post.count({
+      where: {
+        community_id
       }
     })
   }
