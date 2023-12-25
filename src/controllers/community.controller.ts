@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
+import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
@@ -99,14 +100,16 @@ class CommunityController extends BaseController {
     }
 
     try {
-      let posts
+      let posts: unknown
+
       if (page && limit) {
-        posts = await communityRepo.getCommunityPosts(communityId, +page, +limit)
+        posts = await postRepo.getPostsByCommunity(communityId, +page, +limit)
       } else {
-        posts = await communityRepo.getCommunityPosts(communityId)
+        posts = await postRepo.getPostsByCommunity(communityId)
       }
 
-      res.status(200).json({ posts }).end()
+      console.log({ page: +page, limit: +limit, posts: Array.isArray(posts) && posts?.length })
+      res.status(200).json(posts)
     } catch (error) {
       next(error)
     }
@@ -153,7 +156,7 @@ class CommunityController extends BaseController {
           }
         })
 
-        res.status(200).json({ message: 'Member Created Successfully', member: joinedMember })
+        res.status(200).json({ message: 'Member Joined Successfully', member: joinedMember })
         return
       }
 
@@ -329,28 +332,31 @@ class CommunityController extends BaseController {
           community_id: true,
           name: true,
           rules: true,
-          bio: true,
-          members: {
-            select: {
-              member_id: true,
-              community_id: true,
-              role: true,
-              scopes: true
-            }
-          },
-          posts: {
-            select: {
-              post_id: true,
-              member_id: true,
-              title: true,
-              body: true,
-              hasPublished: true
-            }
-          }
+          bio: true
+          // members: {
+          //   select: {
+          //     member_id: true,
+          //     community_id: true,
+          //     role: true,
+          //     scopes: true
+          //   }
+          // },
+          // posts: {
+          //   select: {
+          //     post_id: true,
+          //     member_id: true,
+          //     title: true,
+          //     body: true,
+          //     hasPublished: true
+          //   }
+          // }
         }
       })
 
-      res.status(200).json(communityInfo)
+      const membersCount = await memberRepo.numOfMembersByCommunity(cid)
+      const postsCount = await postRepo.numOfPostsByCommunity(cid)
+
+      res.status(200).json({ ...communityInfo, total_members: membersCount, total_posts: postsCount })
     } catch (error) {
       next(error)
     }
