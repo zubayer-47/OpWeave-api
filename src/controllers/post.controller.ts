@@ -39,7 +39,7 @@ class PostController extends BaseController {
             member_id: member.member_id,
             title: title?.trim(),
             body,
-            hasPublished: member.role === 'ADMIN' || member.role === 'MODERATOR'
+            hasPublished: member.role !== 'MEMBER'
           },
           select: { post_id: true, hasPublished: true }
         })
@@ -149,7 +149,7 @@ class PostController extends BaseController {
 
     const postInfo = await postRepo.getCurrentMemberPost(userId, communityId, postId)
     // console.log({ posts, userId, postId, communityId })
-    if (!postInfo) errors.post = 'This post is not yours'
+    if (!postInfo) errors.post = "Member does not have permission to update another member's post."
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -167,11 +167,10 @@ class PostController extends BaseController {
         },
         select: {
           post_id: true,
-          member_id: true,
           title: true,
           body: true,
           hasPublished: true,
-          community_id: true
+          isVisible: true
         }
       })
 
@@ -186,24 +185,31 @@ class PostController extends BaseController {
     const postId = req.params?.postId
 
     try {
-      const post = await postRepo.get(postId)
       const postInfo = await prismadb.post.findFirst({
         where: {
           post_id: postId,
-          member: {
-            user_id: userId
-          },
+          // member: {
+          //   user_id: userId
+          // },
           deletedAt: null
         },
         select: {
           post_id: true,
+          member_id: true,
+          community_id: true,
           hasPublished: true
         }
       })
 
-      if (post && !postInfo) {
-        res.status(400).json("You don't have rights to delete this post")
+      if (!postInfo) {
+        res.status(404).json('Post Not Found')
         return
+      }
+
+      const memberInfo = await memberRepo.isExist(userId, postInfo.community_id)
+
+      if (!memberInfo) {
+        res.status(500).json({ message: 'Request Failed! Please try again.' })
       }
 
       // permanently delete post if request before admin's approve
@@ -217,28 +223,70 @@ class PostController extends BaseController {
           }
         })
 
-        res.status(200).json({ message: 'Post deleted Successfully' })
-
+        res.status(200).json({ message: 'Post deleted Successfully', postId })
         return
       }
 
-      // if it's a approved post by admin then update deletedAt prop for soft deletion
-      await prismadb.post.update({
-        where: {
-          post_id: postInfo.post_id
-        },
-        data: {
-          deletedAt: new Date()
-        },
-        select: {
-          post_id: true
+      // if req user is a admin/moderator
+      if (memberInfo.role !== 'MEMBER') {
+        await prismadb.post.update({
+          where: {
+            post_id: postInfo.post_id
+          },
+          data: {
+            deletedAt: new Date(),
+            deletedBy: `${memberInfo.member_id}, ${userId}`
+          },
+          select: {
+            post_id: true
+          }
+        })
+      } else {
+        if (memberInfo.member_id !== postInfo.member_id) {
+          res.status(400).json({ message: "You don't have permission to delete this post." })
+
+          return
         }
-      })
+
+        // if this post is owned by current user then delete it softly
+        await prismadb.post.update({
+          where: {
+            post_id: postInfo.post_id
+          },
+          data: {
+            deletedAt: new Date(),
+            deletedBy: `${memberInfo.member_id}, ${userId}`
+          },
+          select: {
+            post_id: true
+          }
+        })
+      }
 
       res.status(200).json({
         message: 'post deleted successfully',
         postId
       })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _hidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
     } catch (error) {
       next(error)
     }
@@ -250,12 +298,17 @@ class PostController extends BaseController {
     // approve post
     this.router.post('/:postId', this._auth, this._approvePost)
 
+    // get single post
     this.router.get('/:postId', this._auth, this._getPost)
 
-    // check whether current user applicable to update or not;
+    // update post
     this.router.patch('/:communityId/:postId', this._auth, this._checkRoles, this._updatePost)
-    // check whether current user applicable to delete or not;
+
+    // delete post by post owner
     this.router.delete('/:postId', this._auth, this._deletePost)
+
+    // hide post (only for admin/moderator)
+    this.router.post('/:postId', this._auth, this._hidePost)
   }
 }
 
