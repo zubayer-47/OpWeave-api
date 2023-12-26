@@ -75,7 +75,8 @@ model post {
 
   title        String
   body         String
-  hasPublished Boolean @default(true)
+  hasPublished Boolean
+  isVisible    Boolean @default(true)
 
   reacts   react[]
   comments comment[]
@@ -83,6 +84,7 @@ model post {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  deletedBy String? // store adminID/moderatorID/ownerID (memberID, userID)
 }
 
 model react {
