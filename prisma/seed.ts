@@ -146,6 +146,7 @@ async function main() {
         title: 'This is unnoyon community admin post',
         body: 'unnoyon community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -156,6 +157,7 @@ async function main() {
         title: 'unnoyon community is a good community',
         body: 'unnoyon community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -166,6 +168,7 @@ async function main() {
         title: 'This is unnoyon community member post',
         body: 'unnoyon community description',
         hasPublished: false,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -176,6 +179,7 @@ async function main() {
         title: 'This is dev community admin post',
         body: 'DEv community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -186,6 +190,7 @@ async function main() {
         title: 'Dev Community is awesome.',
         body: 'dev community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -196,6 +201,7 @@ async function main() {
         title: 'Dev Community member post.',
         body: 'dev community description',
         hasPublished: false,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -206,6 +212,7 @@ async function main() {
         title: 'JoyBangla Community Admin post.',
         body: 'JoyBangla community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -216,6 +223,7 @@ async function main() {
         title: "JoyBangla Community Admin's second post.",
         body: 'JoyBangla community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -226,6 +234,7 @@ async function main() {
         title: 'JoyBangla Community Moderator post.',
         body: 'JoyBangla community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -236,6 +245,7 @@ async function main() {
         title: "JoyBangla Community Member Nishan's post.",
         body: 'JoyBangla community description',
         hasPublished: true,
+        isVisible: true,
         createdAt: new Date()
       },
       {
@@ -246,6 +256,7 @@ async function main() {
         title: "JoyBangla Community Nishan's second post.",
         body: 'JoyBangla community description',
         hasPublished: false,
+        isVisible: true,
         createdAt: new Date()
       }
     ]
