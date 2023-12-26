@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
 import memberRepo from 'src/repos/member.repo'
+import postRepo from 'src/repos/post.repo'
 
 export default abstract class BaseController {
   public router: Router
@@ -50,27 +51,25 @@ export default abstract class BaseController {
   protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user?.userId
-      const errors: { [index: string]: string } = {}
-      const { communityId } = req.params
-      // debugger
-      // grab community_id from uri
-      // const cId = getUUIDByURL(req.originalUrl)
+      const postId = req.params?.postId
 
-      // if (!isValidUUId(mId)) errors.member = 'Member ID is not valid'
-      if (!communityId) {
+      if (!postId) {
         res.status(400).json({ message: 'content missing' })
         return
       }
 
-      const member = await memberRepo.isExist(userId, communityId)
-      if (!member) errors.member = 'Member not exist'
-
-      if (Object.keys(errors).length) {
-        res.status(400).json(errors)
+      const postInfo = await postRepo.get(postId)
+      if (!postInfo) {
+        res.status(404).json({ message: 'Post Not Found' })
         return
       }
 
-      // req.user = { ...req.user, role: member.role }
+      const member = await memberRepo.isExist(userId, postInfo.community_id)
+      if (!member) {
+        res.status(400).json({ message: 'Member not exist' })
+        return
+      }
+
       req.user.role = member.role
     } catch (error) {
       next(error)
