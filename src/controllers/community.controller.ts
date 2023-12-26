@@ -198,47 +198,6 @@ class CommunityController extends BaseController {
   //   }
   // }
 
-  private _deletePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userRole = req.user?.role
-    // const userId = req.user?.userId
-    const { communityId, postId } = req.params
-    /**
-     * Validation
-     */
-
-    // delete post by community based validation
-    const errors: { [index: string]: string } = {}
-
-    if (!communityId || !postId) errors.message = 'content missing'
-
-    // 1st: if not admin then through an error
-    if (userRole !== 'ADMIN') errors.role = 'you are not an Admin. Report post if you are a moderator'
-
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
-
-    try {
-      // 2nd: if admin then can be delete directly
-      await prismadb.post.update({
-        where: {
-          post_id: postId
-        },
-        data: {
-          deletedAt: new Date()
-        },
-        select: {
-          post_id: true
-        }
-      })
-
-      res.status(200).json({ message: 'post deleted successfully', postId })
-    } catch (error) {
-      next(error)
-    }
-  }
-
   private _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const communityId = req.params?.communityId
     const userId = req.user?.userId
@@ -372,8 +331,6 @@ class CommunityController extends BaseController {
     //   GET: queries: (page,limit, cid)
     // this.router.get('/:memberId', this._auth, this._getMemberPosts)
 
-    // delete post
-    this.router.delete('/:communityId/:postId', this._auth, this._checkRoles, this._deletePost)
     // leave
     this.router.post('/:communityId/leave', this._auth, this._checkRoles, this._leaveMember)
 
