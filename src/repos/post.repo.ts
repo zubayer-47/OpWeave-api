@@ -67,17 +67,17 @@ class PostRepo {
     })
   }
 
-  public getCurrentMemberPost(user_id: string, community_id: string, post_id: string) {
+  public getCurrentMemberPost(user_id: string, post_id: string) {
     return this.post.findFirst({
       where: {
         post_id,
-        community_id,
         member: {
           user_id
         },
         deletedAt: null
       },
       select: {
+        post_id: true,
         member_id: true,
         hasPublished: true
       }

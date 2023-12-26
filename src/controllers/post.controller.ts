@@ -130,15 +130,13 @@ class PostController extends BaseController {
 
   private _updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
-    const { communityId, postId } = req.params
+    const postId = req.params?.postId
 
     const { title, body } = req.body
     /**
      * Validation
      */
     const errors: ErrorType = {}
-
-    if (!communityId || !postId) errors.message = 'content missing'
 
     // 1st layer
     if (!title) errors.title = 'title is required!'
@@ -147,7 +145,7 @@ class PostController extends BaseController {
     // 2nd layer
     if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-    const postInfo = await postRepo.getCurrentMemberPost(userId, communityId, postId)
+    const postInfo = await postRepo.getCurrentMemberPost(userId, postId)
     // console.log({ posts, userId, postId, communityId })
     if (!postInfo) errors.post = "Member does not have permission to update another member's post."
 
@@ -302,7 +300,7 @@ class PostController extends BaseController {
     this.router.get('/:postId', this._auth, this._getPost)
 
     // update post
-    this.router.patch('/:communityId/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:postId', this._auth, this._checkRoles, this._updatePost)
 
     // delete post by post owner
     this.router.delete('/:postId', this._auth, this._deletePost)
