@@ -15,7 +15,6 @@ class CommunityController extends BaseController {
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
     const errors: { [index: string]: string } = {}
     const userId = req.user?.userId
-    // const userRole = req.user?.role
 
     const { name, bio, rules } = req.body
 
@@ -134,8 +133,8 @@ class CommunityController extends BaseController {
 
     // check whether member exist or not already
     const member = await memberRepo.isExist(userId, communityId)
-    console.log({ member })
-    if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
+    // console.log({ member })
+    if (member) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors).end()
@@ -156,10 +155,11 @@ class CommunityController extends BaseController {
           }
         })
 
-        res.status(200).json({ message: 'Member Joined Successfully', member: joinedMember })
+        res.status(201).json({ message: 'Member Joined Successfully', member: joinedMember })
         return
       }
 
+      // if member wants to join again after leaving.
       const joinedMember = await prismadb.member.update({
         where: {
           member_id: member.member_id
@@ -174,7 +174,7 @@ class CommunityController extends BaseController {
         }
       })
 
-      res.status(200).json({ message: 'Member Created Successfully', member: joinedMember }).end()
+      res.status(201).json({ message: 'Member Created Successfully', member: joinedMember })
     } catch (error) {
       next(error)
     }
@@ -199,9 +199,9 @@ class CommunityController extends BaseController {
   // }
 
   private _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const communityId = req.params?.communityId
     const userId = req.user?.userId
     const userRole = req.user?.role
+    const communityId = req.params?.communityId
 
     /**
      * Validation
@@ -220,25 +220,7 @@ class CommunityController extends BaseController {
       return
     }
     // check whether member exist or not
-    const member = await prismadb.member.findFirst({
-      where: {
-        user_id: userId,
-        community_id: communityId,
-        leavedAt: null
-      },
-      select: {
-        member_id: true,
-        community_id: true,
-        role: true
-      }
-    })
-
-    // const updatedPost = await prismadb.post.updateMany({
-    //   where: {
-    //     member_id: member?.member_id,
-    //   }
-    // })
-
+    const member = await memberRepo.isExist(userId, communityId)
     if (!member) errors.member = 'You are not a member of this community'
 
     if (Object.keys(errors).length) {
@@ -248,7 +230,7 @@ class CommunityController extends BaseController {
 
     try {
       // update leavedAt property of this member
-      const leavedMember = await prismadb.member.update({
+      await prismadb.member.update({
         where: {
           member_id: member?.member_id
         },
@@ -259,8 +241,6 @@ class CommunityController extends BaseController {
           member_id: true
         }
       })
-
-      console.log({ leavedMember })
 
       res
         .status(200)
@@ -292,23 +272,6 @@ class CommunityController extends BaseController {
           name: true,
           rules: true,
           bio: true
-          // members: {
-          //   select: {
-          //     member_id: true,
-          //     community_id: true,
-          //     role: true,
-          //     scopes: true
-          //   }
-          // },
-          // posts: {
-          //   select: {
-          //     post_id: true,
-          //     member_id: true,
-          //     title: true,
-          //     body: true,
-          //     hasPublished: true
-          //   }
-          // }
         }
       })
 

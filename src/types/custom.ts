@@ -3,9 +3,11 @@ export type JWTType = {
   iat: number
   exp: number
 }
+
+export type Role = 'ADMIN' | 'MEMBER' | 'MODERATOR'
 export type UserAuthReq = {
   userId?: string
-  role?: 'ADMIN' | 'MEMBER' | 'MODERATOR'
+  role?: Role
 }
 
 type OptionTypes = {

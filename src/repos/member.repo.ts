@@ -18,7 +18,8 @@ class MemberRepo {
     return this.member.findFirst({
       where: {
         user_id,
-        community_id
+        community_id,
+        leavedAt: null
       },
       select: {
         member_id: true,
@@ -44,14 +45,11 @@ class MemberRepo {
 
   /**
    * Get Member
-   * @param community_id this should communityId
    * @param member_id this should memberId
-   * @returns user_id member_id and role
    */
-  public get(community_id: string, member_id: string) {
+  public get(member_id: string) {
     return this.member.findFirst({
       where: {
-        community_id,
         member_id
       },
       select: {

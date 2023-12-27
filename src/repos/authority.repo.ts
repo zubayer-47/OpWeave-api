@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
 
-class AdminRepo {
+class AuthorityRepo {
   private member: Prisma.memberDelegate<DefaultArgs>
   private post: Prisma.postDelegate<DefaultArgs>
 
@@ -71,4 +71,4 @@ class AdminRepo {
   //   return this.community.findMany()
   // }
 }
-export default new AdminRepo()
+export default new AuthorityRepo()

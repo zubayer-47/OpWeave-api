@@ -126,6 +126,8 @@ class AuthController extends BaseController {
   public configureRoutes(): void {
     this.router.post('/signup', this._create)
     this.router.post('/signin', this._login)
+
+    // this._showRoutes()
   }
 }
 

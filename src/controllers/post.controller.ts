@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
-import adminRepo from 'src/repos/admin.repo'
+import adminRepo from 'src/repos/authority.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
@@ -270,26 +270,6 @@ class PostController extends BaseController {
     }
   }
 
-  private _hidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
-    const errors: ErrorType = {}
-    // here gose your validation rules
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
-    try {
-      // Your async code gose here...
-    } catch (error) {
-      next(error)
-    }
-  }
-
   public configureRoutes = () => {
     this.router.post('/:communityId/new', this._auth, this._createPost)
 
@@ -305,8 +285,7 @@ class PostController extends BaseController {
     // delete post by post owner
     this.router.delete('/:postId', this._auth, this._deletePost)
 
-    // hide post (only for admin/moderator)
-    this.router.post('/:postId', this._auth, this._hidePost)
+    // this._showRoutes()
   }
 }
 

@@ -35,6 +35,25 @@ class PostRepo {
   }
 
   /**
+   * get post by postId
+   * @param post_id this should be postId
+   * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
+   */
+  public getInvisiblePost(post_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id,
+        isVisible: false
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        isVisible: true
+      }
+    })
+  }
+
+  /**
    * get community posts via pagination or all posts
    * @param community_id this should community_id
    * @param member_id -> member_id but if next params exist -> falsy value
