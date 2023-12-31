@@ -52,8 +52,9 @@ model member {
   community    community @relation(fields: [community_id], references: [community_id])
   community_id String
 
-  role   MemberRole @default(MEMBER)
-  scopes Scopes     @default(VIEWER)
+  role    MemberRole @default(MEMBER)
+  scopes  Scopes     @default(VIEWER)
+  isMuted Boolean    @default(false)
 
   posts         post[]
   reacts        react[]

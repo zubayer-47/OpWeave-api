@@ -124,17 +124,17 @@ class CommunityController extends BaseController {
     if (!communityId) errors.message = 'Content missing'
 
     // check whether user exist or not
-    const user = await userRepo.isExists(userId)
-    if (!user) errors.user = 'User does not exist'
+    // const user = await userRepo.isExists(userId)
+    // if (!user) errors.user = 'User does not exist'
 
     // check whether community exist or not where user wants to add
     const community = await communityRepo.isExist(communityId, 'community_id')
     if (!community) errors.community = 'Community does not exist'
 
     // check whether member exist or not already
-    const member = await memberRepo.isExist(userId, communityId)
+    const member = await memberRepo.isExistWithLeavedAt(userId, communityId)
     // console.log({ member })
-    if (member) errors.member = 'Member Already Exist'
+    if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors).end()
@@ -165,7 +165,8 @@ class CommunityController extends BaseController {
           member_id: member.member_id
         },
         data: {
-          leavedAt: null
+          leavedAt: null,
+          role: 'MEMBER'
         },
         select: {
           community_id: true,
@@ -184,7 +185,7 @@ class CommunityController extends BaseController {
   //   /**
   //    * scopes:
   //    * ADMIN: ['ROOT']
-  //    * MODERATOR: ['REPORT','HIDE_POST', 'ACTION_REQ']
+  //    * MODERATOR: ['REPORT','HIDE_POST', 'MUTE_MEMBER', 'BAN_MEMBER', 'MUTE_POST', 'DELETE_POST']
   //    * MEMBER: ['READ_ONLY', 'SELF_POST_OWNER']
   //    */
 
@@ -201,32 +202,22 @@ class CommunityController extends BaseController {
   private _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
     const userRole = req.user?.role
-    const communityId = req.params?.communityId
+    const community_id = req.body?.community_id
 
-    /**
-     * Validation
-     */
-    const errors: { [index: string]: string } = {}
+    // const errors: { [index: string]: string } = {}
 
     if (userRole === 'ADMIN') {
       res.status(400).json('You are Admin of this community. you cannot perform leave action')
       return
     }
 
-    // check whether community exist or not
-    const community = await communityRepo.isExist(communityId, 'community_id')
-    if (!community) {
-      res.status(404).json('Community not found')
-      return
-    }
-    // check whether member exist or not
-    const member = await memberRepo.isExist(userId, communityId)
-    if (!member) errors.member = 'You are not a member of this community'
+    // get member_id
+    const member = await memberRepo.getMemberRoleInCommunity(userId, community_id)
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
+    // if (Object.keys(errors).length) {
+    //   res.status(400).json(errors)
+    //   return
+    // }
 
     try {
       // update leavedAt property of this member
@@ -246,7 +237,7 @@ class CommunityController extends BaseController {
         .status(200)
         .json({
           message: 'member successfully leaved',
-          member: { community_id: member.community_id, member_id: member.member_id }
+          member: { community_id: community_id, member_id: member.member_id }
         })
         .end()
     } catch (error) {
@@ -275,7 +266,7 @@ class CommunityController extends BaseController {
         }
       })
 
-      const membersCount = await memberRepo.numOfMembersByCommunity(cid)
+      const membersCount = await memberRepo.numOfMembersInCommunity(cid)
       const postsCount = await postRepo.numOfPostsByCommunity(cid)
 
       res.status(200).json({ ...communityInfo, total_members: membersCount, total_posts: postsCount })
@@ -286,7 +277,7 @@ class CommunityController extends BaseController {
 
   public configureRoutes(): void {
     this.router.post('/new', this._auth, this._createCommunity)
-    this.router.get('/:communityId', this._auth, this._getCommunityPosts)
+    this.router.get('/:communityId', this._auth, this._checkRoles, this._getCommunityPosts)
     // make get community
 
     // add member
@@ -295,7 +286,7 @@ class CommunityController extends BaseController {
     // this.router.get('/:memberId', this._auth, this._getMemberPosts)
 
     // leave
-    this.router.post('/:communityId/leave', this._auth, this._checkRoles, this._leaveMember)
+    this.router.delete('/leave', this._auth, this._checkRoles, this._leaveMember)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/', this._auth, this._communityInfo)

@@ -16,11 +16,8 @@ class PostController extends BaseController {
     try {
       const userId = req.user.userId
 
-      // console.log({ userId })
-
       const errors: ErrorType = {}
-      const communityId = req.params?.communityId
-      const { title, body } = req.body
+      const { title, body, communityId } = req.body
 
       // 1st layer
       if (!title) errors.title = 'title is required!'
@@ -29,8 +26,8 @@ class PostController extends BaseController {
       // 2nd layer
       if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-      const member = await memberRepo.isExist(userId, communityId)
-      if (!member) errors.member = `You're not a member of this community`
+      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
+      if (!member) errors.member = `something went wrong. try again.`
 
       if (!Object.keys(errors).length) {
         const post = await prismadb.post.create({
@@ -44,7 +41,7 @@ class PostController extends BaseController {
           select: { post_id: true, hasPublished: true }
         })
 
-        //TODO: if hasPublished returns false -> send a notification to admin
+        //TODO: if this is a member -> send a notification to admin
 
         res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished }).end()
       } else {
@@ -57,16 +54,12 @@ class PostController extends BaseController {
 
   private _approvePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
-
-    const userId = req.user?.userId
-    const { postId } = req.params
+    const userRole = req.user?.role
+    const post_id = req.params?.post_id
 
     // check whether post exist or not
-    const post = await adminRepo.getPost(postId)
-    if (!post) {
-      res.status(404).json({ message: 'Post Not Found' })
-      return
-    }
+    const post = await adminRepo.getPost(post_id)
+    if (!post) errors.post = 'something went wrong. try again.'
 
     if (post.hasPublished) {
       res.status(400).json({ message: 'Post already been approved!' })
@@ -74,17 +67,15 @@ class PostController extends BaseController {
       return
     }
 
-    // check whether request user admin/moderator or not
-    const admin = await adminRepo.isExist(post.community_id, userId)
-    if (admin?.role === 'MEMBER') errors.message = "You're not an Admin/Moderator"
+    if (userRole === 'MEMBER') errors.message = 'You do not have access to do it'
 
-    // here gose your validation rules
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
+
     try {
-      const approvedPost = await adminRepo.approvePost(postId)
+      const approvedPost = await adminRepo.approvePost(post_id)
 
       res.status(200).json({ message: 'Post approved successfully', post: { ...approvedPost } })
     } catch (error) {
@@ -93,41 +84,22 @@ class PostController extends BaseController {
   }
 
   private _getPost = async (req: Request, res: Response, next: NextFunction) => {
+    const post_id = req.params?.post_id
+
     try {
-      // const errors: { [index: string]: string } = {}
-      const { postId } = req.params
-      // const cId = getUUIDByURL(req.originalUrl)
-
-      // if (!isValidUUId(postId) || !isValidUUId(cId)) errors.error = 'Content missing'
-      if (!postId) {
-        res.status(400).json('Content missing')
-        return
-      }
-
-      // check whether community exist or not where user wants to get
-      // const community = await communityRepo.isExist(cId, 'community_id')
-      // if (!community) errors.community = 'Community does not exist'
-
-      // if (!Object.keys(errors).length) {
-      // console.log({ postId })
-      const post = await postRepo.get(postId)
+      const post = await postRepo.get(post_id)
       if (!post) {
-        res.status(404).json({ message: 'Post Not Found' })
+        res.status(403).json({ message: 'Something went wrong. try again' })
         return
       }
 
-      res
-        .status(200)
-        .json({ ...post })
-        .end()
-      // } else {
-      //   res.status(400).json(errors).end()
-      // }
+      res.status(200).json({ ...post })
     } catch (error) {
       next(error)
     }
   }
 
+  // TODO: title and body should be optional field. sanitize them properly and have to have previous data if any of these are blank
   private _updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
     const postId = req.params?.postId
@@ -147,7 +119,7 @@ class PostController extends BaseController {
 
     const postInfo = await postRepo.getCurrentMemberPost(userId, postId)
     // console.log({ posts, userId, postId, communityId })
-    if (!postInfo) errors.post = "Member does not have permission to update another member's post."
+    if (!postInfo) errors.post = 'You are not the owner of this post'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -180,27 +152,13 @@ class PostController extends BaseController {
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId
-    const postId = req.params?.postId
+    const post_id = req.params?.post_id
 
     try {
-      const postInfo = await prismadb.post.findFirst({
-        where: {
-          post_id: postId,
-          // member: {
-          //   user_id: userId
-          // },
-          deletedAt: null
-        },
-        select: {
-          post_id: true,
-          member_id: true,
-          community_id: true,
-          hasPublished: true
-        }
-      })
+      const postInfo = await postRepo.get(post_id)
 
       if (!postInfo) {
-        res.status(404).json('Post Not Found')
+        res.status(403).json({ message: 'something went wrong. try again' })
         return
       }
 
@@ -214,14 +172,14 @@ class PostController extends BaseController {
       if (!postInfo.hasPublished) {
         await prismadb.post.delete({
           where: {
-            post_id: postId
+            post_id: post_id
           },
           select: {
             post_id: true
           }
         })
 
-        res.status(200).json({ message: 'Post deleted Successfully', postId })
+        res.status(200).json({ message: 'Post deleted Successfully', post_id })
         return
       }
 
@@ -263,7 +221,7 @@ class PostController extends BaseController {
 
       res.status(200).json({
         message: 'post deleted successfully',
-        postId
+        post_id
       })
     } catch (error) {
       next(error)
@@ -271,19 +229,19 @@ class PostController extends BaseController {
   }
 
   public configureRoutes = () => {
-    this.router.post('/:communityId/new', this._auth, this._createPost)
+    this.router.post('/new', this._auth, this._checkRoles, this._createPost)
 
     // approve post
-    this.router.post('/:postId', this._auth, this._approvePost)
+    this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)
 
     // get single post
-    this.router.get('/:postId', this._auth, this._getPost)
+    this.router.get('/:post_id', this._auth, this._checkRoles, this._getPost)
 
     // update post
-    this.router.patch('/:postId', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:post_id', this._auth, this._checkRoles, this._updatePost)
 
     // delete post by post owner
-    this.router.delete('/:postId', this._auth, this._deletePost)
+    this.router.delete('/:post_id', this._auth, this._checkRoles, this._deletePost)
 
     // this._showRoutes()
   }

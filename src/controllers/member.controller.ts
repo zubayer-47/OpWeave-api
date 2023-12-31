@@ -30,21 +30,6 @@ class MemberController extends BaseController {
       next(error)
     }
   }
-
-  private _post = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { memberId } = req.params
-    const { name } = req.body
-    const {} = req.query
-
-    console.log({ memberId, name })
-
-    res.status(405).json({ memberId, name })
-    try {
-    } catch (error) {
-      next(error)
-    }
-  }
-
   // private _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   //   const {} = req.params
   //   const {} = req.body
@@ -67,7 +52,6 @@ class MemberController extends BaseController {
 
   public configureRoutes(): void {
     this.router.get('/:memberId', this._auth, this._getCommunityPostsByMember)
-    this.router.post('/:memberId', this._auth, this._post)
 
     // make them
     // get community members
