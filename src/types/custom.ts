@@ -22,3 +22,5 @@ export type PaginationTypes =
     }
 
 export type ErrorType = { [index: string]: string }
+
+export type MemberRoleType = Omit<Role, 'MEMBER'>

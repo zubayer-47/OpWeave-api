@@ -3,7 +3,6 @@ import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
-import userRepo from 'src/repos/user.repo'
 import BaseController from './base.controller'
 
 class CommunityController extends BaseController {
@@ -35,11 +34,6 @@ class CommunityController extends BaseController {
 
       if (existCommunity) errors.name = `community "${existCommunity.name}" already exist`
     }
-    // check whether user exist or not
-    if (userId) {
-      const userExist = await userRepo.isExists(userId)
-      if (!userExist) errors.user = 'User is not valid'
-    }
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors).end()
@@ -47,21 +41,19 @@ class CommunityController extends BaseController {
     }
 
     try {
-      const data = {
-        name,
-        bio,
-        rules: rules.toString()
-      }
-
       const community = await prismadb.community.create({
-        data,
+        data: {
+          name,
+          bio,
+          rules: rules.toString()
+        },
         select: {
           community_id: true
         }
       })
 
       // auto create member as admin of created community;
-      await prismadb.member.create({
+      const member = await prismadb.member.create({
         data: {
           user_id: userId,
           community_id: community.community_id,
@@ -73,10 +65,17 @@ class CommunityController extends BaseController {
         }
       })
 
-      res
-        .status(201)
-        .json({ community_id: community.community_id, ...data })
-        .end()
+      // is it valid or i should add a field to member table called creator: community_id
+      await prismadb.community.update({
+        where: {
+          community_id: community.community_id
+        },
+        data: {
+          createdBy: `${member.member_id}, ${userId}`
+        }
+      })
+
+      res.status(201).json({ community_id: community.community_id, data: { name, bio, rules } })
     } catch (error) {
       next(error)
     }

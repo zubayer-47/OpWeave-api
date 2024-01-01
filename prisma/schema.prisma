@@ -22,9 +22,10 @@ model user {
 
   members member[]
 
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  banned_user banned_user[]
 
   @@index([username, email])
 }
@@ -38,9 +39,11 @@ model community {
   members member[]
   posts   post[]
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  createdBy   String? // (member_id, user_id)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  deletedAt   DateTime?
+  banned_user banned_user[]
 }
 
 model member {
@@ -61,8 +64,9 @@ model member {
   comments      comment[]
   user_comments userComment[]
 
-  joinedAt DateTime  @default(now())
-  leavedAt DateTime?
+  joinedAt    DateTime      @default(now())
+  leavedAt    DateTime?
+  banned_user banned_user[]
 }
 
 model post {
@@ -85,7 +89,24 @@ model post {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
+  // TODO: 01/01 remove it
   deletedBy String? // store adminID/moderatorID/ownerID (memberID, userID)
+}
+
+model banned_user {
+  banned_user_id String @id @default(uuid())
+
+  user    user   @relation(fields: [user_id], references: [user_id])
+  user_id String
+
+  community    community @relation(fields: [community_id], references: [community_id])
+  community_id String
+
+  member   member @relation(fields: [bannedBy], references: [member_id])
+  bannedBy String
+
+  ban_reason String
+  ban_date   DateTime
 }
 
 model react {

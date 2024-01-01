@@ -1,6 +1,7 @@
-import { Prisma } from '@prisma/client'
+import { MemberRole, Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
+import { MemberRoleType } from 'src/types/custom'
 
 type getMemberRoleInCommunityWhereType =
   | { user_id: string; community_id: string; leavedAt: null }
@@ -118,6 +119,11 @@ class MemberRepo {
       },
       select: {
         member_id: true,
+        community: {
+          select: {
+            createdBy: true
+          }
+        },
         role: true,
         isMuted: true
       }
@@ -128,13 +134,13 @@ class MemberRepo {
    *
    * @param member_id
    */
-  public makeModerator(member_id: string) {
+  public createAuthority(member_id: string, type: MemberRoleType) {
     return this.member.update({
       where: {
         member_id
       },
       data: {
-        role: 'MODERATOR'
+        role: type as MemberRole
       },
       select: {
         member_id: true,
@@ -150,11 +156,12 @@ class MemberRepo {
     })
   }
 
+  // TODO: 1/1 move it to AuthorityRepo
   /**
    *
    * @param member_id
    */
-  public removeModerator(member_id: string) {
+  public removeAuthority(member_id: string) {
     return this.member.update({
       where: {
         member_id
