@@ -1,7 +1,7 @@
 import { MemberRole, Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
-import { MemberRoleType } from 'src/types/custom'
+import { MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
 
 type getMemberRoleInCommunityWhereType =
   | { user_id: string; community_id: string; leavedAt: null }
@@ -156,38 +156,11 @@ class MemberRepo {
     })
   }
 
-  // TODO: 1/1 move it to AuthorityRepo
   /**
    *
    * @param member_id
    */
-  public removeAuthority(member_id: string) {
-    return this.member.update({
-      where: {
-        member_id
-      },
-      data: {
-        role: 'MEMBER'
-      },
-      select: {
-        member_id: true,
-        user: {
-          select: {
-            user_id: true,
-            fullname: true,
-            username: true,
-            avatar: true
-          }
-        }
-      }
-    })
-  }
-
-  /**
-   *
-   * @param member_id
-   */
-  public toggleMuteMember(member_id: string, status: 'mute' | 'unmute' = 'mute') {
+  public toggleMuteMember(member_id: string, status: MuteUnmuteStatusType) {
     const data =
       status === 'mute'
         ? {

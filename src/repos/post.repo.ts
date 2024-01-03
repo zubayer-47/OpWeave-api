@@ -10,6 +10,23 @@ class PostRepo {
   }
 
   /**
+   * this method only responsible to check where post exist or not based on post_id and community_id
+   * @param post_id
+   * @param community_id
+   */
+  public isExist(post_id: string, community_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id,
+        community_id
+      },
+      select: {
+        post_id: true
+      }
+    })
+  }
+
+  /**
    * get post by postId
    * @param post_id this should be postId
    * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
@@ -111,7 +128,7 @@ class PostRepo {
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
    */
-  public getPostsByCommunity(community_id: string, page?: number, limit?: number) {
+  public getPostsInCommunity(community_id: string, page?: number, limit?: number) {
     const paginationOptions: PaginationTypes =
       !page || !limit
         ? { orderBy: { createdAt: 'asc' } }
@@ -141,10 +158,26 @@ class PostRepo {
    * @param {String} community_id Community ID
    * @returns {Promise<Number>}
    */
-  public numOfPostsByCommunity(community_id: string): Promise<number> {
+  public numOfPostsInCommunity(community_id: string): Promise<number> {
     return this.post.count({
       where: {
         community_id
+      }
+    })
+  }
+
+  public getPostInCommunity(post_id: string, community_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id,
+        community_id,
+        hasPublished: true,
+        isVisible: true,
+        deletedAt: null
+      },
+      select: {
+        post_id: true,
+        title: true
       }
     })
   }

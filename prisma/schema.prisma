@@ -93,6 +93,7 @@ model post {
   deletedBy String? // store adminID/moderatorID/ownerID (memberID, userID)
 }
 
+// TODO: 3/1 analysis it with AI
 model banned_user {
   banned_user_id String @id @default(uuid())
 

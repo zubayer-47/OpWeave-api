@@ -3,6 +3,7 @@ import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
+import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class CommunityController extends BaseController {
@@ -12,7 +13,7 @@ class CommunityController extends BaseController {
   }
 
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
-    const errors: { [index: string]: string } = {}
+    const errors: ErrorType = {}
     const userId = req.user?.userId
 
     const { name, bio, rules } = req.body
@@ -28,19 +29,18 @@ class CommunityController extends BaseController {
     if (!errors?.bio && bio.length < 4) errors.bio = 'bio should contains 4 letters at least'
     if (!errors?.rules && !Array.isArray(rules)) errors.rules = 'Rules should be an Array of rules'
 
-    // 3rd layer, check db
-    if (!errors.name) {
-      const existCommunity = await communityRepo.isExist(name)
-
-      if (existCommunity) errors.name = `community "${existCommunity.name}" already exist`
-    }
-
     if (Object.keys(errors).length) {
       res.status(400).json(errors).end()
       return
     }
 
     try {
+      const existCommunity = await communityRepo.isExist(name)
+      if (existCommunity) {
+        res.status(400).json({ message: `community "${existCommunity.name}" already exist` })
+        return
+      }
+
       const community = await prismadb.community.create({
         data: {
           name,
@@ -65,7 +65,8 @@ class CommunityController extends BaseController {
         }
       })
 
-      // is it valid or i should add a field to member table called creator: community_id
+      // is it valid or i should add a field to member table called { creator: community_id }
+      // TODO: 3/1 sanitize this field or remove it
       await prismadb.community.update({
         where: {
           community_id: community.community_id
@@ -82,32 +83,60 @@ class CommunityController extends BaseController {
   }
 
   private _getCommunityPosts = async (req: Request, res: Response, next: NextFunction) => {
-    const errors: { [index: string]: string } = {}
-    const { communityId } = req.params
+    // TODO: Sanitize them
+    // const errors: ErrorType = {}
+
+    const communityId = req.params?.communityId
     const { page, limit } = req.query
 
-    if (!communityId) errors.community_id = 'content missing'
+    // if (!communityId) errors.community_id = 'content missing'
 
-    // check whether community exist or not
-    const community = await communityRepo.isExist(communityId, 'community_id')
-    if (!community) errors.community = 'Community does not exist'
+    // // check whether community exist or not
+    // const community = await communityRepo.isExist(communityId, 'community_id')
+    // if (!community) errors.community = 'Community does not exist'
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors).end()
-      return
-    }
+    // if (Object.keys(errors).length) {
+    //   res.status(400).json(errors).end()
+    //   return
+    // }
 
     try {
       let posts: unknown
 
       if (page && limit) {
-        posts = await postRepo.getPostsByCommunity(communityId, +page, +limit)
+        posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
       } else {
-        posts = await postRepo.getPostsByCommunity(communityId)
+        posts = await postRepo.getPostsInCommunity(communityId)
       }
 
-      console.log({ page: +page, limit: +limit, posts: Array.isArray(posts) && posts?.length })
+      // console.log({ page: +page, limit: +limit, posts: Array.isArray(posts) && posts?.length })
       res.status(200).json(posts)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _getPost = async (req: Request, res: Response, next: NextFunction) => {
+    const post_id = req.params?.postId
+    const community_id = req.params?.communityId
+
+    const errors: ErrorType = {}
+
+    if (!post_id) errors.message = 'content missing!'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const post = await postRepo.getPostInCommunity(post_id, community_id)
+      if (!post) {
+        res.status(404).json({ message: 'Post Not Found!' })
+        return
+      }
+
+      res.status(200).json(post)
     } catch (error) {
       next(error)
     }
@@ -119,12 +148,6 @@ class CommunityController extends BaseController {
     const errors: { [index: string]: string } = {}
     const userId = req.user?.userId
     const communityId = req.params?.communityId
-
-    if (!communityId) errors.message = 'Content missing'
-
-    // check whether user exist or not
-    // const user = await userRepo.isExists(userId)
-    // if (!user) errors.user = 'User does not exist'
 
     // check whether community exist or not where user wants to add
     const community = await communityRepo.isExist(communityId, 'community_id')
@@ -244,7 +267,7 @@ class CommunityController extends BaseController {
     }
   }
 
-  // refactor it before send production (add pagination where needs)
+  // TODO: 3/1 refactor it before send production (add pagination where needs)
   private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const cid = req.query?.cid as string
 
@@ -266,7 +289,7 @@ class CommunityController extends BaseController {
       })
 
       const membersCount = await memberRepo.numOfMembersInCommunity(cid)
-      const postsCount = await postRepo.numOfPostsByCommunity(cid)
+      const postsCount = await postRepo.numOfPostsInCommunity(cid)
 
       res.status(200).json({ ...communityInfo, total_members: membersCount, total_posts: postsCount })
     } catch (error) {
@@ -277,7 +300,7 @@ class CommunityController extends BaseController {
   public configureRoutes(): void {
     this.router.post('/new', this._auth, this._createCommunity)
     this.router.get('/:communityId', this._auth, this._checkRoles, this._getCommunityPosts)
-    // make get community
+    this.router.get('/:communityId/post/:postId', this._auth, this._checkRoles, this._getPost)
 
     // add member
     this.router.post('/:communityId', this._auth, this._joinMember)
@@ -288,7 +311,7 @@ class CommunityController extends BaseController {
     this.router.delete('/leave', this._auth, this._checkRoles, this._leaveMember)
 
     // community info (query: communityId) -> testing purpose route
-    this.router.get('/', this._auth, this._communityInfo)
+    this.router.get('/details/:communityId', this._auth, this._checkRoles, this._communityInfo)
   }
 }
 

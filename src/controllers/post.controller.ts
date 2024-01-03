@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
-import adminRepo from 'src/repos/authority.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
@@ -13,61 +12,19 @@ class PostController extends BaseController {
   }
 
   private _createPost = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user.userId
+    // TODO: 3/1 add picture and more.
+    const userId = req.user.userId
 
-      const errors: ErrorType = {}
-      const { title, body, communityId } = req.body
-
-      // 1st layer
-      if (!title) errors.title = 'title is required!'
-      if (!body) errors.body = 'body is required!'
-
-      // 2nd layer
-      if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
-
-      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
-      if (!member) errors.member = `something went wrong. try again.`
-
-      if (!Object.keys(errors).length) {
-        const post = await prismadb.post.create({
-          data: {
-            community_id: communityId,
-            member_id: member.member_id,
-            title: title?.trim(),
-            body,
-            hasPublished: member.role !== 'MEMBER'
-          },
-          select: { post_id: true, hasPublished: true }
-        })
-
-        //TODO: if this is a member -> send a notification to admin
-
-        res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished }).end()
-      } else {
-        res.status(400).json(errors).end()
-      }
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  private _approvePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
-    const userRole = req.user?.role
-    const post_id = req.params?.post_id
 
-    // check whether post exist or not
-    const post = await adminRepo.getPost(post_id)
-    if (!post) errors.post = 'something went wrong. try again.'
+    const { title, body, community_id } = req.body
 
-    if (post.hasPublished) {
-      res.status(400).json({ message: 'Post already been approved!' })
+    // 1st layer
+    if (!title) errors.title = 'title is required!'
+    if (!body) errors.body = 'body is required!'
 
-      return
-    }
-
-    if (userRole === 'MEMBER') errors.message = 'You do not have access to do it'
+    // 2nd layer
+    if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -75,25 +32,51 @@ class PostController extends BaseController {
     }
 
     try {
-      const approvedPost = await adminRepo.approvePost(post_id)
+      const member = await memberRepo.getMemberRoleInCommunity(userId, community_id)
+      if (!member) {
+        res.status(400).json({ message: 'something went wrong. try again.' })
+        return
+      }
 
-      res.status(200).json({ message: 'Post approved successfully', post: { ...approvedPost } })
+      const post = await prismadb.post.create({
+        data: {
+          community_id: community_id,
+          member_id: member.member_id,
+          title: title?.trim(),
+          body,
+          hasPublished: member.role !== 'MEMBER'
+        },
+        select: { post_id: true, hasPublished: true }
+      })
+
+      res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished })
     } catch (error) {
       next(error)
     }
   }
 
-  private _getPost = async (req: Request, res: Response, next: NextFunction) => {
-    const post_id = req.params?.post_id
+  private _reportPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const post_id = req.params?.postId
+    const { community_id, report_reason } = req.body
+
+    const errors: ErrorType = {}
+
+    if (!post_id || !report_reason) errors.message = 'content missing'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
 
     try {
-      const post = await postRepo.get(post_id)
+      const post = await postRepo.isExist(post_id, community_id)
       if (!post) {
-        res.status(403).json({ message: 'Something went wrong. try again' })
+        res.status(404).json({ message: 'Post Not Found!' })
         return
       }
 
-      res.status(200).json({ ...post })
+      // TODO: 3/1 send a notification or something to notify every admin & moderators
+      res.status(200).json({ message: 'kaj colche' })
     } catch (error) {
       next(error)
     }
@@ -152,7 +135,7 @@ class PostController extends BaseController {
 
   private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId
-    const post_id = req.params?.post_id
+    const post_id = req.params?.postId
 
     try {
       const postInfo = await postRepo.get(post_id)
@@ -231,17 +214,17 @@ class PostController extends BaseController {
   public configureRoutes = () => {
     this.router.post('/new', this._auth, this._checkRoles, this._createPost)
 
-    // approve post
-    this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)
+    // report post by any of who is member
+    this.router.post('/report/:postId', this._auth, this._checkRoles, this._reportPost)
 
-    // get single post
-    this.router.get('/:post_id', this._auth, this._checkRoles, this._getPost)
+    // approve post
+    // this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)
 
     // update post
-    this.router.patch('/:post_id', this._auth, this._checkRoles, this._updatePost)
+    this.router.patch('/:postId', this._auth, this._checkRoles, this._updatePost)
 
     // delete post by post owner
-    this.router.delete('/:post_id', this._auth, this._checkRoles, this._deletePost)
+    this.router.delete('/:postId', this._auth, this._checkRoles, this._deletePost)
 
     // this._showRoutes()
   }

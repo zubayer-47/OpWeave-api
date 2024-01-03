@@ -67,6 +67,32 @@ class AuthorityRepo {
     })
   }
 
+  /**
+   *
+   * @param member_id
+   */
+  public removeAuthority(member_id: string) {
+    return this.member.update({
+      where: {
+        member_id
+      },
+      data: {
+        role: 'MEMBER'
+      },
+      select: {
+        member_id: true,
+        user: {
+          select: {
+            user_id: true,
+            fullname: true,
+            username: true,
+            avatar: true
+          }
+        }
+      }
+    })
+  }
+
   // public gets() {
   //   return this.community.findMany()
   // }

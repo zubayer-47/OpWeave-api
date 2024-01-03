@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
+import authorityRepo from 'src/repos/authority.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
-import { ErrorType, MemberRoleType } from 'src/types/custom'
+import { ErrorType, MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class AuthorityController extends BaseController {
@@ -11,22 +12,62 @@ class AuthorityController extends BaseController {
     this.configureRoutes()
   }
 
-  private _toggleHidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.userId
-    const userRole = req.user?.role
-    const postId = req.params?.post_id
+  private _approvePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
+    const userRole = req.user?.role
+    const post_id = req.params?.postId
+    const community_id = req.body?.community_id
 
-    if (userRole === 'MEMBER') errors.message = "You don't have permission to hide or unhide any post"
+    if (userRole === 'MEMBER') errors.message = 'You do not have access to do it'
 
-    const postInfo = await postRepo.getInvisiblePost(postId)
-
-    const member = await memberRepo.isExist(userId, postInfo.community_id)
-    if (!member) errors.message = 'Something went wrong! Please try again...'
+    if (!post_id) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
+    }
+
+    // check whether post exist or not
+    const post = await postRepo.isExist(post_id, community_id)
+    if (!post) {
+      res.status(404).json({ message: 'Post Not Found!' })
+      return
+    }
+
+    // if (post.hasPublished) {
+    //   res.status(403).json({ message: 'Post already been approved!' })
+    //   return
+    // }
+
+    try {
+      const approvedPost = await authorityRepo.approvePost(post_id)
+
+      res.status(200).json({ message: 'Post approved successfully', post: { ...approvedPost } })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _toggleHidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.userId
+    const userRole = req.user?.role
+
+    const errors: ErrorType = {}
+
+    const postId = req.params?.postId
+
+    if (userRole === 'MEMBER') errors.message = "You don't have permission to hide or unhide any post"
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    const postInfo = await postRepo.getInvisiblePost(postId)
+
+    const member = await memberRepo.isExist(userId, postInfo.community_id)
+    if (!member) {
+      res.status(403).json({ message: 'Something went wrong! Please try again...' })
     }
 
     try {
@@ -67,78 +108,51 @@ class AuthorityController extends BaseController {
     }
   }
 
-  private _muteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private _toggleMuteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
-
     const errors: ErrorType = {}
 
-    const { community_id, member_id } = req.body
+    const member_id = req.body?.member_id
+    const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
 
-    if (!community_id || !member_id) {
-      res.status(400).json({ message: 'content missing' })
-      return
-    }
+    if (userRole === 'MEMBER') errors.role = 'You do not have access to do it'
 
-    if (userRole === 'MEMBER') {
-      res.status(403).json({ message: 'You do not have access to do it' })
-      return
-    }
+    if (!member_id) errors.message = 'content missing'
 
-    const member = await memberRepo.get(member_id)
-    if (!member) errors.message = 'Member Not Exist'
+    if (!['mute', 'unmute'].includes(status)) errors.status = 'status missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
 
-    try {
-      await memberRepo.toggleMuteMember(member_id)
-
-      res.status(200).json({ message: 'member muted successfully', member_id })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  private _unmuteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userRole = req.user?.role
-
-    const errors: ErrorType = {}
-
-    const { community_id, member_id } = req.body
-
-    if (!community_id || !member_id) {
-      res.status(400).json({ message: 'content missing' })
-      return
-    }
-
-    if (userRole === 'MEMBER') {
-      res.status(403).json({ message: 'You do not have access to do it' })
-      return
-    }
-
     const member = await memberRepo.get(member_id)
-    if (!member || !member.isMuted) errors.message = 'Something went wrong! please try again'
+    // console.log({ member })
+    if (!member) {
+      res.status(400).json({ message: 'Something went wrong! please try again' })
+      return
+    }
 
-    // TODO: return errors before async process
+    if (member.isMuted && status === 'mute') {
+      res.status(403).json({ message: 'This Member already muted' })
+      return
+    }
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
+    if (!member.isMuted && status === 'unmute') {
+      res.status(403).json({ message: 'This Member already unmuted' })
       return
     }
 
     try {
-      await memberRepo.toggleMuteMember(member_id, 'unmute')
+      await memberRepo.toggleMuteMember(member_id, status)
 
-      res.status(200).json({ message: 'member successfully unmuted', member_id })
+      res.status(200).json({ message: `member successfully ${status}d`, member_id })
     } catch (error) {
       next(error)
     }
   }
 
   private _banMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.userId
     const userRole = req.user?.role
 
     const errors: ErrorType = {}
@@ -167,30 +181,17 @@ class AuthorityController extends BaseController {
 
   private _addAuthority = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
-    // const errors: ErrorType = {}
+    const errors: ErrorType = {}
 
     const role = req.params?.role.toUpperCase() as MemberRoleType
     const member_id = req.body?.member_id
-    const community_id = req.body?.community_id
 
-    if (userRole !== 'ADMIN') {
-      res.status(403).json({
-        message: 'You do not have permission to do it'
-      })
-      return
-    }
+    if (userRole !== 'ADMIN') errors.message = 'You do not have permission to do it'
 
-    /**
-     * * community_id should check here because _checkRoles middleware is not verifying for this specific route
-     * * if it is not verifying here and user provide only member_id except community_id the _checkRoles middleware check the member's role using member_id.
-     */
-    if (!community_id) {
-      res.status(400).json({ message: 'Content missing.' })
-      return
-    }
+    if (!['ADMIN', 'MODERATOR'].includes(role + '')) errors.role = 'Role missing'
 
-    if (!['ADMIN', 'MODERATOR'].includes(role + '')) {
-      res.status(403).json({ message: 'Role missing' })
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
       return
     }
 
@@ -199,11 +200,6 @@ class AuthorityController extends BaseController {
       res.status(403).json({ message: `Member not found to make ${role}` })
       return
     }
-
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
 
     try {
       const updatedMember = await memberRepo.createAuthority(member_id, role)
@@ -217,55 +213,17 @@ class AuthorityController extends BaseController {
   private _removeAuthority = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
 
-    // const role = req.params?.role.toUpperCase() as MemberRoleType
-
-    //   const member_id = req.body?.member_id
-    //   const community_id = req.body?.community_id
-
-    //   /**
-    //    * * community_id should check here because _checkRoles middleware is not verifying for this specific route
-    //    * * if it is not verifying here and user provide only member_id except community_id the _checkRoles middleware check the member's role using member_id.
-    //    */
-    //   if (!community_id) {
-    //     res.status(400).json({ message: 'Content missing.' })
-    //     return
-    //   }
-
-    //   if (userRole !== 'ADMIN') {
-    //     res.status(403).json({
-    //       message: 'You do not have permission to do it'
-    //     })
-    //     return
-    //   }
-
-    //   const member = await memberRepo.get(member_id)
-    //   if (!member || member.role !== type) {
-    //     res.status(404).json({ message: `${type} Not Found to remove` })
-    //     return
-    //   }
+    const errors: ErrorType = {}
 
     const role = req.params?.role.toUpperCase() as MemberRoleType
-    const member_id = req.params?.member_id
-    const community_id = req.params?.community_id
+    const member_id = req.body?.member_id
 
-    if (userRole !== 'ADMIN') {
-      res.status(403).json({
-        message: 'You do not have permission to do it'
-      })
-      return
-    }
+    if (userRole !== 'ADMIN') errors.message = 'You do not have permission to do it'
 
-    /**
-     * * community_id should check here because _checkRoles middleware is not verifying for this specific route
-     * * if it is not verifying here and user provide only member_id except community_id the _checkRoles middleware check the member's role using member_id.
-     */
-    if (!community_id) {
-      res.status(400).json({ message: 'Content missing.' })
-      return
-    }
+    if (!['ADMIN', 'MODERATOR'].includes(role + '')) errors.role = 'Role missing'
 
-    if (!['ADMIN', 'MODERATOR'].includes(role + '')) {
-      res.status(403).json({ message: 'Role missing' })
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
       return
     }
 
@@ -275,6 +233,7 @@ class AuthorityController extends BaseController {
       return
     }
 
+    // TODO: 3/1 sanitize createdBy field (store here member_id only)
     const createdBy = member.community.createdBy.split(',')[0] // it'll be member_id
 
     if (createdBy === member.member_id) {
@@ -282,13 +241,8 @@ class AuthorityController extends BaseController {
       return
     }
 
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
-
     try {
-      const updatedMember = await memberRepo.removeAuthority(member_id)
+      const updatedMember = await authorityRepo.removeAuthority(member_id)
 
       res.status(200).json({ message: `${role} removed Successfully`, ...updatedMember })
     } catch (error) {
@@ -302,17 +256,16 @@ class AuthorityController extends BaseController {
    */
 
   configureRoutes() {
-    // hide post
-    this.router.post('/posts/:post_id', this._auth, this._checkRoles, this._toggleHidePost)
+    // approve post
+    this.router.post('/approve/:postId', this._auth, this._checkRoles, this._approvePost)
 
-    // TODO: 1/1 make mute/unmute to _toggleMute
-    // mute member
-    this.router.post('/mute', this._auth, this._checkRoles, this._muteMember)
+    // toggle hide/unhide post
+    this.router.post('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)
 
-    this.router.post('/unmute', this._auth, this._checkRoles, this._unmuteMember)
+    // toggle mute/unmute member
+    this.router.post('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
 
-    // ? ban member routes
-    // ban
+    // TODO: make it
     this.router.post('/ban', this._auth, this._checkRoles, this._banMember)
 
     // TODO: 1/1 test 2 routes below and sanitize them
@@ -321,6 +274,8 @@ class AuthorityController extends BaseController {
 
     // remove moderator
     this.router.delete('/:role', this._auth, this._checkRoles, this._removeAuthority)
+
+    // TODO: 3/1 think about banned_users table in schema
 
     // this._showRoutes()
   }

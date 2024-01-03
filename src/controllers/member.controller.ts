@@ -10,9 +10,9 @@ class MemberController extends BaseController {
 
   private _getCommunityPostsByMember = async (req: Request, res: Response, next: NextFunction) => {
     const { page, limit } = req.query
-    const { memberId } = req.params
+    const member_id = req.params?.memberId
 
-    if (!memberId) {
+    if (!member_id) {
       res.status(400).json('Content missing').end()
       return
     }
@@ -20,9 +20,9 @@ class MemberController extends BaseController {
     try {
       let posts: unknown
       if (page && limit) {
-        posts = await postRepo.getPostByMember(memberId, +page, +limit)
+        posts = await postRepo.getPostByMember(member_id, +page, +limit)
       } else {
-        posts = await postRepo.getPostByMember(memberId)
+        posts = await postRepo.getPostByMember(member_id)
       }
 
       res.status(200).json({ posts }).end()
