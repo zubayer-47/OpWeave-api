@@ -83,22 +83,8 @@ class CommunityController extends BaseController {
   }
 
   private _getCommunityPosts = async (req: Request, res: Response, next: NextFunction) => {
-    // TODO: Sanitize them
-    // const errors: ErrorType = {}
-
     const communityId = req.params?.communityId
     const { page, limit } = req.query
-
-    // if (!communityId) errors.community_id = 'content missing'
-
-    // // check whether community exist or not
-    // const community = await communityRepo.isExist(communityId, 'community_id')
-    // if (!community) errors.community = 'Community does not exist'
-
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors).end()
-    //   return
-    // }
 
     try {
       let posts: unknown
@@ -109,7 +95,6 @@ class CommunityController extends BaseController {
         posts = await postRepo.getPostsInCommunity(communityId)
       }
 
-      // console.log({ page: +page, limit: +limit, posts: Array.isArray(posts) && posts?.length })
       res.status(200).json(posts)
     } catch (error) {
       next(error)

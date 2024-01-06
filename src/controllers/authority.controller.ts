@@ -114,6 +114,7 @@ class AuthorityController extends BaseController {
 
     const member_id = req.body?.member_id
     const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
+    const community_id = req.body?.community_id
 
     if (userRole === 'MEMBER') errors.role = 'You do not have access to do it'
 
@@ -126,7 +127,7 @@ class AuthorityController extends BaseController {
       return
     }
 
-    const member = await memberRepo.get(member_id)
+    const member = await memberRepo.get(member_id, community_id)
     // console.log({ member })
     if (!member) {
       res.status(400).json({ message: 'Something went wrong! please try again' })
@@ -152,28 +153,36 @@ class AuthorityController extends BaseController {
     }
   }
 
-  private _banMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private _toggleBanMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // const userId = req.user?.userId
     const userRole = req.user?.role
-
     const errors: ErrorType = {}
 
-    const { member_id, community_id, ban_reason } = req.body
+    const member_id = req.params?.memberId
+    const status = req.params?.status.toUpperCase()
+    const { community_id, ban_reason } = req.body
 
     // member_id, community_id, ban_reason, bannedBy
 
-    if (!member_id || !community_id || !ban_reason) {
-      res.status(400).json({ message: 'content missing. you should provide member_id, community_id, ban_reason' })
-      return
-    }
+    if (!member_id || !community_id || !ban_reason) errors.message = 'content missing'
 
-    if (userRole === 'MEMBER') errors.member = ''
+    if (userRole === 'MEMBER') errors.member = 'You do not have access to do it'
+
+    if (!['BAN', 'UNBAN'].includes(status)) errors.message = 'Status missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
     try {
-      // Your async code gose here...
+      const member = await memberRepo.get(member_id, community_id)
+      if (!member) {
+        res.status(404).json({ message: 'Member Not Found!' })
+        return
+      }
+
+      // TODO: 4/1 work with ban member after fixing banned_member table
+      // const statusInfo = await
     } catch (error) {
       next(error)
     }
@@ -185,6 +194,7 @@ class AuthorityController extends BaseController {
 
     const role = req.params?.role.toUpperCase() as MemberRoleType
     const member_id = req.body?.member_id
+    const community_id = req.body?.community_id
 
     if (userRole !== 'ADMIN') errors.message = 'You do not have permission to do it'
 
@@ -195,7 +205,7 @@ class AuthorityController extends BaseController {
       return
     }
 
-    const member = await memberRepo.get(member_id)
+    const member = await memberRepo.get(member_id, community_id)
     if (!member || member.role === role) {
       res.status(403).json({ message: `Member not found to make ${role}` })
       return
@@ -217,6 +227,7 @@ class AuthorityController extends BaseController {
 
     const role = req.params?.role.toUpperCase() as MemberRoleType
     const member_id = req.body?.member_id
+    const community_id = req.body?.community_id
 
     if (userRole !== 'ADMIN') errors.message = 'You do not have permission to do it'
 
@@ -227,7 +238,7 @@ class AuthorityController extends BaseController {
       return
     }
 
-    const member = await memberRepo.get(member_id)
+    const member = await memberRepo.get(member_id, community_id)
     if (!member || member.role !== role) {
       res.status(404).json({ message: `${role} Not Found to remove` })
       return
@@ -260,17 +271,17 @@ class AuthorityController extends BaseController {
     this.router.post('/approve/:postId', this._auth, this._checkRoles, this._approvePost)
 
     // toggle hide/unhide post
-    this.router.post('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)
+    this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)
 
     // toggle mute/unmute member
-    this.router.post('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
+    this.router.patch('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
 
     // TODO: make it
-    this.router.post('/ban', this._auth, this._checkRoles, this._banMember)
+    this.router.patch('members/:memberId/:status', this._auth, this._checkRoles, this._toggleBanMember)
 
     // TODO: 1/1 test 2 routes below and sanitize them
     // add moderator
-    this.router.post('/:role', this._auth, this._checkRoles, this._addAuthority)
+    this.router.patch('/:role', this._auth, this._checkRoles, this._addAuthority)
 
     // remove moderator
     this.router.delete('/:role', this._auth, this._checkRoles, this._removeAuthority)

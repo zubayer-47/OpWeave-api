@@ -215,7 +215,7 @@ class PostController extends BaseController {
     this.router.post('/new', this._auth, this._checkRoles, this._createPost)
 
     // report post by any of who is member
-    this.router.post('/report/:postId', this._auth, this._checkRoles, this._reportPost)
+    this.router.post('/:postId/report', this._auth, this._checkRoles, this._reportPost)
 
     // approve post
     // this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)

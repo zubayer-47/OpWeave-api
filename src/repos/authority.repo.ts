@@ -97,4 +97,5 @@ class AuthorityRepo {
   //   return this.community.findMany()
   // }
 }
+
 export default new AuthorityRepo()

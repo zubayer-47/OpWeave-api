@@ -41,6 +41,29 @@ class MemberRepo {
   }
 
   /**
+   * Get Member
+   * @param member_id this should memberId
+   */
+  public get(member_id: string, community_id: string) {
+    return this.member.findFirst({
+      where: {
+        member_id,
+        community_id
+      },
+      select: {
+        member_id: true,
+        community: {
+          select: {
+            createdBy: true
+          }
+        },
+        role: true,
+        isMuted: true
+      }
+    })
+  }
+
+  /**
    *
    * @param user_id
    * @param community_id
@@ -109,28 +132,6 @@ class MemberRepo {
   }
 
   /**
-   * Get Member
-   * @param member_id this should memberId
-   */
-  public get(member_id: string) {
-    return this.member.findFirst({
-      where: {
-        member_id
-      },
-      select: {
-        member_id: true,
-        community: {
-          select: {
-            createdBy: true
-          }
-        },
-        role: true,
-        isMuted: true
-      }
-    })
-  }
-
-  /**
    *
    * @param member_id
    */
@@ -180,5 +181,16 @@ class MemberRepo {
       }
     })
   }
+
+  // TODO: 4/1 customize it before use
+  public toggleBanMember(member_id: string) {
+    return this.member.update({
+      where: {
+        member_id
+      },
+      data: {}
+    })
+  }
 }
+
 export default new MemberRepo()

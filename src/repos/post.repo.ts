@@ -71,14 +71,13 @@ class PostRepo {
   }
 
   /**
-   * get community posts via pagination or all posts
+   * get member posts by pagination or all posts
    * @param community_id this should community_id
    * @param member_id -> member_id but if next params exist -> falsy value
    * @param page optional filed
    * @param limit optional field
-   * @returns community_id member_id title body createdAt updatedAt
    */
-  public getPostByMember(member_id: string, page?: number, limit?: number) {
+  public getMemberPosts(member_id: string, page?: number, limit?: number) {
     const paginationOptions: PaginationTypes =
       !page || !limit
         ? { orderBy: { createdAt: 'asc' } }
@@ -88,7 +87,11 @@ class PostRepo {
       where: {
         member_id,
         hasPublished: true,
-        deletedAt: null
+        isVisible: true,
+        deletedAt: null,
+        member: {
+          leavedAt: null
+        }
       },
       select: {
         post_id: true,
@@ -138,7 +141,11 @@ class PostRepo {
       where: {
         community_id,
         hasPublished: true,
-        deletedAt: null
+        isVisible: true,
+        deletedAt: null,
+        member: {
+          leavedAt: null
+        }
       },
       select: {
         post_id: true,
@@ -173,7 +180,10 @@ class PostRepo {
         community_id,
         hasPublished: true,
         isVisible: true,
-        deletedAt: null
+        deletedAt: null,
+        member: {
+          leavedAt: null
+        }
       },
       select: {
         post_id: true,

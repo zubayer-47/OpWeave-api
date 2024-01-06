@@ -54,36 +54,12 @@ export default abstract class BaseController {
       const member_id = req.body?.member_id
       const method = req.method.toLowerCase()
 
-      // let member: {
-      //   member_id: string
-      //   role: Role
-      // }
-
       if (!community_id && !member_id) {
         res.status(400).json({ message: 'content missing' })
         return
       }
 
-      // if (!community_id && postId) {
-      //   // console.log('fetching post...')
-      //   const postInfo = await postRepo.get(postId)
-      //   if (!postInfo) {
-      //     res.status(404).json({ message: 'Post Not Found' })
-      //     return
-      //   }
-
-      //   member = await memberRepo.getMemberRoleInCommunity(
-      //     userId,
-      //     postInfo.community_id,
-      //     method.toLowerCase() !== 'get'
-      //   )
-      // } else if (community_id) {
-      // console.log('fetching member')
       const member = await memberRepo.getMemberRoleInCommunity(userId, community_id, method !== 'get')
-      // } else {
-      //   // it's in last because when adding a moderator or admin by main admin it can be a cause of conflict.
-      //   member = await memberRepo.get(member_id)
-      // }
 
       if (!member || !member.role) {
         res.status(400).json({ message: 'you do not have permission to access this route' })

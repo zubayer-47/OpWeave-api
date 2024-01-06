@@ -5,6 +5,7 @@ import { emailReg } from 'src/libs'
 import { setJWT } from 'src/libs/cookie'
 import prismadb from 'src/libs/prismadb'
 import userRepo from 'src/repos/user.repo'
+import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class AuthController extends BaseController {
@@ -16,7 +17,7 @@ class AuthController extends BaseController {
   private _create = async (req: Request, res: Response, next: NextFunction) => {
     try {
       // TODO: Like a create random record
-      const errors: { [index: string]: string } = {}
+      const errors: ErrorType = {}
       const { fullname, username, email, password, gender } = req.body
 
       // const gender_tuple = ['MALE', 'FEMALE']
