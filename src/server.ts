@@ -14,7 +14,6 @@ import authController from './controllers/auth.controller'
 import authorityController from './controllers/authority.controller'
 import communityController from './controllers/community.controller'
 import memberController from './controllers/member.controller'
-import postController from './controllers/post.controller'
 import userController from './controllers/user.controller'
 import corsOptions from './libs/cors'
 import { sysLog } from './libs/logger'
@@ -60,12 +59,12 @@ class ExpressServer {
       res.send('All Ok !')
     })
 
-    this.express.use('/v1/auth/', authController.router)
-    this.express.use('/v1/users/', userController.router)
-    this.express.use('/v1/communities/', communityController.router)
-    this.express.use('/v1/posts/', postController.router)
-    this.express.use('/v1/members/', memberController.router)
-    this.express.use('/v1/authority/', authorityController.router)
+    this.express.use('/api/v1/auth/', authController.router)
+    this.express.use('/api/v1/users/', userController.router)
+    this.express.use('/api/v1/communities/', communityController.router)
+    // this.express.use('/api/v1/posts/', postController.router)
+    // this.express.use('/api/v1/members/', memberController.router)
+    this.express.use('/api/v1/authority/', authorityController.router)
   }
 
   private _sockets() {
