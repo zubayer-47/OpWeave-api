@@ -51,10 +51,10 @@ export default abstract class BaseController {
       const userId = req.user?.userId
       // const postId = req.params?.postId
       const community_id = req.params?.communityId ?? req.body?.community_id
-      const member_id = req.body?.member_id
+      // const member_id = req.body?.member_id
       const method = req.method.toLowerCase()
 
-      if (!community_id && !member_id) {
+      if (!community_id) {
         res.status(400).json({ message: 'content missing' })
         return
       }
