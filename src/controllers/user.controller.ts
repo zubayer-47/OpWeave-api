@@ -2,6 +2,7 @@ import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { emailReg } from 'src/libs'
 import userRepo from 'src/repos/user.repo'
+import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class UserController extends BaseController {
@@ -20,18 +21,36 @@ class UserController extends BaseController {
     }
   }
 
+  private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+
   private _updateUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.userId
-
-      console.log({ userId })
-
+      // console.log({ userId })
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
       const user = await userRepo.getCurrentUser(userId)
       if (!user) {
-        res.status(404).json('user not found!').end()
+        res.status(401).json('Unauthorized!')
         return
       }
 
@@ -54,6 +73,7 @@ class UserController extends BaseController {
 
         if (user) errors.username = 'duplicate username, try different username'
       }
+
       if (email) {
         // check whether username exist or not
         const isEmailExist = await userRepo.isUnique(email, 'email')
@@ -67,23 +87,84 @@ class UserController extends BaseController {
         if (comparedPass) errors.password = 'your current password and given password are same'
       }
 
-      console.log(Object.keys(errors).length, { errors })
+      // console.log(Object.keys(errors).length, { errors })
 
-      if (!Object.keys(errors).length) {
-        const hashedPassword: string | null = password ? await hash(password, 12) : null
-
-        const updatedUser = await userRepo.updateUser(userId, {
-          fullname: fullname || user.fullname,
-          username: username || user.username,
-          password: hashedPassword || user.password,
-          email: email || user.email,
-          gender: gender?.toUpperCase() || user.gender
-        })
-
-        res.status(200).json({ message: 'User updated successfully', user: updatedUser })
-      } else {
+      if (Object.keys(errors).length) {
         res.status(400).json(errors)
+        return
       }
+
+      const hashedPassword: string | null = password ? await hash(password, 12) : null
+
+      const updatedUser = await userRepo.updateUser(userId, {
+        fullname: fullname || user.fullname,
+        username: username || user.username,
+        password: hashedPassword || user.password,
+        email: email || user.email,
+        gender: gender?.toUpperCase() || user.gender
+      })
+
+      res.status(200).json({ message: 'User updated successfully', user: updatedUser })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _getProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _updateProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _deleteProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
     } catch (error) {
       next(error)
     }
@@ -94,7 +175,35 @@ class UserController extends BaseController {
    */
   public configureRoutes() {
     this.router.get('/', this._auth, this._profile)
-    this.router.patch('/', this._auth, this._updateUser)
+
+    // get current user's All posts with pagination.
+    // TODO: 21/1 make it later with pagination
+    this.router.get('/:userId/posts', this._auth, this._getPosts)
+
+    // update the user
+    this.router.patch('/:userId', this._auth, this._updateUser)
+
+    // Retrieve the user's profile picture.
+    // TODO: 21/1 make it
+    this.router.get('/:userId/profilePicture', this._auth, this._getProfilePicture)
+
+    // Update the user's profile picture.
+    // TODO: 21/1 make it
+    this.router.put('/:userId/profilePicture', this._auth, this._updateProfilePicture)
+
+    // Delete the user's profile picture.
+    // TODO: 21/1 make it
+    this.router.delete('/:userId/profilePicture', this._auth, this._deleteProfilePicture)
+
+    /**
+     * ? GET /users: Get user's profile information.
+     * ? GET /users/:userId/posts: Get a list of user's posts across all groups.
+     * ? PATCH /users/:userId: User update partially.
+     *
+     * ? GET /users/:userId/profilePicture: Retrieve the user's profile picture.
+     * ? PUT /users/:userId/profilePicture: Update the user's profile picture.
+     * ? DELETE /users/:userId/profilePicture: Delete the user's profile picture.
+     */
 
     // this._showRoutes()
   }
