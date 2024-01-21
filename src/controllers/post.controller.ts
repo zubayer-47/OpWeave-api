@@ -3,15 +3,48 @@ import prismadb from 'src/libs/prismadb'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
-import BaseController from './base.controller'
 
-class PostController extends BaseController {
-  constructor() {
-    super()
-    this.configureRoutes()
+class PostController {
+  static _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
+  }
+  static _getPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
   }
 
-  private _createPost = async (req: Request, res: Response, next: NextFunction) => {
+  static _createPost = async (req: Request, res: Response, next: NextFunction) => {
     // TODO: 3/1 add picture and more.
     const userId = req.user.userId
 
@@ -55,7 +88,7 @@ class PostController extends BaseController {
     }
   }
 
-  private _reportPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  static _reportPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const post_id = req.params?.postId
     const { community_id, report_reason } = req.body
 
@@ -83,7 +116,7 @@ class PostController extends BaseController {
   }
 
   // TODO: title and body should be optional field. sanitize them properly and have to have previous data if any of these are blank
-  private _updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  static _updatePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
     const postId = req.params?.postId
 
@@ -133,7 +166,7 @@ class PostController extends BaseController {
     }
   }
 
-  private _deletePost = async (req: Request, res: Response, next: NextFunction) => {
+  static _deletePost = async (req: Request, res: Response, next: NextFunction) => {
     const userId = req.user?.userId
     const post_id = req.params?.postId
 
@@ -211,23 +244,28 @@ class PostController extends BaseController {
     }
   }
 
-  public configureRoutes = () => {
-    this.router.post('/new', this._auth, this._checkRoles, this._createPost)
+  // public configureRoutes = () => {
+  //   this.router.post('/', this._auth, this._checkRoles, this._createPost)
 
-    // report post by any of who is member
-    this.router.post('/:postId/report', this._auth, this._checkRoles, this._reportPost)
+  //   // report post by any of who is member
+  //   this.router.post('/:postId/report', this._auth, this._checkRoles, this._reportPost)
 
-    // approve post
-    // this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)
+  //   // approve post
+  //   // this.router.post('/:post_id', this._auth, this._checkRoles, this._approvePost)
 
-    // update post
-    this.router.patch('/:postId', this._auth, this._checkRoles, this._updatePost)
+  //   // update post
+  //   this.router.patch('/:postId', this._auth, this._checkRoles, this._updatePost)
 
-    // delete post by post owner
-    this.router.delete('/:postId', this._auth, this._checkRoles, this._deletePost)
+  //   // delete post by post owner
+  //   this.router.delete('/:postId', this._auth, this._checkRoles, this._deletePost)
 
-    // this._showRoutes()
-  }
+  //   /**
+  //    * ? /posts (GET, POST)
+  //    * ? /posts/:postId (GET, PUT, DELETE)
+  //    */
+
+  //   // this._showRoutes()
+  // }
 }
 
-export default new PostController()
+export default PostController
