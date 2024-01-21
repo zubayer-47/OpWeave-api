@@ -5,11 +5,33 @@ import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
+import MemberController from './member.controller'
+import PostController from './post.controller'
 
 class CommunityController extends BaseController {
   constructor() {
     super()
     this.configureRoutes()
+  }
+
+  private _getCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
+    /**
+     * Validation
+     */
+    const errors: ErrorType = {}
+    // here gose your validation rules
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+    try {
+      // Your async code gose here...
+    } catch (error) {
+      next(error)
+    }
   }
 
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
@@ -129,129 +151,6 @@ class CommunityController extends BaseController {
 
   // private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
-  private _joinMember = async (req: Request, res: Response, next: NextFunction) => {
-    const errors: { [index: string]: string } = {}
-    const userId = req.user?.userId
-    const communityId = req.params?.communityId
-
-    // check whether community exist or not where user wants to add
-    const community = await communityRepo.isExist(communityId, 'community_id')
-    if (!community) errors.community = 'Community does not exist'
-
-    // check whether member exist or not already
-    const member = await memberRepo.isExistWithLeavedAt(userId, communityId)
-    // console.log({ member })
-    if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
-
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors).end()
-      return
-    }
-
-    try {
-      if (!member) {
-        const joinedMember = await prismadb.member.create({
-          data: {
-            user_id: userId,
-            community_id: communityId
-          },
-          select: {
-            community_id: true,
-            member_id: true,
-            role: true
-          }
-        })
-
-        res.status(201).json({ message: 'Member Joined Successfully', member: joinedMember })
-        return
-      }
-
-      // if member wants to join again after leaving.
-      const joinedMember = await prismadb.member.update({
-        where: {
-          member_id: member.member_id
-        },
-        data: {
-          leavedAt: null,
-          role: 'MEMBER'
-        },
-        select: {
-          community_id: true,
-          member_id: true,
-          role: true
-        }
-      })
-
-      res.status(201).json({ message: 'Member Created Successfully', member: joinedMember })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  // private _changeRole = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  //   /**
-  //    * scopes:
-  //    * ADMIN: ['ROOT']
-  //    * MODERATOR: ['REPORT','HIDE_POST', 'MUTE_MEMBER', 'BAN_MEMBER', 'MUTE_POST', 'DELETE_POST']
-  //    * MEMBER: ['READ_ONLY', 'SELF_POST_OWNER']
-  //    */
-
-  //   const {} = req.params
-  //   const {} = req.body
-  //   const {} = req.query
-  //   try {
-  //     // Your async code gose here...
-  //   } catch (error) {
-  //     next(error)
-  //   }
-  // }
-
-  private _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.userId
-    const userRole = req.user?.role
-    const community_id = req.body?.community_id
-
-    // const errors: { [index: string]: string } = {}
-
-    if (userRole === 'ADMIN') {
-      res.status(400).json('You are Admin of this community. you cannot perform leave action')
-      return
-    }
-
-    // get member_id
-    const member = await memberRepo.getMemberRoleInCommunity(userId, community_id)
-
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
-
-    try {
-      // update leavedAt property of this member
-      await prismadb.member.update({
-        where: {
-          member_id: member?.member_id
-        },
-        data: {
-          leavedAt: new Date()
-        },
-        select: {
-          member_id: true
-        }
-      })
-
-      res
-        .status(200)
-        .json({
-          message: 'member successfully leaved',
-          member: { community_id: community_id, member_id: member.member_id }
-        })
-        .end()
-    } catch (error) {
-      next(error)
-    }
-  }
-
   // TODO: 3/1 refactor it before send production (add pagination where needs)
   private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const cid = req.query?.cid as string
@@ -283,20 +182,86 @@ class CommunityController extends BaseController {
   }
 
   public configureRoutes(): void {
-    this.router.post('/new', this._auth, this._createCommunity)
+    /**
+     * ? Community:
+     * ? /communities (GET, POST)
+     * ? /communities/:communityId (GET, PUT, DELETE)
+     */
+
+    // get all communities by pagination
+    // TODO: 21/1 ->> make this method
+    this.router.get('/', this._auth, this._getCommunities)
+
+    // create community
+    this.router.post('/', this._auth, this._createCommunity)
+
     this.router.get('/:communityId', this._auth, this._checkRoles, this._getCommunityPosts)
     this.router.get('/:communityId/post/:postId', this._auth, this._checkRoles, this._getPost)
 
     // add member
-    this.router.post('/:communityId', this._auth, this._joinMember)
+    // this.router.post('/:communityId', this._auth, this._joinMember)
     //   GET: queries: (page,limit, cid)
     // this.router.get('/:memberId', this._auth, this._getMemberPosts)
 
     // leave
-    this.router.delete('/leave', this._auth, this._checkRoles, this._leaveMember)
+    // this.router.delete('/leave', this._auth, this._checkRoles, this._leaveMember)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/details/:communityId', this._auth, this._checkRoles, this._communityInfo)
+
+    /**
+     * ? Posts:
+     * ? GET /communities/:communityId/posts: Get a list of posts in a specific community.
+     * ? POST /communities/:communityId/posts: Create a new post in a specific community.
+     * ?    * Include checks for user role or user existence.
+     *
+     * ? GET /communities/:communityId/posts/:postId: Get details of a specific post in a community.
+     * ? PUT /communities/:communityId/posts/:postId: Update a post in a specific community.
+     * ?    * Only the post creator or authorized community members can modify the post.
+     *
+     * ? DELETE /communities/:communityId/posts/:postId: Delete a post in a specific community.
+     * ?    * Only the post creator or authorized community members can delete the post.
+     */
+
+    //? posts controller ->> <<-
+    // Get a list of posts in a specific community with pagination.
+    // TODO: 21/1 make it later with pagination
+    this.router.get('/:communityId/posts', this._auth, this._checkRoles, PostController._getPosts)
+
+    // Create a new post in a specific community.
+    // TODO: 21/1 make it later
+    this.router.post('/:communityId/posts', this._auth, this._checkRoles, PostController._createPost)
+
+    // Get details of a specific post in a community.
+    // TODO: 21/1 make it later
+    this.router.get('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
+
+    // Update a post in a specific community. ->> Only the post creator or authorized community members can modify the post.
+    // TODO: 21/1 make it later
+    this.router.patch('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
+
+    // Delete a post in a specific community. ->> Only the post creator or authorized community members can delete the post.
+    // TODO: 21/1 verify it later
+    this.router.delete('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._deletePost)
+
+    /**
+     * ? Members:
+     * ? GET /communities/:communityId/members: Get a list of community members.
+     * ? POST /communities/:communityId/members: Add a user to the community.
+     * ? DELETE /communities/:communityId/members/:userId: Remove a user from the community.
+     */
+
+    // Get a list of specific community members with pagination.
+    // TODO: 21/1 verify it later
+    this.router.get('/:communityId/members', this._auth, this._checkRoles, MemberController._getMembers)
+
+    // Add/Join a user to the community.
+    // TODO: 21/1 test it
+    this.router.post('/:communityId/members', this._auth, this._checkRoles, MemberController._joinMember)
+
+    // Remove/Leave a user from the community.
+    // TODO: 21/1 test it
+    this.router.post('/:communityId/members', this._auth, this._checkRoles, MemberController._leaveMember)
   }
 }
 
