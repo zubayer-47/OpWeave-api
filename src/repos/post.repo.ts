@@ -31,11 +31,13 @@ class PostRepo {
    * @param post_id this should be postId
    * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
    */
-  public get(post_id: string) {
+  public get(post_id: string, community_id) {
     return this.post.findFirst({
       where: {
         post_id,
+        community_id,
         hasPublished: true,
+        isVisible: true,
         deletedAt: null
       },
       select: {
@@ -106,19 +108,22 @@ class PostRepo {
     })
   }
 
-  public getCurrentMemberPost(user_id: string, post_id: string) {
+  public getCurrentMemberPost(post_id: string) {
     return this.post.findFirst({
       where: {
         post_id,
-        member: {
-          user_id
-        },
         deletedAt: null
       },
       select: {
         post_id: true,
-        member_id: true,
-        hasPublished: true
+        title: true,
+        body: true,
+        member: {
+          select: {
+            user_id: true,
+            role: true
+          }
+        }
       }
     })
   }

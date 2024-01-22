@@ -62,7 +62,7 @@ export default abstract class BaseController {
       const member = await memberRepo.getMemberRoleInCommunity(userId, community_id, method !== 'get')
 
       if (!member || !member.role) {
-        res.status(400).json({ message: 'you do not have permission to access this route' })
+        res.status(403).json({ message: 'you do not have permission to access this route' })
         return
       }
 

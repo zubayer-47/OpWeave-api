@@ -1,3 +1,4 @@
+import { $Enums } from '@prisma/client'
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
@@ -7,20 +8,29 @@ import { ErrorType } from 'src/types/custom'
 
 export default class MemberController {
   static _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
     const errors: ErrorType = {}
-    // here gose your validation rules
+    const { communityId } = req.params
+    const { page, limit } = req.query
+
+    if (!communityId) errors.message = 'content missing'
+
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
+
     try {
-      // Your async code gose here...
+      let members: {
+        member_id: string
+        user_id: string
+        community_id: string
+        role: $Enums.MemberRole
+      }[]
+
+      if (page && limit) members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
+      else members = await memberRepo.getMembersInCommunity(communityId)
+
+      res.status(200).json({ members })
     } catch (error) {
       next(error)
     }
@@ -37,7 +47,7 @@ export default class MemberController {
 
     // check whether member exist or not already
     const member = await memberRepo.isExistWithLeavedAt(userId, communityId)
-    // console.log({ member })
+    console.log({ member })
     if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
@@ -88,17 +98,18 @@ export default class MemberController {
   static _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
     const userRole = req.user?.role
-    const community_id = req.body?.community_id
+    const community_id = req.params?.community_id
 
     // const errors: { [index: string]: string } = {}
 
     if (userRole === 'ADMIN') {
-      res.status(400).json('You are Admin of this community. you cannot perform leave action')
+      res.status(400).json({ message: 'You are Admin of this community. you cannot perform leave action' })
       return
     }
 
     // get member_id
     const member = await memberRepo.getMemberRoleInCommunity(userId, community_id)
+    console.log('member :', member)
 
     // if (Object.keys(errors).length) {
     //   res.status(400).json(errors)

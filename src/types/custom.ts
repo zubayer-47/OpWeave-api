@@ -11,14 +11,14 @@ export type UserAuthReq = {
 }
 
 type OptionTypes = {
-  orderBy: { createdAt: 'asc' | 'desc' }
+  orderBy: { createdAt?: 'asc' | 'desc'; joinedAt?: 'asc' | 'desc' }
   skip: number
   take: number
 }
 export type PaginationTypes =
   | OptionTypes
   | {
-      orderBy: { createdAt: 'asc' | 'desc' }
+      orderBy: { createdAt?: 'asc' | 'desc'; joinedAt?: 'asc' | 'desc' }
     }
 
 export type ErrorType = { [index: string]: string }

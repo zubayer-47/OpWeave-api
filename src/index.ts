@@ -24,8 +24,8 @@ export const APP_ENV = {
   // JWT
   JWT_ALGORITHM: 'HS256', // 'RS256'
   JWT_ISSUER: process.env?.JWT_ISSUER || 'Social Media',
-  JWT_SUBJECT: process.env?.JWT_SUBJECT || 'anonymouse@chatme.com',
-  JWT_AUDIENCE: process.env?.JWT_AUDIENCE || 'https://chatme.com',
+  JWT_SUBJECT: process.env?.JWT_SUBJECT || 'anonymouse@opweave.com',
+  JWT_AUDIENCE: process.env?.JWT_AUDIENCE || 'https://opweave.com',
   JWT_ACCESS_TOKEN_EXP: +process.env?.JWT_ACCESS_TOKEN_EXP || 10, // in minutes
   JWT_REFRESH_TOKEN_EXP: +process.env?.JWT_REFRESH_TOKEN_EXP || 3, // in days
   // KEYS
