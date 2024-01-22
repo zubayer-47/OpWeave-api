@@ -34,6 +34,34 @@ class CommunityController extends BaseController {
     }
   }
 
+  private _getUserAssignedCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.userId
+    const { page, limit } = req.query
+
+    // console.log(userId)
+    // const errors: ErrorType = {}
+
+    // if (Object.keys(errors).length) {
+    //   res.status(400).json(errors)
+    //   return
+    // }
+
+    try {
+      if (page && limit) {
+        const communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
+
+        res.status(200).json({ communities })
+        return
+      }
+
+      const communities = await communityRepo.getUserAssignedCommunities(userId)
+
+      res.status(200).json({ communities })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
     const errors: ErrorType = {}
     const userId = req.user?.userId
@@ -153,16 +181,17 @@ class CommunityController extends BaseController {
 
   // TODO: 3/1 refactor it before send production (add pagination where needs)
   private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const cid = req.query?.cid as string
+    const communityId = req.query?.communityId as string
 
-    if (!cid) {
+    if (!communityId) {
       res.status(400).json({ message: 'content missing' })
+      return
     }
 
     try {
       const communityInfo = await prismadb.community.findFirst({
         where: {
-          community_id: cid
+          community_id: communityId
         },
         select: {
           community_id: true,
@@ -172,8 +201,8 @@ class CommunityController extends BaseController {
         }
       })
 
-      const membersCount = await memberRepo.numOfMembersInCommunity(cid)
-      const postsCount = await postRepo.numOfPostsInCommunity(cid)
+      const membersCount = await memberRepo.numOfMembersInCommunity(communityId)
+      const postsCount = await postRepo.numOfPostsInCommunity(communityId)
 
       res.status(200).json({ ...communityInfo, total_members: membersCount, total_posts: postsCount })
     } catch (error) {
@@ -188,23 +217,19 @@ class CommunityController extends BaseController {
      * ? /communities/:communityId (GET, PUT, DELETE)
      */
 
-    // get all communities by pagination
-    // TODO: 21/1 ->> make this method
+    // get all communities with pagination (with calculation of popular communities from all sides)
+    // TODO: 21/1 ->> make this method (look at upper comment)
     this.router.get('/', this._auth, this._getCommunities)
+
+    // get all communities where current user is assigned with pagination
+    // TODO: 21/1 ->> modify this method if needed
+    this.router.get('/joined', this._auth, this._getUserAssignedCommunities)
 
     // create community
     this.router.post('/', this._auth, this._createCommunity)
 
     this.router.get('/:communityId', this._auth, this._checkRoles, this._getCommunityPosts)
     this.router.get('/:communityId/post/:postId', this._auth, this._checkRoles, this._getPost)
-
-    // add member
-    // this.router.post('/:communityId', this._auth, this._joinMember)
-    //   GET: queries: (page,limit, cid)
-    // this.router.get('/:memberId', this._auth, this._getMemberPosts)
-
-    // leave
-    // this.router.delete('/leave', this._auth, this._checkRoles, this._leaveMember)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/details/:communityId', this._auth, this._checkRoles, this._communityInfo)
@@ -225,20 +250,16 @@ class CommunityController extends BaseController {
 
     //? posts controller ->> <<-
     // Get a list of posts in a specific community with pagination.
-    // TODO: 21/1 make it later with pagination
-    this.router.get('/:communityId/posts', this._auth, this._checkRoles, PostController._getPosts)
+    this.router.get('/:communityId/posts', this._auth, this._checkRoles, PostController._getCommunityPosts)
 
     // Create a new post in a specific community.
-    // TODO: 21/1 make it later
     this.router.post('/:communityId/posts', this._auth, this._checkRoles, PostController._createPost)
 
     // Get details of a specific post in a community.
-    // TODO: 21/1 make it later
     this.router.get('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
 
     // Update a post in a specific community. ->> Only the post creator or authorized community members can modify the post.
-    // TODO: 21/1 make it later
-    this.router.patch('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
+    this.router.patch('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._updatePost)
 
     // Delete a post in a specific community. ->> Only the post creator or authorized community members can delete the post.
     // TODO: 21/1 verify it later
@@ -252,16 +273,14 @@ class CommunityController extends BaseController {
      */
 
     // Get a list of specific community members with pagination.
-    // TODO: 21/1 verify it later
     this.router.get('/:communityId/members', this._auth, this._checkRoles, MemberController._getMembers)
 
     // Add/Join a user to the community.
-    // TODO: 21/1 test it
-    this.router.post('/:communityId/members', this._auth, this._checkRoles, MemberController._joinMember)
+    this.router.post('/:communityId/members', this._auth, MemberController._joinMember)
 
     // Remove/Leave a user from the community.
     // TODO: 21/1 test it
-    this.router.post('/:communityId/members', this._auth, this._checkRoles, MemberController._leaveMember)
+    this.router.delete('/:communityId/members', this._auth, this._checkRoles, MemberController._leaveMember)
   }
 }
 
