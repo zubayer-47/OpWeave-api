@@ -15,20 +15,29 @@ class CommunityController extends BaseController {
   }
 
   private _getCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
-    const errors: ErrorType = {}
-    // here gose your validation rules
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
+    // TODO: 23/1 check all routes where pagination works to send total number of data;
+    const { page, limit } = req.query
+    // const errors: ErrorType = {}
+    // // here gose your validation rules
+    // if (Object.keys(errors).length) {
+    //   res.status(400).json(errors)
+    //   return
+    // }
+
     try {
-      // Your async code gose here...
+      let communities: {
+        community_id: string
+        name: string
+        bio: string
+        createdAt: Date
+      }[]
+
+      const total = await communityRepo.totalCountOfCommunities()
+
+      if (page && limit) communities = await communityRepo.getCommunities(+page, +limit)
+      else communities = await communityRepo.getCommunities()
+
+      res.status(200).json({ communities, total })
     } catch (error) {
       next(error)
     }
@@ -46,17 +55,29 @@ class CommunityController extends BaseController {
     //   return
     // }
 
-    try {
-      if (page && limit) {
-        const communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
-
-        res.status(200).json({ communities })
-        return
+    const total = await communityRepo.totalCountOfCommunities({
+      members: {
+        some: {
+          user_id: userId,
+          leavedAt: null
+        }
       }
+    })
 
-      const communities = await communityRepo.getUserAssignedCommunities(userId)
+    // console.log(total)
 
-      res.status(200).json({ communities })
+    try {
+      let communities: {
+        community_id: string
+        name: string
+        bio: string
+        rules: string
+      }[]
+
+      if (page && limit) communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
+      else communities = await communityRepo.getUserAssignedCommunities(userId)
+
+      res.status(200).json({ communities, total })
     } catch (error) {
       next(error)
     }
@@ -222,7 +243,6 @@ class CommunityController extends BaseController {
     this.router.get('/', this._auth, this._getCommunities)
 
     // get all communities where current user is assigned with pagination
-    // TODO: 21/1 ->> modify this method if needed
     this.router.get('/joined', this._auth, this._getUserAssignedCommunities)
 
     // create community
@@ -279,7 +299,6 @@ class CommunityController extends BaseController {
     this.router.post('/:communityId/members', this._auth, MemberController._joinMember)
 
     // Remove/Leave a user from the community.
-    // TODO: 21/1 test it
     this.router.delete('/:communityId/members', this._auth, this._checkRoles, MemberController._leaveMember)
   }
 }
