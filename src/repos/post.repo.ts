@@ -108,7 +108,37 @@ class PostRepo {
     })
   }
 
-  public getCurrentMemberPost(post_id: string) {
+  /**
+   * getPostsWithUserId ->> Get posts by userId
+   */
+  public getPostsByUserId(user_id: string, page?: number, limit?: number) {
+    const paginationOptions: PaginationTypes =
+      !page || !limit
+        ? { orderBy: { createdAt: 'asc' } }
+        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
+
+    return this.post.findMany({
+      where: {
+        member: {
+          user_id
+        },
+        deletedAt: null,
+        isVisible: true,
+        hasPublished: true
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        title: true,
+        body: true,
+        createdAt: true
+      },
+      ...paginationOptions
+    })
+  }
+
+  public getPostIncludingUserId(post_id: string) {
     return this.post.findFirst({
       where: {
         post_id,
@@ -147,10 +177,10 @@ class PostRepo {
         community_id,
         hasPublished: true,
         isVisible: true,
-        deletedAt: null,
-        member: {
-          leavedAt: null
-        }
+        deletedAt: null
+        // member: {
+        //   leavedAt: null
+        // }
       },
       select: {
         post_id: true,
@@ -165,6 +195,25 @@ class PostRepo {
     })
   }
 
+  public getPostInCommunity(post_id: string, community_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id,
+        community_id,
+        hasPublished: true,
+        isVisible: true,
+        deletedAt: null
+        // member: {
+        //   leavedAt: null
+        // }
+      },
+      select: {
+        post_id: true,
+        title: true
+      }
+    })
+  }
+
   /**
    *
    * @param {String} community_id Community ID
@@ -173,26 +222,25 @@ class PostRepo {
   public numOfPostsInCommunity(community_id: string): Promise<number> {
     return this.post.count({
       where: {
-        community_id
+        community_id,
+        deletedAt: null
       }
     })
   }
-
-  public getPostInCommunity(post_id: string, community_id: string) {
-    return this.post.findFirst({
+  /**
+   *
+   * @param {String} user_id user id
+   * @returns {Promise<Number>}
+   */
+  public numOfPostsOfUser(user_id: string): Promise<number> {
+    return this.post.count({
       where: {
-        post_id,
-        community_id,
-        hasPublished: true,
-        isVisible: true,
-        deletedAt: null,
         member: {
-          leavedAt: null
-        }
-      },
-      select: {
-        post_id: true,
-        title: true
+          user_id
+        },
+        deletedAt: null,
+        isVisible: true,
+        hasPublished: true
       }
     })
   }

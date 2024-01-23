@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { emailReg } from 'src/libs'
+import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
 import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
@@ -22,20 +23,34 @@ class UserController extends BaseController {
   }
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
+    const userId = req.params?.userId
+    const { page, limit } = req.query
+
     const errors: ErrorType = {}
-    // here gose your validation rules
+
+    if (!userId) errors.message = 'content missing'
+
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
+
     try {
-      // Your async code gose here...
+      let posts: {
+        createdAt: Date
+        post_id: string
+        community_id: string
+        member_id: string
+        title: string
+        body: string
+      }[]
+
+      if (page && limit) posts = await postRepo.getPostsByUserId(userId, +page, +limit)
+      else posts = await postRepo.getPostsByUserId(userId)
+
+      const total = await postRepo.numOfPostsOfUser(userId)
+
+      res.status(200).json({ posts, total })
     } catch (error) {
       next(error)
     }
@@ -177,7 +192,6 @@ class UserController extends BaseController {
     this.router.get('/', this._auth, this._profile)
 
     // get current user's All posts with pagination.
-    // TODO: 21/1 make it later with pagination
     this.router.get('/:userId/posts', this._auth, this._getPosts)
 
     // update the user

@@ -51,8 +51,34 @@ class CommunityRepo {
     })
   }
 
-  // public gets() {
-  //   return this.community.findMany()
-  // }
+  /**
+   * totalCountOfCommunities
+   */
+  public totalCountOfCommunities(where?: Prisma.communityWhereInput) {
+    return this.community.count({
+      where
+    })
+  }
+
+  public async getCommunities(page?: number, limit?: number) {
+    const paginationOptions: PaginationTypes =
+      !page || !limit
+        ? { orderBy: { createdAt: 'asc' } }
+        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
+
+    return await this.community.findMany({
+      where: {
+        deletedAt: null
+      },
+      select: {
+        community_id: true,
+        bio: true,
+        name: true,
+        createdAt: true
+      },
+      ...paginationOptions
+    })
+  }
 }
+
 export default new CommunityRepo()

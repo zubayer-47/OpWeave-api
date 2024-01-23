@@ -50,16 +50,17 @@ export default abstract class BaseController {
     try {
       const userId = req.user?.userId
       // const postId = req.params?.postId
-      const community_id = req.params?.communityId ?? req.body?.community_id
+      const communityId = req.params?.communityId
       // const member_id = req.body?.member_id
       const method = req.method.toLowerCase()
 
-      if (!community_id) {
+      if (!communityId) {
         res.status(400).json({ message: 'content missing' })
         return
       }
 
-      const member = await memberRepo.getMemberRoleInCommunity(userId, community_id, method !== 'get')
+      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
+      // console.log('member from role :', member)
 
       if (!member || !member.role) {
         res.status(403).json({ message: 'you do not have permission to access this route' })

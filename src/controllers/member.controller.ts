@@ -98,18 +98,17 @@ export default class MemberController {
   static _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
     const userRole = req.user?.role
-    const community_id = req.params?.community_id
+    const communityId = req.params?.communityId
 
     // const errors: { [index: string]: string } = {}
 
     if (userRole === 'ADMIN') {
-      res.status(400).json({ message: 'You are Admin of this community. you cannot perform leave action' })
+      res.status(400).json({ message: 'You are the Admin of this community. you cannot perform leave action' })
       return
     }
 
     // get member_id
-    const member = await memberRepo.getMemberRoleInCommunity(userId, community_id)
-    console.log('member :', member)
+    const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
 
     // if (Object.keys(errors).length) {
     //   res.status(400).json(errors)
@@ -134,7 +133,7 @@ export default class MemberController {
         .status(200)
         .json({
           message: 'member successfully leaved',
-          member: { community_id: community_id, member_id: member.member_id }
+          member: { community_id: communityId, member_id: member.member_id }
         })
         .end()
     } catch (error) {

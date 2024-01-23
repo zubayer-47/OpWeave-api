@@ -151,7 +151,7 @@ class PostController {
 
     if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
-    const postInfo = await postRepo.getCurrentMemberPost(postId)
+    const postInfo = await postRepo.getPostIncludingUserId(postId)
     console.log({ postInfo })
     if (!postInfo) errors.post = 'Post Not Exist'
 
@@ -191,7 +191,7 @@ class PostController {
     const errors: ErrorType = {}
     const { postId, communityId } = req.params
 
-    if (communityId || postId) errors.message = 'content missing'
+    if (!communityId || !postId) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -200,6 +200,7 @@ class PostController {
 
     try {
       const postInfo = await postRepo.get(postId, communityId)
+      console.table({ postId, communityId })
 
       if (!postInfo) {
         res.status(403).json({ message: 'something went wrong. try again' })
