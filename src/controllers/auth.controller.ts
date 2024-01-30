@@ -78,13 +78,14 @@ class AuthController extends BaseController {
           user_id: true
         }
       })
+
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
       // response the final data
-      res.json({ id: user.user_id, ...data, token }).end()
+      res.status(201).json({ id: user.user_id, ...data, token })
     } catch (error: any) {
       next(error)
     }
@@ -94,7 +95,7 @@ class AuthController extends BaseController {
     const { username, password } = req.body
     //validation
     if (!username || !password || (password && password.length < 8)) {
-      res.status(400).json({ message: 'Incorrect login credentials!' }).end()
+      res.status(400).json({ message: 'Incorrect login credentials!' })
       return
     }
 
@@ -102,12 +103,12 @@ class AuthController extends BaseController {
       const user = await userRepo.getUser(username)
       // console.log({ user })
       if (!user) {
-        res.status(400).json({ message: "User doesn't exist" }).end()
+        res.status(400).json({ message: "User doesn't exist" })
         return
       }
 
       if (!(await compare(password, user.password))) {
-        res.status(400).json({ message: 'Incorrect login credentials!' }).end()
+        res.status(400).json({ message: 'Incorrect login credentials!' })
         return
       }
 
@@ -118,7 +119,7 @@ class AuthController extends BaseController {
       // set token to response cookie
       setJWT(token, res)
 
-      res.json({ id: user?.user_id, ...currentUser, token }).end()
+      res.status(200).json({ id: user?.user_id, ...currentUser, token })
     } catch (error) {
       next(error)
     }
