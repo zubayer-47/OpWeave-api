@@ -63,12 +63,6 @@ class UserController extends BaseController {
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
-      const user = await userRepo.getCurrentUser(userId)
-      if (!user) {
-        res.status(401).json('Unauthorized!')
-        return
-      }
-
       if (fullname && fullname.length < 4) errors.fullname = 'Fullname should contains 4 characters at least'
       else if (fullname && fullname.match(/[;]$/g)) errors.fullname = "You can't provide semicolon(;)"
       if (username && username.length < 4) errors.username = 'Username should contains 4 characters at least'
@@ -96,7 +90,8 @@ class UserController extends BaseController {
         if (isEmailExist) errors.username = 'This email already exist, try different email'
       }
 
-      if (user) {
+      const user = await userRepo.getCurrentUser(userId)
+      if (user && password) {
         const comparedPass = await compare(password || '', user.password)
 
         if (comparedPass) errors.password = 'your current password and given password are same'

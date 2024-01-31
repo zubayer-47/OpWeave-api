@@ -50,7 +50,7 @@ export default abstract class BaseController {
     try {
       const userId = req.user?.userId
       // const postId = req.params?.postId
-      const communityId = req.params?.communityId
+      const communityId = req.params?.communityId ?? req.body?.community_id
       // const member_id = req.body?.member_id
       const method = req.method.toLowerCase()
 
