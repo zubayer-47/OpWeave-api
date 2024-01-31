@@ -89,6 +89,7 @@ class ExpressServer {
 
       if (process.env.NODE_ENV !== 'production') {
         console.log('Error encountered:', err.stack || err)
+        sysLog.error(err.stack || err)
       } else {
         sysLog.error(err.stack || err)
       }

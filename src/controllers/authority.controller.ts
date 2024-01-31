@@ -34,6 +34,11 @@ class AuthorityController extends BaseController {
       return
     }
 
+    if (post.hasPublished) {
+      res.status(403).json('Post already approved')
+      return
+    }
+
     // if (post.hasPublished) {
     //   res.status(403).json({ message: 'Post already been approved!' })
     //   return
@@ -49,7 +54,7 @@ class AuthorityController extends BaseController {
   }
 
   private _toggleHidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user?.userId
+    // const userId = req.user?.userId
     const userRole = req.user?.role
 
     const errors: ErrorType = {}
@@ -63,15 +68,20 @@ class AuthorityController extends BaseController {
       return
     }
 
-    const postInfo = await postRepo.getInvisiblePost(postId)
-
-    const member = await memberRepo.isExist(userId, postInfo.community_id)
-    if (!member) {
-      res.status(403).json({ message: 'Something went wrong! Please try again...' })
+    const postInfo = await postRepo.postVisibility(postId)
+    if (!postInfo) {
+      res.status(404).json('Post Not Found')
+      return
     }
 
+    // const member = await memberRepo.isExist(userId, postInfo?.community_id)
+    // console.log('member :', member)
+    // if (!member) {
+    //   res.status(403).json({ message: 'Something went wrong! Please try again...' })
+    // }
+
     try {
-      if (!postInfo) {
+      if (!postInfo.isVisible) {
         const unhiddenPost = await prismadb.post.update({
           where: {
             post_id: postId
@@ -85,7 +95,7 @@ class AuthorityController extends BaseController {
           }
         })
 
-        res.status(200).json({ message: 'Post successfully undo', ...unhiddenPost })
+        res.status(200).json({ message: 'Post successfully exposed', ...unhiddenPost })
         return
       }
 
@@ -94,8 +104,9 @@ class AuthorityController extends BaseController {
           post_id: postId
         },
         data: {
-          isVisible: false,
-          deletedBy: `${member.member_id},${userId}`
+          isVisible: false
+          // TODO: 31/1 remove this from schema
+          // deletedBy: `${member.member_id},${userId}`
         },
         select: {
           post_id: true

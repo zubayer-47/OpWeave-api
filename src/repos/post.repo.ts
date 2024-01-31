@@ -21,7 +21,8 @@ class PostRepo {
         community_id
       },
       select: {
-        post_id: true
+        post_id: true,
+        hasPublished: true
       }
     })
   }
@@ -56,13 +57,11 @@ class PostRepo {
   /**
    * get post by postId
    * @param post_id this should be postId
-   * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
    */
-  public getInvisiblePost(post_id: string) {
+  public postVisibility(post_id: string) {
     return this.post.findFirst({
       where: {
-        post_id,
-        isVisible: false
+        post_id
       },
       select: {
         post_id: true,

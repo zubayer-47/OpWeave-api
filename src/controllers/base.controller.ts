@@ -50,7 +50,9 @@ export default abstract class BaseController {
     try {
       const userId = req.user?.userId
       // const postId = req.params?.postId
-      const communityId = req.params?.communityId ?? req.body?.community_id
+      const communityId = req.params?.communityId || req.body?.community_id
+      console.log('communityId :', communityId)
+
       // const member_id = req.body?.member_id
       const method = req.method.toLowerCase()
 
@@ -59,6 +61,7 @@ export default abstract class BaseController {
         return
       }
 
+      // TODO: 31/1 check this why using weirdest third param
       const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
       // console.log('member from role :', member)
 
