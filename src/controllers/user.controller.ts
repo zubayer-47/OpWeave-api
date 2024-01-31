@@ -16,7 +16,7 @@ class UserController extends BaseController {
     try {
       const userId = req.user.userId
       const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(userId)
-      res.json({ id: userId, ...currentUser }).end()
+      res.status(200).json({ id: userId, ...currentUser })
     } catch (error) {
       next(error)
     }
@@ -63,12 +63,6 @@ class UserController extends BaseController {
       const errors: { [index: string]: string } = {}
       const { fullname, username, email, gender, password } = req.body
 
-      const user = await userRepo.getCurrentUser(userId)
-      if (!user) {
-        res.status(401).json('Unauthorized!')
-        return
-      }
-
       if (fullname && fullname.length < 4) errors.fullname = 'Fullname should contains 4 characters at least'
       else if (fullname && fullname.match(/[;]$/g)) errors.fullname = "You can't provide semicolon(;)"
       if (username && username.length < 4) errors.username = 'Username should contains 4 characters at least'
@@ -96,7 +90,8 @@ class UserController extends BaseController {
         if (isEmailExist) errors.username = 'This email already exist, try different email'
       }
 
-      if (user) {
+      const user = await userRepo.getCurrentUser(userId)
+      if (user && password) {
         const comparedPass = await compare(password || '', user.password)
 
         if (comparedPass) errors.password = 'your current password and given password are same'
@@ -126,9 +121,9 @@ class UserController extends BaseController {
   }
 
   private _getProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
+    const { } = req.params
+    const { } = req.body
+    const { } = req.query
     /**
      * Validation
      */
@@ -146,9 +141,9 @@ class UserController extends BaseController {
   }
 
   private _updateProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
+    const { } = req.params
+    const { } = req.body
+    const { } = req.query
     /**
      * Validation
      */
@@ -166,9 +161,9 @@ class UserController extends BaseController {
   }
 
   private _deleteProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
+    const { } = req.params
+    const { } = req.body
+    const { } = req.query
     /**
      * Validation
      */

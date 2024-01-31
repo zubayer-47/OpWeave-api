@@ -29,7 +29,7 @@ export default abstract class BaseController {
     // console.log({ token })
 
     if (!token) {
-      res.status(401).send('Unauthorized!')
+      res.status(401).json('Unauthorized!')
       return
     }
 
@@ -40,7 +40,7 @@ export default abstract class BaseController {
         userId: decoded.aud
       }
     } catch (err) {
-      res.status(403).send('Invalid Token')
+      res.status(403).json('Invalid Token')
       return
     }
     next()
