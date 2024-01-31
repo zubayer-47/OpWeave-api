@@ -136,14 +136,12 @@ class CommunityController extends BaseController {
         }
       })
 
-      // is it valid or i should add a field to member table called { creator: community_id }
-      // TODO: 3/1 sanitize this field or remove it
       await prismadb.community.update({
         where: {
           community_id: community.community_id
         },
         data: {
-          createdBy: `${member.member_id}, ${userId}`
+          createdBy: member.member_id
         }
       })
 

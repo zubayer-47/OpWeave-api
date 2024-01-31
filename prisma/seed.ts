@@ -49,19 +49,22 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         name: 'Dev Community',
         bio: 'this is dev community',
-        rules: 'dev, technology, programming'
+        rules: 'dev, technology, programming',
+        createdBy: '784ce74a-e5b8-4160-9309-74ae3b2332cc'
       },
       {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         name: 'Unnoyon',
         bio: 'this is Unnoyon community',
-        rules: 'BD unnoyon, BD'
+        rules: 'BD unnoyon, BD',
+        createdBy: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7'
       },
       {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         name: 'JoyBangla',
         bio: 'this is Joy Bangla community',
-        rules: 'BD Awami League Jindabad bollei colbe, BD'
+        rules: 'BD Awami League Jindabad bollei colbe, BD',
+        createdBy: '715449ac-e120-4fab-9ed5-875670b095ef'
       }
     ]
   })

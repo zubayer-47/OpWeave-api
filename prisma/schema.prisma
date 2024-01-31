@@ -39,7 +39,7 @@ model community {
   members member[]
   posts   post[]
 
-  createdBy String? // (member_id, user_id)
+  createdBy String? // member_id
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?

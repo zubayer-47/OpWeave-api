@@ -124,8 +124,8 @@ class AuthorityController extends BaseController {
     const errors: ErrorType = {}
 
     const member_id = req.body?.member_id
-    const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
     const community_id = req.body?.community_id
+    const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
 
     if (userRole === 'MEMBER') errors.role = 'You do not have access to do it'
 
@@ -170,16 +170,17 @@ class AuthorityController extends BaseController {
     const errors: ErrorType = {}
 
     const member_id = req.params?.memberId
-    const status = req.params?.status.toUpperCase()
     const { community_id, ban_reason } = req.body
+
+    const status = req.params?.status.toLowerCase()
 
     // member_id, community_id, ban_reason, bannedBy
 
-    if (!member_id || !community_id || !ban_reason) errors.message = 'content missing'
-
     if (userRole === 'MEMBER') errors.member = 'You do not have access to do it'
 
-    if (!['BAN', 'UNBAN'].includes(status)) errors.message = 'Status missing'
+    if (!member_id || !community_id || !ban_reason) errors.message = 'content missing'
+
+    if (!['ban', 'unban'].includes(status)) errors.message = 'Status missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -200,16 +201,14 @@ class AuthorityController extends BaseController {
   }
 
   private _addAuthority = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userRole = req.user?.role
+    // const userRole = req.user?.role
     const errors: ErrorType = {}
 
+    const { member_id, community_id } = req.body
+
     const role = req.params?.role.toUpperCase() as MemberRoleType
-    const member_id = req.body?.member_id
-    const community_id = req.body?.community_id
 
-    if (userRole !== 'ADMIN') errors.message = 'You do not have permission to do it'
-
-    if (!['ADMIN', 'MODERATOR'].includes(role + '')) errors.role = 'Role missing'
+    if (!['admin', 'MODERATOR'].includes(role + '')) errors.role = 'Role missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -255,8 +254,7 @@ class AuthorityController extends BaseController {
       return
     }
 
-    // TODO: 3/1 sanitize createdBy field (store here member_id only)
-    const createdBy = member.community.createdBy.split(',')[0] // it'll be member_id
+    const createdBy = member.community.createdBy // member_id
 
     if (createdBy === member.member_id) {
       res.status(403).json({ message: 'Operation failed!' })
@@ -290,9 +288,8 @@ class AuthorityController extends BaseController {
     // TODO: make it
     this.router.patch('members/:memberId/:status', this._auth, this._checkRoles, this._toggleBanMember)
 
-    // TODO: 1/1 test 2 routes below and sanitize them
     // add moderator
-    this.router.patch('/:role', this._auth, this._checkRoles, this._addAuthority)
+    this.router.post('/:role', this._auth, this._checkRoles, this._addAuthority)
 
     // remove moderator
     this.router.delete('/:role', this._auth, this._checkRoles, this._removeAuthority)
