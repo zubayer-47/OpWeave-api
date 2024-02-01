@@ -20,6 +20,8 @@ export default class MemberController {
     }
 
     try {
+      const total = await memberRepo.numOfMembersInCommunity(communityId)
+
       let members: {
         member_id: string
         user_id: string
@@ -30,7 +32,7 @@ export default class MemberController {
       if (page && limit) members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
       else members = await memberRepo.getMembersInCommunity(communityId)
 
-      res.status(200).json({ members })
+      res.status(200).json({ members, total })
     } catch (error) {
       next(error)
     }
@@ -89,7 +91,7 @@ export default class MemberController {
         }
       })
 
-      res.status(201).json({ message: 'Member Created Successfully', member: joinedMember })
+      res.status(201).json({ message: 'Member Successfully Created', member: joinedMember })
     } catch (error) {
       next(error)
     }

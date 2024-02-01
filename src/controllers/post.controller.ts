@@ -13,13 +13,14 @@ class PostController {
 
     if (!communityId) errors.message = 'Content missing'
 
-    // here gose your validation rules
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
 
     try {
+      const total = await postRepo.numOfPostsInCommunity(communityId)
+
       let posts: {
         post_id: string
         community_id: string
@@ -36,11 +37,12 @@ class PostController {
         posts = await postRepo.getPostsInCommunity(communityId)
       }
 
-      res.status(200).json({ posts })
+      res.status(200).json({ posts, total })
     } catch (error) {
       next(error)
     }
   }
+
   static _getPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { communityId, postId } = req.params
 
@@ -102,7 +104,7 @@ class PostController {
         select: { post_id: true, hasPublished: true }
       })
 
-      res.json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished })
+      res.status(201).json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished })
     } catch (error) {
       next(error)
     }
@@ -200,7 +202,7 @@ class PostController {
 
     try {
       const postInfo = await postRepo.get(postId, communityId)
-      console.table({ postId, communityId })
+      // console.table({ postId, communityId })
 
       if (!postInfo) {
         res.status(403).json({ message: 'something went wrong. try again' })
@@ -235,8 +237,8 @@ class PostController {
             post_id: postInfo.post_id
           },
           data: {
-            deletedAt: new Date(),
-            deletedBy: `${memberInfo.member_id}, ${userId}`
+            deletedAt: new Date()
+            // deletedBy: memberInfo.member_id
           },
           select: {
             post_id: true
@@ -255,8 +257,8 @@ class PostController {
             post_id: postInfo.post_id
           },
           data: {
-            deletedAt: new Date(),
-            deletedBy: `${memberInfo.member_id}, ${userId}`
+            deletedAt: new Date()
+            // deletedBy: memberInfo.member_id
           },
           select: {
             post_id: true
@@ -265,7 +267,7 @@ class PostController {
       }
 
       res.status(200).json({
-        message: 'post deleted successfully',
+        message: 'post successfully deleted',
         postId
       })
     } catch (error) {

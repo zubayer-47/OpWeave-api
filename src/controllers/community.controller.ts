@@ -91,17 +91,17 @@ class CommunityController extends BaseController {
 
     if (!name) errors.name = 'name is required'
     if (!bio) errors.bio = 'bio is required'
-    if (!rules?.length) errors.rules = 'rules is required'
+    if (!rules) errors.rules = 'rules is required'
 
     // 2nd layer
     if (!errors?.name && name.length < 3) errors.name = 'name should contains 3 letters at least'
     else if (!errors.name && name.match(/[;]$/g)) errors.name = "You can't provide semicolon(;)"
 
     if (!errors?.bio && bio.length < 4) errors.bio = 'bio should contains 4 letters at least'
-    if (!errors?.rules && !Array.isArray(rules)) errors.rules = 'Rules should be an Array of rules'
+    if (!errors?.rules && !rules?.length) errors.rules = 'Every community should have maintain their rules'
 
     if (Object.keys(errors).length) {
-      res.status(400).json(errors).end()
+      res.status(400).json(errors)
       return
     }
 
@@ -145,62 +145,15 @@ class CommunityController extends BaseController {
         }
       })
 
-      res.status(201).json({ community_id: community.community_id, data: { name, bio, rules } })
+      res.status(201).json({ community_id: community.community_id, name, bio, rules })
     } catch (error) {
       next(error)
     }
   }
-
-  private _getCommunityPosts = async (req: Request, res: Response, next: NextFunction) => {
-    const communityId = req.params?.communityId
-    const { page, limit } = req.query
-
-    try {
-      let posts: unknown
-
-      if (page && limit) {
-        posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
-      } else {
-        posts = await postRepo.getPostsInCommunity(communityId)
-      }
-
-      res.status(200).json(posts)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  private _getPost = async (req: Request, res: Response, next: NextFunction) => {
-    const post_id = req.params?.postId
-    const community_id = req.params?.communityId
-
-    const errors: ErrorType = {}
-
-    if (!post_id) errors.message = 'content missing!'
-
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
-
-    try {
-      const post = await postRepo.getPostInCommunity(post_id, community_id)
-      if (!post) {
-        res.status(404).json({ message: 'Post Not Found!' })
-        return
-      }
-
-      res.status(200).json(post)
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  // private _getMemberPosts = async (_req: Request, _res: Response, _next: NextFunction) => {}
 
   // TODO: 3/1 refactor it before send production (add pagination where needs)
   private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const communityId = req.query?.communityId as string
+    const communityId = req.params?.communityId
 
     if (!communityId) {
       res.status(400).json({ message: 'content missing' })
@@ -245,9 +198,6 @@ class CommunityController extends BaseController {
 
     // create community
     this.router.post('/', this._auth, this._createCommunity)
-
-    this.router.get('/:communityId', this._auth, this._checkRoles, this._getCommunityPosts)
-    this.router.get('/:communityId/post/:postId', this._auth, this._checkRoles, this._getPost)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/details/:communityId', this._auth, this._checkRoles, this._communityInfo)

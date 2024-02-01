@@ -222,6 +222,8 @@ class PostRepo {
     return this.post.count({
       where: {
         community_id,
+        hasPublished: true,
+        isVisible: true,
         deletedAt: null
       }
     })
