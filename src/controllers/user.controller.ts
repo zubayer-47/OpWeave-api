@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { emailReg } from 'src/libs'
+import { handleUpload, upload } from 'src/libs/uploadImage'
 import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
 import { ErrorType } from 'src/types/custom'
@@ -121,9 +122,9 @@ class UserController extends BaseController {
   }
 
   private _getProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { } = req.params
-    const { } = req.body
-    const { } = req.query
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
     /**
      * Validation
      */
@@ -141,29 +142,34 @@ class UserController extends BaseController {
   }
 
   private _updateProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { } = req.params
-    const { } = req.body
-    const { } = req.query
-    /**
-     * Validation
-     */
-    const errors: ErrorType = {}
-    // here gose your validation rules
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
+    const file = req.file
+
+    if (!file) {
+      res.status(400).json({
+        message: 'No files provided!'
+      })
+
       return
     }
+
     try {
-      // Your async code gose here...
+      const b64 = Buffer.from(file.buffer).toString('base64')
+      let dataURI = 'data:' + file.mimetype + ';base64,' + b64
+      const cldRes = await handleUpload(dataURI)
+
+      res.status(200).json({
+        message: 'File Successfully Saved',
+        secure_url: cldRes.secure_url
+      })
     } catch (error) {
       next(error)
     }
   }
 
   private _deleteProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { } = req.params
-    const { } = req.body
-    const { } = req.query
+    const {} = req.params
+    const {} = req.body
+    const {} = req.query
     /**
      * Validation
      */
@@ -198,7 +204,7 @@ class UserController extends BaseController {
 
     // Update the user's profile picture.
     // TODO: 21/1 make it
-    this.router.put('/:userId/profilePicture', this._auth, this._updateProfilePicture)
+    this.router.put('/:userId/profilePicture', this._auth, upload.single('avatar'), this._updateProfilePicture)
 
     // Delete the user's profile picture.
     // TODO: 21/1 make it

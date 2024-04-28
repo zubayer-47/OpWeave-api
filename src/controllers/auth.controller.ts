@@ -66,7 +66,8 @@ class AuthController extends BaseController {
         fullname,
         username: username.toLowerCase(),
         email: email.toLowerCase(),
-        gender: gender.toUpperCase()
+        gender: gender.toUpperCase(),
+        avatar: 'http://www.gravatar.com/avatar?d=identicon'
       }
 
       const user = await prismadb.user.create({
