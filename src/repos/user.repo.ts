@@ -2,7 +2,14 @@ import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
 
-type User = { fullname: string; username: string; email: string; gender: 'MALE' | 'FEMALE'; password: string }
+type User = {
+  fullname: string
+  username: string
+  email: string
+  gender: 'MALE' | 'FEMALE'
+  password: string
+  avatar: string
+}
 
 class UserRepo {
   private user: Prisma.userDelegate<DefaultArgs>
@@ -88,7 +95,7 @@ class UserRepo {
    * @param user this should be userInfo
    * @returns {User}
    */
-  public updateUser(user_id: string, user: User) {
+  public updateUser(user_id: string, user: Partial<User>) {
     return this.user.update({
       where: {
         user_id
@@ -99,7 +106,22 @@ class UserRepo {
         fullname: true,
         username: true,
         email: true,
-        gender: true
+        gender: true,
+        avatar: true
+      }
+    })
+  }
+
+  /**
+   * getAvatar
+   */
+  public getAvatar(user_id: string) {
+    return this.user.findFirst({
+      where: {
+        user_id
+      },
+      select: {
+        avatar: true
       }
     })
   }

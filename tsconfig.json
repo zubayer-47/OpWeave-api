@@ -31,6 +31,6 @@
       "middlewares/*": ["src/middlewares/*"]
     }
   },
-  "include": ["src/**/*", "__tests__/**/*"],
+  "include": ["src/**/*", "__tests__/**/*", "src/testHash.js"],
   "exclude": ["node_modules", "build"]
 }

@@ -122,20 +122,14 @@ class UserController extends BaseController {
   }
 
   private _getProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
-    const errors: ErrorType = {}
-    // here gose your validation rules
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
+    const user_id = req.user.userId
+
     try {
-      // Your async code gose here...
+      const { avatar } = await userRepo.getAvatar(user_id)
+
+      res.status(200).json({
+        avatar
+      })
     } catch (error) {
       next(error)
     }
@@ -155,13 +149,24 @@ class UserController extends BaseController {
     try {
       const b64 = Buffer.from(file.buffer).toString('base64')
       let dataURI = 'data:' + file.mimetype + ';base64,' + b64
-      const cldRes = await handleUpload(dataURI)
+      const cldRes = await handleUpload(req.user.userId, dataURI)
+
+      await userRepo.updateUser(req.user.userId, {
+        avatar: cldRes.secure_url
+      })
 
       res.status(200).json({
         message: 'File Successfully Saved',
-        secure_url: cldRes.secure_url
+        avatar: cldRes.secure_url
       })
-    } catch (error) {
+    } catch (error: any) {
+      if (error?.http_code == 400) {
+        res.status(400).json({
+          message: "Invalid file formate. 'jpg', 'png' and 'webp' these formats are allowed"
+        })
+
+        return
+      }
       next(error)
     }
   }
