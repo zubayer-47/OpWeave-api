@@ -76,7 +76,8 @@ class AuthController extends BaseController {
           password: hashedPassword
         },
         select: {
-          user_id: true
+          user_id: true,
+          createdAt: true
         }
       })
 
@@ -86,7 +87,7 @@ class AuthController extends BaseController {
       // set token to response cookie
       setJWT(token, res)
       // response the final data
-      res.status(201).json({ id: user.user_id, ...data, token })
+      res.status(201).json({ user: { id: user.user_id, ...data }, access_token: token })
     } catch (error: any) {
       next(error)
     }
@@ -113,14 +114,14 @@ class AuthController extends BaseController {
         return
       }
 
-      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(user.user_id)
+      const { password: pwd, ...data } = await userRepo.getCurrentUser(user.user_id)
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
         expiresIn: '24h'
       })
       // set token to response cookie
       setJWT(token, res)
 
-      res.status(200).json({ id: user?.user_id, ...currentUser, token })
+      res.status(200).json({ user: { id: user.user_id, ...data }, access_token: token })
     } catch (error) {
       next(error)
     }
