@@ -8,40 +8,53 @@ async function main() {
         fullname: 'A B M Zubayer',
         username: 'zubayerjs',
         email: 'zubayerjs.dev@gmail.com',
-        password: '$2b$12$lT7JpTM.xWrAO49o6vJ2au11jhF4frpicZcARNQJyBAoMNY.f7uwe', // row text -> password
+        password: '$2b$12$E9GejJKL.kkR3Bl7LOEOj.8EcQ35.A0ShnEbHmnP7LF1kQei2N7Li', // row text -> test1234
         gender: 'MALE',
-        avatar: 'e8fe4dc7-d913-446e-add8-f9f8bc95f837.png'
+        avatar: 'http://www.gravatar.com/avatar?d=identicon'
       },
       {
         user_id: 'f037ad18-1d82-414a-a764-b0048d742a7c',
         fullname: 'Nishan Ahmed',
         username: 'nishan',
         email: 'nishangmail.com',
-        password: '$2b$12$lT7JpTM.xWrAO49o6vJ2au11jhF4frpicZcARNQJyBAoMNY.f7uwe', // row text -> password
+        password: '$2b$12$E9GejJKL.kkR3Bl7LOEOj.8EcQ35.A0ShnEbHmnP7LF1kQei2N7Li', // row text -> test1234
         gender: 'MALE',
-        avatar: 'e8fe4dc7-d913-446e-add8-f9f8bc95f837.png'
+        avatar: 'http://www.gravatar.com/avatar?d=identicon'
       },
       {
         user_id: 'ed318213-a230-425a-bc93-00dyw7ee58d6',
         fullname: 'Abdullah Al Mousuf',
         username: 'mousuf',
         email: 'mousuf@gmail.com',
-        password: '$2b$12$lT7JpTM.xWrAO49o6vJ2au11jhF4frpicZcARNQJyBAoMNY.f7uwe', // row text -> password
+        password: '$2b$12$E9GejJKL.kkR3Bl7LOEOj.8EcQ35.A0ShnEbHmnP7LF1kQei2N7Li', // row text -> test1234
         gender: 'MALE',
-        avatar: 'e8fe4dc7-d913-446e-add8-f9f8bc95f837.png'
+        avatar: 'http://www.gravatar.com/avatar?d=identicon'
       },
       {
         user_id: '69a5a201-a855-412e-9f3e-8b8beba94194',
         fullname: 'Rasel Ahmed',
         username: 'rasel-dev',
         email: 'raseldev@gmail.com',
-        password: '$2b$12$lT7JpTM.xWrAO49o6vJ2au11jhF4frpicZcARNQJyBAoMNY.f7uwe', // row text -> password
+        password: '$2b$12$E9GejJKL.kkR3Bl7LOEOj.8EcQ35.A0ShnEbHmnP7LF1kQei2N7Li', // row text -> test1234
         gender: 'MALE',
-        avatar: 'e8fe4dc7-d913-446e-add8-f9f8bc95f837.png'
+        avatar: 'http://www.gravatar.com/avatar?d=identicon'
       }
     ]
   })
   console.log({ users })
+
+  // const updatedUser = await prisma.user.update({
+  //   where: { user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde' },
+  //   data: {
+  //     fullname: 'Test Zubayer'
+  //   },
+  //   select: {
+  //     user_id: true,
+  //     fullname: true
+  //   }
+  // })
+
+  // console.log({ updatedUser })
 
   const communities = await prisma.community.createMany({
     data: [

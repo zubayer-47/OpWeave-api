@@ -1,6 +1,7 @@
 import { compare, hash } from 'bcrypt'
 import { NextFunction, Request, Response } from 'express'
 import { emailReg } from 'src/libs'
+import prismadb from 'src/libs/prismadb'
 import { handleUpload, upload } from 'src/libs/uploadImage'
 import postRepo from 'src/repos/post.repo'
 import userRepo from 'src/repos/user.repo'
@@ -62,12 +63,14 @@ class UserController extends BaseController {
       const userId = req.user.userId
       // console.log({ userId })
       const errors: { [index: string]: string } = {}
-      const { fullname, username, email, gender, password } = req.body
+      const { fullname, username, email, gender, password, bio } = req.body
 
       if (fullname && fullname.length < 4) errors.fullname = 'Fullname should contains 4 characters at least'
       else if (fullname && fullname.match(/[;]$/g)) errors.fullname = "You can't provide semicolon(;)"
+
       if (username && username.length < 4) errors.username = 'Username should contains 4 characters at least'
       else if (username && username.match(/[;]$/g)) errors.username = "You can't provide semicolon(;)"
+
       if (gender && gender.match(/male|female/gi) === null) {
         errors.gender = 'Gender should have MALE/FEMALE'
       }
@@ -112,7 +115,8 @@ class UserController extends BaseController {
         username: username || user.username,
         password: hashedPassword || user.password,
         email: email || user.email,
-        gender: gender?.toUpperCase() || user.gender
+        gender: gender?.toUpperCase() || user.gender,
+        bio: bio || user.bio
       })
 
       res.status(200).json({ message: 'User updated successfully', user: updatedUser })
@@ -125,10 +129,10 @@ class UserController extends BaseController {
     const user_id = req.user.userId
 
     try {
-      const { avatar } = await userRepo.getAvatar(user_id)
+      const resAvatar = await userRepo.getAvatar(user_id)
 
       res.status(200).json({
-        avatar
+        avatar: resAvatar.avatar
       })
     } catch (error) {
       next(error)
@@ -151,15 +155,25 @@ class UserController extends BaseController {
       let dataURI = 'data:' + file.mimetype + ';base64,' + b64
       const cldRes = await handleUpload(req.user.userId, dataURI)
 
-      await userRepo.updateUser(req.user.userId, {
-        avatar: cldRes.secure_url
+      // const updatedUser = await userRepo.updateUser(req.user.userId, {
+      //   avatar: cldRes.secure_url
+      // })
+      const updatedUser = await prismadb.user.update({
+        where: { user_id: req.user.userId },
+        data: { avatar: cldRes.secure_url },
+        select: {
+          user_id: true
+        }
       })
+
+      console.log({ updatedUser })
 
       res.status(200).json({
         message: 'File Successfully Saved',
         avatar: cldRes.secure_url
       })
     } catch (error: any) {
+      console.log({ error }, 'updatedProfilePictureError')
       if (error?.http_code == 400) {
         res.status(400).json({
           message: "Invalid file formate. 'jpg', 'png' and 'webp' these formats are allowed"

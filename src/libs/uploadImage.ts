@@ -21,7 +21,7 @@ export async function handleUpload(userId: string, file) {
     resource_type: 'image'
   })
 
-  console.log('res :', res)
+  console.log('res handleUpload:', res)
   return res
 }
 

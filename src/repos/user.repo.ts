@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client'
+import { Gender, Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
 
@@ -6,9 +6,10 @@ type User = {
   fullname: string
   username: string
   email: string
-  gender: 'MALE' | 'FEMALE'
+  gender: Gender
   password: string
   avatar: string
+  bio: string
 }
 
 class UserRepo {
@@ -58,7 +59,7 @@ class UserRepo {
    * @returns user_id | password
    */
   public getUser(input: string, filterBy: 'username' | 'email' = 'username') {
-    const where = filterBy === 'username' ? { username: input.toLowerCase() } : { email: input.toLowerCase() }
+    const where = filterBy === 'username' ? { username: input } : { email: input.toLowerCase() }
 
     return this.user.findFirst({
       where,
@@ -84,6 +85,7 @@ class UserRepo {
         password: true,
         gender: true,
         avatar: true,
+        bio: true,
         createdAt: true
       }
     })
@@ -93,7 +95,6 @@ class UserRepo {
    * update user through userInfo
    * @param user_id this should be userId
    * @param user this should be userInfo
-   * @returns {User}
    */
   public updateUser(user_id: string, user: Partial<User>) {
     return this.user.update({
@@ -107,7 +108,9 @@ class UserRepo {
         username: true,
         email: true,
         gender: true,
-        avatar: true
+        avatar: true,
+        bio: true,
+        updatedAt: true
       }
     })
   }
@@ -121,6 +124,7 @@ class UserRepo {
         user_id
       },
       select: {
+        user_id: true,
         avatar: true
       }
     })
