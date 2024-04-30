@@ -4,7 +4,7 @@ import prismadb from 'src/libs/prismadb'
 
 type User = {
   fullname: string
-  username: string
+  // username: string
   email: string
   gender: Gender
   password: string
