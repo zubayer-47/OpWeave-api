@@ -19,8 +19,7 @@ model user {
   password String
   gender   Gender
   avatar   String?
-  // bio      String
-  // TODO: 29/4 bio
+  bio      String?
 
   members member[]
 
