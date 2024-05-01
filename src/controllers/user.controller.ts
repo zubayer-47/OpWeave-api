@@ -110,7 +110,7 @@ class UserController extends BaseController {
 
       const hashedPassword: string | null = password ? await hash(password, 12) : null
 
-      const updatedUser = await userRepo.updateUser(userId, {
+      const { user_id, ...updatedUser } = await userRepo.updateUser(userId, {
         fullname: fullname || user.fullname,
         // username: username || user.username,
         password: hashedPassword || user.password,
@@ -119,7 +119,7 @@ class UserController extends BaseController {
         bio: bio || user.bio
       })
 
-      res.status(200).json({ message: 'User updated successfully', user: updatedUser })
+      res.status(200).json({ message: 'User updated successfully', user: { id: user_id, ...updatedUser } })
     } catch (error) {
       next(error)
     }

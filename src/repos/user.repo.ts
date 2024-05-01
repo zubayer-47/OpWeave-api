@@ -85,8 +85,8 @@ class UserRepo {
         password: true,
         gender: true,
         avatar: true,
-        bio: true,
-        createdAt: true
+        bio: true
+        // createdAt: true
       }
     })
   }
@@ -109,8 +109,8 @@ class UserRepo {
         email: true,
         gender: true,
         avatar: true,
-        bio: true,
-        updatedAt: true
+        bio: true
+        // updatedAt: true
       }
     })
   }
