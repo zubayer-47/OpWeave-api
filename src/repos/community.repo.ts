@@ -60,11 +60,11 @@ class CommunityRepo {
     })
   }
 
-  public async getCommunities(page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { createdAt: 'asc' } }
-        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
+  public async getCommunities(page: number, limit: number) {
+    // const paginationOptions: PaginationTypes =
+    //   !page || !limit
+    //     ? { orderBy: { createdAt: 'asc' } }
+    //     : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
 
     return await this.community.findMany({
       where: {
@@ -76,7 +76,9 @@ class CommunityRepo {
         name: true,
         createdAt: true
       },
-      ...paginationOptions
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
     })
   }
 }

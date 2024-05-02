@@ -16,7 +16,8 @@ class CommunityController extends BaseController {
 
   private _getCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // TODO: 23/1 check all routes where pagination works to send total number of data;
-    const { page, limit } = req.query
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
     // const errors: ErrorType = {}
     // // here gose your validation rules
     // if (Object.keys(errors).length) {
@@ -34,10 +35,11 @@ class CommunityController extends BaseController {
 
       const total = await communityRepo.totalCountOfCommunities()
 
-      if (page && limit) communities = await communityRepo.getCommunities(+page, +limit)
-      else communities = await communityRepo.getCommunities()
+      res.setHeader('X-Total-Count', total.toString())
 
-      res.status(200).json({ communities, total })
+      communities = await communityRepo.getCommunities(+page, +limit)
+
+      res.status(200).json({ communities })
     } catch (error) {
       next(error)
     }
@@ -119,7 +121,8 @@ class CommunityController extends BaseController {
           rules: rules.toString()
         },
         select: {
-          community_id: true
+          community_id: true,
+          createdAt: true
         }
       })
 
@@ -145,7 +148,7 @@ class CommunityController extends BaseController {
         }
       })
 
-      res.status(201).json({ community_id: community.community_id, name, bio, rules })
+      res.status(201).json({ community_id: community.community_id, name, bio, rules, createdAt: community.createdAt })
     } catch (error) {
       next(error)
     }
