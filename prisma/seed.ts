@@ -63,6 +63,8 @@ async function main() {
         name: 'Dev Community',
         bio: 'this is dev community',
         rules: 'dev, technology, programming',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
         createdBy: '784ce74a-e5b8-4160-9309-74ae3b2332cc'
       },
       {
@@ -70,6 +72,8 @@ async function main() {
         name: 'Unnoyon',
         bio: 'this is Unnoyon community',
         rules: 'BD unnoyon, BD',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
         createdBy: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7'
       },
       {
@@ -77,6 +81,8 @@ async function main() {
         name: 'JoyBangla',
         bio: 'this is Joy Bangla community',
         rules: 'BD Awami League Jindabad bollei colbe, BD',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
         createdBy: '715449ac-e120-4fab-9ed5-875670b095ef'
       }
     ]

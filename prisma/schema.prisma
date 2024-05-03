@@ -36,6 +36,7 @@ model community {
   name         String @unique
   bio          String
   rules        String // discuss about it
+  description  String
 
   members member[]
   posts   post[]
@@ -53,7 +54,7 @@ model member {
   user    user   @relation(fields: [user_id], references: [user_id])
   user_id String
 
-  community    community @relation(fields: [community_id], references: [community_id])
+  community    community @relation(fields: [community_id], references: [community_id], onDelete: Cascade)
   community_id String
 
   role    MemberRole @default(MEMBER)

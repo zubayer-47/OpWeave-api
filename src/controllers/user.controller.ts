@@ -17,7 +17,15 @@ class UserController extends BaseController {
   private _profile = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = req.user.userId
-      const { password: pwd, ...currentUser } = await userRepo.getCurrentUser(userId)
+      const user = await userRepo.getCurrentUser(userId)
+      if (!user) {
+        res.status(404).json({
+          message: "user doesn't exist"
+        })
+        return
+      }
+      const { password: pwd, ...currentUser } = user
+
       res.status(200).json({ id: userId, ...currentUser })
     } catch (error) {
       next(error)

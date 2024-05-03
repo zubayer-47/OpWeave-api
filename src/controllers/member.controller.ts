@@ -91,7 +91,7 @@ export default class MemberController {
         }
       })
 
-      res.status(201).json({ message: 'Member Successfully Created', member: joinedMember })
+      res.status(201).json({ message: 'Member Joined Successfully', member: joinedMember })
     } catch (error) {
       next(error)
     }

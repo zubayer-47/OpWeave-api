@@ -89,23 +89,28 @@ class CommunityController extends BaseController {
     const errors: ErrorType = {}
     const userId = req.user?.userId
 
-    const { name, bio, rules } = req.body
+    const { name, bio, rules, description } = req.body
 
     if (!name) errors.name = 'name is required'
     if (!bio) errors.bio = 'bio is required'
     if (!rules) errors.rules = 'rules is required'
+    if (!description) errors.description = 'description is required'
 
     // 2nd layer
     if (!errors?.name && name.length < 3) errors.name = 'name should contains 3 letters at least'
     else if (!errors.name && name.match(/[;]$/g)) errors.name = "You can't provide semicolon(;)"
 
     if (!errors?.bio && bio.length < 4) errors.bio = 'bio should contains 4 letters at least'
-    if (!errors?.rules && !rules?.length) errors.rules = 'Every community should have maintain their rules'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
+
+    let com: {
+      community_id: string
+      createdAt: Date
+    } | null = null
 
     try {
       const existCommunity = await communityRepo.isExist(name)
@@ -118,7 +123,8 @@ class CommunityController extends BaseController {
         data: {
           name,
           bio,
-          rules: rules.toString()
+          rules: rules.toString(),
+          description
         },
         select: {
           community_id: true,
@@ -126,6 +132,10 @@ class CommunityController extends BaseController {
         }
       })
 
+      com = community
+      console.log('community :', community)
+
+      console.log('userId :', userId)
       // auto create member as admin of created community;
       const member = await prismadb.member.create({
         data: {
@@ -138,8 +148,9 @@ class CommunityController extends BaseController {
           member_id: true
         }
       })
+      console.log('member :', member)
 
-      await prismadb.community.update({
+      const updateCreatedBy = await prismadb.community.update({
         where: {
           community_id: community.community_id
         },
@@ -148,8 +159,23 @@ class CommunityController extends BaseController {
         }
       })
 
+      console.log('updateCreatedBy :', updateCreatedBy)
       res.status(201).json({ community_id: community.community_id, name, bio, rules, createdAt: community.createdAt })
     } catch (error) {
+      // if there is an error then remove the created community
+
+      if (com) {
+        const deletedCommunity = await prismadb.community.delete({
+          where: {
+            community_id: com.community_id
+          },
+          select: {
+            community_id: true
+          }
+        })
+        console.log('deletedCommunity :', deletedCommunity)
+      }
+
       next(error)
     }
   }
@@ -172,14 +198,18 @@ class CommunityController extends BaseController {
           community_id: true,
           name: true,
           rules: true,
-          bio: true
+          bio: true,
+          createdAt: true
         }
       })
 
       const membersCount = await memberRepo.numOfMembersInCommunity(communityId)
       const postsCount = await postRepo.numOfPostsInCommunity(communityId)
 
-      res.status(200).json({ ...communityInfo, total_members: membersCount, total_posts: postsCount })
+      res.setHeader('X-Total-Member-Count', membersCount.toString())
+      res.setHeader('X-Total-Post-Count', postsCount.toString())
+
+      res.status(200).json({ ...communityInfo })
     } catch (error) {
       next(error)
     }
@@ -203,7 +233,7 @@ class CommunityController extends BaseController {
     this.router.post('/', this._auth, this._createCommunity)
 
     // community info (query: communityId) -> testing purpose route
-    this.router.get('/details/:communityId', this._auth, this._checkRoles, this._communityInfo)
+    this.router.get('/:communityId', this._auth, this._checkRoles, this._communityInfo)
 
     /**
      * ? Posts:
