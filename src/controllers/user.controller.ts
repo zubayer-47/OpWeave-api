@@ -24,6 +24,7 @@ class UserController extends BaseController {
         })
         return
       }
+
       const { password: pwd, ...currentUser } = user
 
       res.status(200).json({ id: userId, ...currentUser })
@@ -34,7 +35,7 @@ class UserController extends BaseController {
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.params?.userId
-    const { page, limit } = req.query
+    const { page = 1, limit = 10 } = req.query
 
     const errors: ErrorType = {}
 
@@ -46,17 +47,7 @@ class UserController extends BaseController {
     }
 
     try {
-      let posts: {
-        createdAt: Date
-        post_id: string
-        community_id: string
-        member_id: string
-        title: string
-        body: string
-      }[]
-
-      if (page && limit) posts = await postRepo.getPostsByUserId(userId, +page, +limit)
-      else posts = await postRepo.getPostsByUserId(userId)
+      const posts = await postRepo.getPostsByUserId(userId, +page, +limit)
 
       const total = await postRepo.numOfPostsOfUser(userId)
 

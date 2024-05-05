@@ -9,7 +9,7 @@ class PostController {
     const errors: ErrorType = {}
 
     const communityId = req.params?.communityId
-    const { page, limit } = req.query
+    const { page = 1, limit = 10 } = req.query
 
     if (!communityId) errors.message = 'Content missing'
 
@@ -21,21 +21,7 @@ class PostController {
     try {
       const total = await postRepo.numOfPostsInCommunity(communityId)
 
-      let posts: {
-        post_id: string
-        community_id: string
-        member_id: string
-        title: string
-        body: string
-        createdAt: Date
-        updatedAt: Date
-      }[]
-
-      if (page && limit) {
-        posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
-      } else {
-        posts = await postRepo.getPostsInCommunity(communityId)
-      }
+      const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
 
       res.status(200).json({ posts, total })
     } catch (error) {
@@ -72,14 +58,14 @@ class PostController {
     const errors: ErrorType = {}
 
     const communityId = req.params?.communityId
-    const { title, body } = req.body
+    const { body } = req.body
 
     // 1st layer
-    if (!title) errors.title = 'title is required!'
+    // if (!title) errors.title = 'title is required!'
     if (!body) errors.body = 'body is required!'
 
     // 2nd layer
-    if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
+    // if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -97,14 +83,14 @@ class PostController {
         data: {
           community_id: communityId,
           member_id: member.member_id,
-          title: title?.trim(),
+          // title: title?.trim(),
           body,
           hasPublished: member.role !== 'MEMBER'
         },
         select: { post_id: true, hasPublished: true }
       })
 
-      res.status(201).json({ post_id: post.post_id, title, body, hasPublished: post.hasPublished })
+      res.status(201).json({ post_id: post.post_id, body, hasPublished: post.hasPublished })
     } catch (error) {
       next(error)
     }
@@ -172,12 +158,10 @@ class PostController {
           post_id: postId
         },
         data: {
-          title: title || postInfo.title,
           body: body || postInfo.body
         },
         select: {
           post_id: true,
-          title: true,
           body: true
         }
       })

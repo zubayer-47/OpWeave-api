@@ -45,7 +45,6 @@ class PostRepo {
         post_id: true,
         community_id: true,
         member_id: true,
-        title: true,
         body: true,
         hasPublished: true,
         createdAt: true,
@@ -98,7 +97,6 @@ class PostRepo {
         post_id: true,
         community_id: true,
         member_id: true,
-        title: true,
         body: true,
         createdAt: true,
         updatedAt: true
@@ -129,7 +127,6 @@ class PostRepo {
         post_id: true,
         community_id: true,
         member_id: true,
-        title: true,
         body: true,
         createdAt: true
       },
@@ -145,7 +142,6 @@ class PostRepo {
       },
       select: {
         post_id: true,
-        title: true,
         body: true,
         member: {
           select: {
@@ -185,7 +181,6 @@ class PostRepo {
         post_id: true,
         community_id: true,
         member_id: true,
-        title: true,
         body: true,
         createdAt: true,
         updatedAt: true
@@ -207,8 +202,7 @@ class PostRepo {
         // }
       },
       select: {
-        post_id: true,
-        title: true
+        post_id: true
       }
     })
   }

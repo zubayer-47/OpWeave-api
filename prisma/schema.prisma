@@ -37,6 +37,7 @@ model community {
   bio          String
   rules        String // discuss about it
   description  String
+  avatar       String
 
   members member[]
   posts   post[]
@@ -81,8 +82,8 @@ model post {
   member    member @relation(fields: [member_id], references: [member_id])
   member_id String
 
-  title        String
   body         String
+  image_url    String?
   hasPublished Boolean
   isVisible    Boolean @default(true)
 

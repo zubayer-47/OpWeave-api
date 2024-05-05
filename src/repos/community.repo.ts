@@ -45,7 +45,8 @@ class CommunityRepo {
         community_id: true,
         name: true,
         bio: true,
-        rules: true
+        rules: true,
+        createdAt: true
       },
       ...paginationOptions
     })

@@ -47,15 +47,7 @@ class CommunityController extends BaseController {
 
   private _getUserAssignedCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
-    const { page, limit } = req.query
-
-    // console.log(userId)
-    // const errors: ErrorType = {}
-
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
+    const { page = 1, limit = 10 } = req.query
 
     const total = await communityRepo.totalCountOfCommunities({
       members: {
@@ -66,20 +58,12 @@ class CommunityController extends BaseController {
       }
     })
 
-    // console.log(total)
-
     try {
-      let communities: {
-        community_id: string
-        name: string
-        bio: string
-        rules: string
-      }[]
+      const communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
 
-      if (page && limit) communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
-      else communities = await communityRepo.getUserAssignedCommunities(userId)
+      res.setHeader('X-Total-Communities-Count', total.toString())
 
-      res.status(200).json({ communities, total })
+      res.status(200).json({ communities })
     } catch (error) {
       next(error)
     }
@@ -124,6 +108,7 @@ class CommunityController extends BaseController {
           name,
           bio,
           rules: rules.toString(),
+          avatar: 'http://www.gravatar.com/avatar?d=identicon',
           description
         },
         select: {
