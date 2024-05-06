@@ -212,7 +212,7 @@ class CommunityController extends BaseController {
     this.router.get('/', this._auth, this._getCommunities)
 
     // get all communities where current user is assigned with pagination
-    this.router.get('/joined', this._auth, this._getUserAssignedCommunities)
+    this.router.get('/assigned', this._auth, this._getUserAssignedCommunities)
 
     // create community
     this.router.post('/', this._auth, this._createCommunity)
