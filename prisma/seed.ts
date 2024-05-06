@@ -80,9 +80,9 @@ async function main() {
       },
       {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
-        name: 'JoyBangla',
-        bio: 'this is Joy Bangla community',
-        rules: 'BD Awami League Jindabad bollei colbe, BD',
+        name: 'Tech World',
+        bio: 'News for Technology World',
+        rules: 'Only Bangladeshi and World-Wide news you should post',
         avatar: 'http://www.gravatar.com/avatar?d=identicon',
         description:
           'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
@@ -131,7 +131,7 @@ async function main() {
         joinedAt: new Date()
       },
       {
-        //   Rasel -> JoyBangla
+        //   Rasel -> Tech World
         member_id: '715449ac-e120-4fab-9ed5-875670b095ef',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: '69a5a201-a855-412e-9f3e-8b8beba94194',
@@ -140,7 +140,7 @@ async function main() {
         joinedAt: new Date()
       },
       {
-        //   Zubayer -> JoyBangla
+        //   Zubayer -> Tech World
         member_id: '4352a883-63dd-4bfe-a5f2-26d59a9503d3',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
@@ -149,7 +149,7 @@ async function main() {
         joinedAt: new Date()
       },
       {
-        //   Nishan -> JoyBangla
+        //   Nishan -> Tech World
         member_id: 'a00bfa9e-1c15-4df3-aab5-224ad94910d8',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: 'f037ad18-1d82-414a-a764-b0048d742a7c',
@@ -230,55 +230,55 @@ async function main() {
         createdAt: new Date()
       },
       {
-        //   -> JoyBangla community - rasel - admin
+        //   -> Tech World - rasel - admin
         post_id: 'c118f617-6037-48c1-a1f0-f94bbfac2300',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '715449ac-e120-4fab-9ed5-875670b095ef',
-        body: 'JoyBangla community description',
+        body: 'React Updates to v19',
         image_url: 'http://www.gravatar.com/avatar?d=identicon',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
       },
       {
-        //   -> JoyBangla community - rasel - admin
+        //   -> Tech World - rasel - admin
         post_id: '3e0ea6ba-7c8c-4992-9337-47c3741c046f',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '715449ac-e120-4fab-9ed5-875670b095ef',
-        body: 'JoyBangla community description',
+        body: 'React Updates to v19',
         image_url: 'http://www.gravatar.com/avatar?d=identicon',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
       },
       {
-        //   -> JoyBangla community - zubayer - moderator
+        //   -> Tech World - zubayer - moderator
         post_id: 'eb185422-48c7-41ca-a1af-a4b52921bcc7',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '4352a883-63dd-4bfe-a5f2-26d59a9503d3',
-        body: 'JoyBangla community description',
+        body: 'React Updates to v19',
         image_url: 'http://www.gravatar.com/avatar?d=identicon',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
       },
       {
-        //   -> JoyBangla community - Nishan - Member
+        //   -> Tech World - Nishan - Member
         post_id: '3ace4759-d409-4e35-9eaf-16b392a4fd05',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: 'a00bfa9e-1c15-4df3-aab5-224ad94910d8',
-        body: 'JoyBangla community description',
+        body: 'React Updates to v19',
         image_url: 'http://www.gravatar.com/avatar?d=identicon',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
       },
       {
-        //   -> JoyBangla community - Nishan - Member
+        //   -> Tech World - Nishan - Member
         post_id: 'bbf4bb05-6ac7-4c4d-9c5f-186a3d364f87',
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: 'a00bfa9e-1c15-4df3-aab5-224ad94910d8',
-        body: 'JoyBangla community description',
+        body: 'React Updates to v19',
         image_url: 'http://www.gravatar.com/avatar?d=identicon',
         hasPublished: false,
         isVisible: true,
