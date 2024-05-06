@@ -24,9 +24,7 @@ export default abstract class BaseController {
   }
 
   protected _auth = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.body.token || req.query.token || req.headers['authorization'] || req.headers['x-access-token']
-
-    // console.log({ token })
+    const token = req.body?.token || req.headers['authorization'] || req.headers['x-access-token']
 
     if (!token) {
       res.status(401).json('Unauthorized!')
@@ -54,7 +52,7 @@ export default abstract class BaseController {
       console.log('communityId :', communityId)
 
       // const member_id = req.body?.member_id
-      const method = req.method.toLowerCase()
+      // const method = req.method.toLowerCase()
 
       if (!communityId) {
         res.status(400).json({ message: 'content missing' })
@@ -62,7 +60,8 @@ export default abstract class BaseController {
       }
 
       // TODO: 31/1 check this why using weirdest third param
-      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
+      // const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
+      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
       // console.log('member from role :', member)
 
       if (!member || !member.role) {

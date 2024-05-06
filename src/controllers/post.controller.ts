@@ -23,7 +23,9 @@ class PostController {
 
       const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
 
-      res.status(200).json({ posts, total })
+      res.setHeader('X-Total-Post-Count', total.toString())
+
+      res.status(200).json({ posts })
     } catch (error) {
       next(error)
     }
@@ -58,11 +60,12 @@ class PostController {
     const errors: ErrorType = {}
 
     const communityId = req.params?.communityId
-    const { body } = req.body
+    const { payload } = req.body
+    console.log('body :', payload)
 
     // 1st layer
     // if (!title) errors.title = 'title is required!'
-    if (!body) errors.body = 'body is required!'
+    if (!payload) errors.payload = 'payload is required!'
 
     // 2nd layer
     // if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
@@ -84,13 +87,13 @@ class PostController {
           community_id: communityId,
           member_id: member.member_id,
           // title: title?.trim(),
-          body,
+          body: payload,
           hasPublished: member.role !== 'MEMBER'
         },
-        select: { post_id: true, hasPublished: true }
+        select: { post_id: true, community_id: true, member_id: true, body: true, createdAt: true, updatedAt: true }
       })
 
-      res.status(201).json({ post_id: post.post_id, body, hasPublished: post.hasPublished })
+      res.status(201).json({ ...post })
     } catch (error) {
       next(error)
     }
