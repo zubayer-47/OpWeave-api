@@ -54,6 +54,43 @@ class PostRepo {
   }
 
   /**
+   * createPost
+   */
+  public async createPost(
+    data:
+      | (Prisma.Without<Prisma.postCreateInput, Prisma.postUncheckedCreateInput> & Prisma.postUncheckedCreateInput)
+      | (Prisma.Without<Prisma.postUncheckedCreateInput, Prisma.postCreateInput> & Prisma.postCreateInput)
+  ) {
+    return await this.post.create({
+      data,
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        body: true,
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
+      }
+    })
+  }
+
+  /**
    * get post by postId
    * @param post_id this should be postId
    */

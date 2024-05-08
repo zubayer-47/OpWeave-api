@@ -82,15 +82,12 @@ class PostController {
         return
       }
 
-      const post = await prismadb.post.create({
-        data: {
-          community_id: communityId,
-          member_id: member.member_id,
-          // title: title?.trim(),
-          body: payload,
-          hasPublished: member.role !== 'MEMBER'
-        },
-        select: { post_id: true, community_id: true, member_id: true, body: true, createdAt: true, updatedAt: true }
+      const post = await postRepo.createPost({
+        community_id: communityId,
+        member_id: member.member_id,
+        // title: title?.trim(),
+        body: payload,
+        hasPublished: member.role !== 'MEMBER'
       })
 
       res.status(201).json({ ...post })

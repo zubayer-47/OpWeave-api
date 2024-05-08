@@ -26,11 +26,12 @@ class ExpressServer {
   constructor() {
     this.express = express()
     this.server = createServer(this.express)
-    this.io = new Server(this.server, {
-      cors: {
-        origin: 'http://localhost:5173/'
-      }
-    })
+    this.io = new Server(this.server)
+    // this.io = new Server(this.server, {
+    //   cors: {
+    //     origin: 'http://localhost:5173/'
+    //   }
+    // })
     this.httpTerminator = createHttpTerminator({ server: this.server })
     this._configure()
     this._routes()
