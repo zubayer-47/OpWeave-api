@@ -198,12 +198,7 @@ class PostRepo {
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
    */
-  public getPostsInCommunity(community_id: string, page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { createdAt: 'asc' } }
-        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
+  public getPostsInCommunity(community_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
         community_id,
@@ -220,9 +215,27 @@ class PostRepo {
         member_id: true,
         body: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
       },
-      ...paginationOptions
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
     })
   }
 
