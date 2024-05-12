@@ -46,6 +46,7 @@ class PostRepo {
         community_id: true,
         member_id: true,
         body: true,
+        image_url: true,
         hasPublished: true,
         createdAt: true,
         updatedAt: true
@@ -136,6 +137,7 @@ class PostRepo {
         community_id: true,
         member_id: true,
         body: true,
+        image_url: true,
         createdAt: true,
         updatedAt: true
       },
@@ -166,6 +168,7 @@ class PostRepo {
         community_id: true,
         member_id: true,
         body: true,
+        image_url: true,
         createdAt: true
       },
       ...paginationOptions
@@ -181,6 +184,7 @@ class PostRepo {
       select: {
         post_id: true,
         body: true,
+        image_url: true,
         member: {
           select: {
             user_id: true,
@@ -215,6 +219,7 @@ class PostRepo {
         community_id: true,
         member_id: true,
         body: true,
+        image_url: true,
         createdAt: true,
         updatedAt: true,
         member: {
@@ -237,24 +242,6 @@ class PostRepo {
       orderBy: { createdAt: 'asc' },
       skip: (page - 1) * limit,
       take: limit
-    })
-  }
-
-  public getPostInCommunity(post_id: string, community_id: string) {
-    return this.post.findFirst({
-      where: {
-        post_id,
-        community_id,
-        hasPublished: true,
-        isVisible: true,
-        deletedAt: null
-        // member: {
-        //   leavedAt: null
-        // }
-      },
-      select: {
-        post_id: true
-      }
     })
   }
 
