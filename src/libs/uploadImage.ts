@@ -1,4 +1,4 @@
-import { v2 as cloudinary } from 'cloudinary'
+import { UploadApiOptions, UploadApiResponse, v2 as cloudinary } from 'cloudinary'
 import { createHmac } from 'crypto'
 import multer, { Multer } from 'multer'
 
@@ -8,8 +8,9 @@ cloudinary.config({
   api_secret: process.env.API_SECRET
 })
 
+// TODO: Caution: memoryStorage can issue for crashing
 const storage = multer.memoryStorage()
-export const upload: Multer = multer({ storage: storage })
+export const upload: Multer = multer({ storage })
 
 export async function handleUpload(userId: string, file) {
   const fileName = generateConsistentHash(userId)
@@ -21,7 +22,7 @@ export async function handleUpload(userId: string, file) {
     resource_type: 'image'
   })
 
-  console.log('res handleUpload:', res)
+  // console.log('res handleUpload:', res)
   return res
 }
 
@@ -29,4 +30,24 @@ function generateConsistentHash(userId: string): string {
   const hash = createHmac('sha256', '123').update(userId).digest('hex')
 
   return hash
+}
+
+// Helper function to upload WebP to Cloudinary
+export const uploadWebPToCloudinary = async (
+  webpBuffer: Buffer,
+  options: UploadApiOptions = {}
+): Promise<UploadApiResponse> => {
+  // const webpString = webpBuffer.toString('base64')
+
+  return new Promise((resolve, reject) => {
+    cloudinary.uploader
+      .upload_stream(options, (error, result) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(result)
+        }
+      })
+      .end(webpBuffer)
+  })
 }

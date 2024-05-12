@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
+import { upload } from 'src/libs/uploadImage'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
@@ -239,7 +240,13 @@ class CommunityController extends BaseController {
     this.router.get('/:communityId/posts', this._auth, this._checkRoles, PostController._getCommunityPosts)
 
     // Create a new post in a specific community.
-    this.router.post('/:communityId/posts', this._auth, this._checkRoles, PostController._createPost)
+    this.router.post(
+      '/:communityId/posts',
+      this._auth,
+      this._checkRoles,
+      upload.single('post_image'),
+      PostController._createPost
+    )
 
     // Get details of a specific post in a community.
     this.router.get('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)

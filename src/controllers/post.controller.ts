@@ -1,8 +1,12 @@
+import { UploadApiResponse } from 'cloudinary'
 import { NextFunction, Request, Response } from 'express'
+import sharp from 'sharp'
 import prismadb from 'src/libs/prismadb'
+import { uploadWebPToCloudinary } from 'src/libs/uploadImage'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
+import { v4 as uid } from 'uuid'
 
 class PostController {
   static _getCommunityPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -56,19 +60,13 @@ class PostController {
   static _createPost = async (req: Request, res: Response, next: NextFunction) => {
     // TODO: 3/1 add picture and more.
     const userId = req.user.userId
-
     const errors: ErrorType = {}
 
     const communityId = req.params?.communityId
-    const { payload } = req.body
-    console.log('body :', payload)
+    const { content } = req.body
+    const file = req.file
 
-    // 1st layer
-    // if (!title) errors.title = 'title is required!'
-    if (!payload) errors.payload = 'payload is required!'
-
-    // 2nd layer
-    // if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
+    if (!content) errors.content = 'Something is missing in content!'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -82,11 +80,26 @@ class PostController {
         return
       }
 
+      const outputFileName = `post-${uid()}` // Unique filename
+
+      let uploadResult: UploadApiResponse | null
+
+      if (file) {
+        const webpBuffer = await sharp(file.buffer)
+          .webp() // Convert to WebP
+          .toBuffer()
+
+        uploadResult = await uploadWebPToCloudinary(webpBuffer, {
+          folder: 'post',
+          public_id: outputFileName
+        })
+      }
+
       const post = await postRepo.createPost({
         community_id: communityId,
         member_id: member.member_id,
-        // title: title?.trim(),
-        body: payload,
+        body: content,
+        image_url: uploadResult?.secure_url || null,
         hasPublished: member.role !== 'MEMBER'
       })
 

@@ -49,8 +49,8 @@ class ExpressServer {
     this.express.use(cookieParser())
     this.express.use(compression())
     this.express.use(hpp())
-    this.express.use(express.urlencoded({ extended: true, limit: '50KB' }))
-    this.express.use(express.json({ limit: '50KB', type: 'application/json' }))
+    this.express.use(express.urlencoded({ extended: true, limit: '100kb' }))
+    this.express.use(express.json({ limit: '10kb', type: 'application/json' }))
     this.express.use('/static', express.static(path.resolve('./uploads')))
   }
 

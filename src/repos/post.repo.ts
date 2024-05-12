@@ -68,6 +68,7 @@ class PostRepo {
         community_id: true,
         member_id: true,
         body: true,
+        image_url: true,
         createdAt: true,
         updatedAt: true,
         member: {

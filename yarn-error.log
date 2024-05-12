@@ -1,5 +1,5 @@
 Arguments: 
-  /home/zubayerjs/.nvm/versions/node/v18.18.1/bin/node /home/zubayerjs/.nvm/versions/node/v18.18.1/bin/yarn add -D @types/cloudinary
+  /home/zubayerjs/.nvm/versions/node/v18.18.1/bin/node /home/zubayerjs/.nvm/versions/node/v18.18.1/bin/yarn add sharp
 
 PATH: 
   /home/zubayerjs/.nvm/versions/node/v18.18.1/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
@@ -14,17 +14,17 @@ Platform:
   linux x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2fcloudinary: Not found
-      at params.callback [as _callback] (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:66145:18)
-      at self.callback (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:140890:22)
+  Error: https://registry.yarnpkg.com/object-assign/-/object-assign-4.1.1.tgz: Request failed "500 Internal Server Error"
+      at ResponseError.ExtendableBuiltin (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:696:66)
+      at new ResponseError (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:802:124)
+      at Request.<anonymous> (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:66215:16)
       at Request.emit (node:events:517:28)
-      at Request.<anonymous> (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:141862:10)
-      at Request.emit (node:events:517:28)
-      at IncomingMessage.<anonymous> (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:141784:12)
-      at Object.onceWrapper (node:events:631:28)
-      at IncomingMessage.emit (node:events:529:35)
-      at endReadableNT (node:internal/streams/readable:1368:12)
-      at process.processTicksAndRejections (node:internal/process/task_queues:82:21)
+      at module.exports.Request.onRequestResponse (/home/zubayerjs/.nvm/versions/node/v18.18.1/lib/node_modules/yarn/lib/cli.js:141767:10)
+      at ClientRequest.emit (node:events:517:28)
+      at HTTPParser.parserOnIncomingClient (node:_http_client:700:27)
+      at HTTPParser.parserOnHeadersComplete (node:_http_common:119:17)
+      at TLSSocket.socketOnData (node:_http_client:541:22)
+      at TLSSocket.emit (node:events:517:28)
 
 npm manifest: 
   {
@@ -50,7 +50,6 @@ npm manifest:
       "@babel/preset-typescript": "^7.21.0",
       "@tsconfig/recommended": "^1.0.2",
       "@types/axios": "^0.14.0",
-      "@types/bcrypt": "^5.0.0",
       "@types/compression": "^1.7.2",
       "@types/cookie-parser": "^1.4.3",
       "@types/cors": "^2.8.13",
@@ -89,7 +88,7 @@ npm manifest:
     "dependencies": {
       "@prisma/client": "^5.4.2",
       "axios": "^1.3.4",
-      "bcrypt": "^5.1.0",
+      "bcrypt": "^5.1.1",
       "cloudinary": "^2.2.0",
       "compression": "^1.7.4",
       "cookie-parser": "^1.4.6",
@@ -1178,10 +1177,10 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/@leichtgewicht/ip-codec/-/ip-codec-2.0.4.tgz#b2ac626d6cb9c8718ab459166d4bb405b8ffa78b"
     integrity sha512-Hcv+nVC0kZnQ3tD9GVu5xSMR4VVYOteQIr/hwFPVEvPdlXqgGEuRjiheChHgdM+JyqdgNcmzZOX/tnl0JOiI7A==
   
-  "@mapbox/node-pre-gyp@^1.0.10":
-    version "1.0.10"
-    resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.10.tgz#8e6735ccebbb1581e5a7e652244cadc8a844d03c"
-    integrity sha512-4ySo4CjzStuprMwk35H5pPbkymjv1SF3jGLj6rAHp/xT/RF7TL7bd9CTm1xDY49K2qF7jmR/g7k+SkLETP6opA==
+  "@mapbox/node-pre-gyp@^1.0.11":
+    version "1.0.11"
+    resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.11.tgz#417db42b7f5323d79e93b34a6d7a2a12c0df43fa"
+    integrity sha512-Yhlar6v9WQgUp/He7BdgzOz8lqMQ8sU+jkCq7Wx8Myc5YFJLbEe7lgui/V7G1qB1DJykHSGwreceSaD60Y0PUQ==
     dependencies:
       detect-libc "^2.0.0"
       https-proxy-agent "^5.0.0"
@@ -1301,13 +1300,6 @@ Lockfile:
     integrity sha512-KqQnQbdYE54D7oa/UmYVMZKq7CO4l8DEENzOKc4aBRwxCXSlJXGz83flFx5L7AWrOQnmuN3kVsRdt+GZPPjiVQ==
     dependencies:
       axios "*"
-  
-  "@types/bcrypt@^5.0.0":
-    version "5.0.0"
-    resolved "https://registry.yarnpkg.com/@types/bcrypt/-/bcrypt-5.0.0.tgz#a835afa2882d165aff5690893db314eaa98b9f20"
-    integrity sha512-agtcFKaruL8TmcvqbndlqHPSJgsolhf/qPWchFlgnW1gECTN/nKbFcoFnvKAQRFfKbh+BO6A3SWdJu9t+xF3Lw==
-    dependencies:
-      "@types/node" "*"
   
   "@types/body-parser@*":
     version "1.19.2"
@@ -2025,12 +2017,12 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/batch/-/batch-0.6.1.tgz#dc34314f4e679318093fc760272525f94bf25c16"
     integrity sha512-x+VAiMRL6UPkx+kudNvxTl6hB2XNNCG2r+7wixVfIYwu/2HKRXimwQyaumLjMveWvT2Hkd/cAJw+QBMfJ/EKVw==
   
-  bcrypt@^5.1.0:
-    version "5.1.0"
-    resolved "https://registry.yarnpkg.com/bcrypt/-/bcrypt-5.1.0.tgz#bbb27665dbc400480a524d8991ac7434e8529e17"
-    integrity sha512-RHBS7HI5N5tEnGTmtR/pppX0mmDSBpQ4aCBsj7CEQfYXDcO74A8sIBYcJMuCsis2E81zDxeENYhv66oZwLiA+Q==
+  bcrypt@^5.1.1:
+    version "5.1.1"
+    resolved "https://registry.yarnpkg.com/bcrypt/-/bcrypt-5.1.1.tgz#0f732c6dcb4e12e5b70a25e326a72965879ba6e2"
+    integrity sha512-AGBHOG5hPYZ5Xl9KXzU5iKq9516yEmvCKDg3ecP5kX2aB6UqTeXZxk2ELnDgDm6BQSMlLt9rDB4LoSMx0rYwww==
     dependencies:
-      "@mapbox/node-pre-gyp" "^1.0.10"
+      "@mapbox/node-pre-gyp" "^1.0.11"
       node-addon-api "^5.0.0"
   
   binary-extensions@^2.0.0:
@@ -4163,15 +4155,15 @@ Lockfile:
     dependencies:
       yallist "^4.0.0"
   
-  minipass@^4.0.0:
-    version "4.2.5"
-    resolved "https://registry.yarnpkg.com/minipass/-/minipass-4.2.5.tgz#9e0e5256f1e3513f8c34691dd68549e85b2c8ceb"
-    integrity sha512-+yQl7SX3bIT83Lhb4BVorMAHVuqsskxRdlmO9kTpyukp8vsm2Sn/fUOV9xlnG8/a5JsypJzap21lz/y3FBMJ8Q==
-  
   minipass@^4.0.2, minipass@^4.2.4:
     version "4.2.4"
     resolved "https://registry.yarnpkg.com/minipass/-/minipass-4.2.4.tgz#7d0d97434b6a19f59c5c3221698b48bbf3b2cd06"
     integrity sha512-lwycX3cBMTvcejsHITUgYj6Gy6A7Nh4Q6h9NP4sTHY1ccJlC7yKzDmiShEHsJ16Jf1nKGDEaiHxiltsJEvk0nQ==
+  
+  minipass@^5.0.0:
+    version "5.0.0"
+    resolved "https://registry.yarnpkg.com/minipass/-/minipass-5.0.0.tgz#3e9788ffb90b694a5d0ec94479a45b5d8738133d"
+    integrity sha512-3FnjYuehv9k6ovOEbyOswadCDPX1piCfhV8ncmYtHOjuPwylVWsghTLo7rabjC3Rx5xD4HDx8Wm1xnMF7S5qFQ==
   
   minizlib@^2.1.1:
     version "2.1.2"
@@ -4277,9 +4269,9 @@ Lockfile:
     integrity sha512-GyHvgPvUXBvAkXa0YvYnhilSB1A+FRYMpIVggKzPZqdaZfevZOuzfWzyvgzOwRLHBeo/MMswmJFsrNF4Nw1pmA==
   
   node-fetch@^2.6.7:
-    version "2.6.9"
-    resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
-    integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
+    version "2.7.0"
+    resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.7.0.tgz#d0f0fa6e3e2dc1d27efcd8ad99d550bda94d187d"
+    integrity sha512-c4FRfUm/dbcWZ7U+1Wq0AwCyFL+3nt2bEw05wfxSz+DWpWsitgmSgYmy2dQdWyKC1694ELPqMs/YzUSNozLt8A==
     dependencies:
       whatwg-url "^5.0.0"
   
@@ -5420,13 +5412,13 @@ Lockfile:
       readable-stream "^3.1.1"
   
   tar@^6.1.11:
-    version "6.1.13"
-    resolved "https://registry.yarnpkg.com/tar/-/tar-6.1.13.tgz#46e22529000f612180601a6fe0680e7da508847b"
-    integrity sha512-jdIBIN6LTIe2jqzay/2vtYLlBHa3JF42ot3h1dW8Q0PaAG4v8rm0cvpVePtau5C6OKXGGcgO9q2AMNSWxiLqKw==
+    version "6.2.1"
+    resolved "https://registry.yarnpkg.com/tar/-/tar-6.2.1.tgz#717549c541bc3c2af15751bea94b1dd068d4b03a"
+    integrity sha512-DZ4yORTwrbTj/7MZYq2w+/ZFdI6OZ/f9SFHR+71gIVUZhOQPHzVCLpvRnPgyaMpfWxxk/4ONva3GQSyNIKRv6A==
     dependencies:
       chownr "^2.0.0"
       fs-minipass "^2.0.0"
-      minipass "^4.0.0"
+      minipass "^5.0.0"
       minizlib "^2.1.1"
       mkdirp "^1.0.3"
       yallist "^4.0.0"
