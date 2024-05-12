@@ -86,7 +86,7 @@ class PostController {
 
       if (file) {
         const webpBuffer = await sharp(file.buffer)
-          .webp() // Convert to WebP
+          .webp({ quality: 50 }) // Convert to WebP
           .toBuffer()
 
         uploadResult = await uploadWebPToCloudinary(webpBuffer, {
