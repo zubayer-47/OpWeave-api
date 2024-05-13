@@ -10,7 +10,17 @@ const corsOptions: cors.CorsOptions = {
       callback(new Error('cors'))
     }
   },
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Access-Token', 'Authorization'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+    'Authorization',
+    'X-Total-Count',
+    'X-Total-Member-Count',
+    'X-Total-Post-Count'
+  ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   credentials: true,
   optionsSuccessStatus: 200

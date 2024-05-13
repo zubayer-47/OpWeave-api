@@ -54,6 +54,22 @@ class AuthorityRepo {
    * @param post_id
    * @returns
    */
+  public rejectPost(post_id: string) {
+    return this.post.delete({
+      where: {
+        post_id
+      },
+      select: {
+        post_id: true
+      }
+    })
+  }
+
+  /**
+   *
+   * @param post_id
+   * @returns
+   */
   public getPost(post_id: string) {
     return this.post.findFirst({
       where: {

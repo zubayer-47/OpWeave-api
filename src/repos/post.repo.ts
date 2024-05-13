@@ -196,6 +196,37 @@ class PostRepo {
   }
 
   /**
+   *
+   * @param community_id
+   * @param page
+   * @param limit
+   * @returns array of posts
+   */
+  public getCommunityPendingPosts(community_id: string, page: number, limit: number) {
+    return this.post.findMany({
+      where: {
+        community_id,
+        hasPublished: false,
+        deletedAt: null
+      },
+      select: {
+        post_id: true,
+        body: true,
+        image_url: true,
+        member: {
+          select: {
+            user_id: true,
+            member_id: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
+  /**
    * get community posts via pagination or all posts
    * @param community_id this should community_id
    * @param member_id -> member_id but if next params exist -> falsy value
@@ -274,6 +305,19 @@ class PostRepo {
         deletedAt: null,
         isVisible: true,
         hasPublished: true
+      }
+    })
+  }
+
+  /**
+   * numOfPendingPostsInCommunity
+   */
+  public numOfPendingPostsInCommunity(community_id: string) {
+    return this.post.count({
+      where: {
+        community_id,
+        hasPublished: false,
+        deletedAt: null
       }
     })
   }

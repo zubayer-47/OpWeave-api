@@ -27,7 +27,7 @@ class PostController {
 
       const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
 
-      res.setHeader('X-Total-Post-Count', total.toString())
+      res.setHeader('X-Total-Count', total.toString())
 
       res.status(200).json({ posts })
     } catch (error) {
@@ -267,6 +267,35 @@ class PostController {
         message: 'post successfully deleted',
         postId
       })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static _getPendingPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const errors: ErrorType = {}
+
+    const communityId = req.params?.communityId
+    const role = req.user.role
+    const { page = 1, limit = 10 } = req.query
+
+    if (!communityId) errors.message = 'Content missing'
+
+    if (role === 'MEMBER') errors.message = "You don't have any permission to use this route"
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const totalPendingPosts = await postRepo.numOfPendingPostsInCommunity(communityId)
+
+      const posts = await postRepo.getCommunityPendingPosts(communityId, +page, +limit)
+
+      res.setHeader('X-Total-Count', totalPendingPosts.toString())
+
+      res.status(200).json({ posts })
     } catch (error) {
       next(error)
     }

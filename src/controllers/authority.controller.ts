@@ -53,6 +53,37 @@ class AuthorityController extends BaseController {
     }
   }
 
+  private _rejectPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const errors: ErrorType = {}
+    const userRole = req.user?.role
+    const post_id = req.query?.postId as string
+    const community_id = req.query?.communityId as string
+
+    if (userRole === 'MEMBER') errors.message = 'You do not have access to do it'
+
+    if (!post_id) errors.message = 'content missing'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      // check whether post exist or not
+      const post = await postRepo.isExist(post_id, community_id)
+      if (!post) {
+        res.status(404).json({ message: 'Post Not Found!' })
+        return
+      }
+
+      const rejectedPost = await authorityRepo.rejectPost(post_id)
+
+      res.status(200).json({ message: 'Post rejected successfully', post: { ...rejectedPost } })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   private _toggleHidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userId = req.user?.userId
     const userRole = req.user?.role
@@ -278,6 +309,9 @@ class AuthorityController extends BaseController {
   configureRoutes() {
     // approve post
     this.router.post('/approve/:postId', this._auth, this._checkRoles, this._approvePost)
+
+    // reject post
+    this.router.delete('/reject', this._auth, this._checkRoles, this._rejectPost)
 
     // toggle hide/unhide post
     this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)

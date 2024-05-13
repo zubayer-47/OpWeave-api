@@ -48,8 +48,7 @@ export default abstract class BaseController {
     try {
       const userId = req.user?.userId
       // const postId = req.params?.postId
-      const communityId = req.params?.communityId || req.body?.community_id
-      console.log('communityId :', communityId)
+      const communityId = req.params?.communityId || req.body?.community_id || req.query?.communityId
 
       // const member_id = req.body?.member_id
       // const method = req.method.toLowerCase()

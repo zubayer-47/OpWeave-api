@@ -62,7 +62,7 @@ class CommunityController extends BaseController {
     try {
       const communities = await communityRepo.getUserAssignedCommunities(userId, +page, +limit)
 
-      res.setHeader('X-Total-Communities-Count', total.toString())
+      res.setHeader('X-Total-Count', total.toString())
 
       res.status(200).json({ communities })
     } catch (error) {
@@ -168,6 +168,7 @@ class CommunityController extends BaseController {
 
   // TODO: 3/1 refactor it before send production (add pagination where needs)
   private _communityInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const user_id = req.user.userId
     const communityId = req.params?.communityId
 
     if (!communityId) {
@@ -176,6 +177,17 @@ class CommunityController extends BaseController {
     }
 
     try {
+      const member = await prismadb.member.findFirst({
+        where: {
+          user_id,
+          community_id: communityId
+        },
+        select: {
+          member_id: true,
+          role: true
+        }
+      })
+
       const communityInfo = await prismadb.community.findFirst({
         where: {
           community_id: communityId
@@ -185,6 +197,8 @@ class CommunityController extends BaseController {
           name: true,
           rules: true,
           bio: true,
+          description: true,
+          avatar: true,
           createdAt: true
         }
       })
@@ -195,7 +209,7 @@ class CommunityController extends BaseController {
       res.setHeader('X-Total-Member-Count', membersCount.toString())
       res.setHeader('X-Total-Post-Count', postsCount.toString())
 
-      res.status(200).json({ ...communityInfo })
+      res.status(200).json({ ...communityInfo, member })
     } catch (error) {
       next(error)
     }
@@ -257,6 +271,9 @@ class CommunityController extends BaseController {
     // Delete a post in a specific community. ->> Only the post creator or authorized community members can delete the post.
     // TODO: 21/1 verify it later
     this.router.delete('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._deletePost)
+
+    // Get all Pending to approval posts by administrators
+    this.router.get('/:communityId/pending/posts', this._auth, this._checkRoles, PostController._getPendingPosts)
 
     /**
      * ? Members:
