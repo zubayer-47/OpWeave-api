@@ -148,12 +148,7 @@ class PostRepo {
   /**
    * getPostsWithUserId ->> Get posts by userId
    */
-  public getPostsByUserId(user_id: string, page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { createdAt: 'asc' } }
-        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
+  public getPostsByUserId(user_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
         member: {
@@ -169,9 +164,28 @@ class PostRepo {
         member_id: true,
         body: true,
         image_url: true,
-        createdAt: true
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
       },
-      ...paginationOptions
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit
     })
   }
 
