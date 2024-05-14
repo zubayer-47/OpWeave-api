@@ -274,6 +274,7 @@ class PostController {
 
   static _getPendingPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
+    const user_id = req.user.userId
 
     const communityId = req.params?.communityId
     const role = req.user.role
@@ -292,10 +293,34 @@ class PostController {
       const totalPendingPosts = await postRepo.numOfPendingPostsInCommunity(communityId)
 
       const posts = await postRepo.getCommunityPendingPosts(communityId, +page, +limit)
+      const member_role = await prismadb.member.findFirst({
+        where: {
+          community_id: communityId,
+          user_id
+        },
+        select: {
+          role: true
+        }
+      })
 
-      res.setHeader('X-Total-Count', totalPendingPosts.toString())
+      res.setHeader('x-total-count', totalPendingPosts.toString())
 
-      res.status(200).json({ posts })
+      res.status(200).json({ posts, ...member_role })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static _getUserFeedPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
+    const { page = 1, limit = 10 } = req.query
+
+    try {
+      const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
+
+      res.status(200).json({
+        posts
+      })
     } catch (error) {
       next(error)
     }

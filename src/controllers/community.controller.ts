@@ -206,8 +206,10 @@ class CommunityController extends BaseController {
       const membersCount = await memberRepo.numOfMembersInCommunity(communityId)
       const postsCount = await postRepo.numOfPostsInCommunity(communityId)
 
-      res.setHeader('X-Total-Member-Count', membersCount.toString())
-      res.setHeader('X-Total-Post-Count', postsCount.toString())
+      res.setHeader('x-total-member-count', membersCount.toString())
+      res.setHeader('x-total-post-count', postsCount.toString())
+
+      console.log(res.getHeaders())
 
       res.status(200).json({ ...communityInfo, member })
     } catch (error) {
@@ -248,6 +250,9 @@ class CommunityController extends BaseController {
      * ? DELETE /communities/:communityId/posts/:postId: Delete a post in a specific community.
      * ?    * Only the post creator or authorized community members can delete the post.
      */
+
+    // get user feed posts
+    this.router.get('/posts/feed', this._auth, PostController._getUserFeedPosts)
 
     //? posts controller ->> <<-
     // Get a list of posts in a specific community with pagination.

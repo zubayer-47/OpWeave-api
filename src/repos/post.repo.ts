@@ -207,16 +207,73 @@ class PostRepo {
       where: {
         community_id,
         hasPublished: false,
-        deletedAt: null
+        deletedAt: null,
+        member: {
+          leavedAt: null
+        }
       },
       select: {
         post_id: true,
+        community_id: true,
         body: true,
         image_url: true,
         member: {
           select: {
-            user_id: true,
-            member_id: true
+            member_id: true,
+            user: {
+              select: {
+                user_id: true,
+                fullname: true,
+                avatar: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
+  /**
+   *
+   * @param user_id
+   * @param page
+   * @param limit
+   * @returns list of posts
+   */
+  public getUserFeedPosts(user_id: string, page: number, limit: number) {
+    return this.post.findMany({
+      where: {
+        member: {
+          user_id
+        },
+        deletedAt: null,
+        hasPublished: true
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        body: true,
+        image_url: true,
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
           }
         }
       },
