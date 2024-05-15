@@ -42,12 +42,15 @@ class PostController {
 
     if (!communityId || !postId) errors.message = 'content missing'
 
-    try {
-      const post = await postRepo.get(postId, communityId)
-      if (!post) errors.message = 'Post Does Not Exist'
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
 
-      if (Object.keys(errors).length) {
-        res.status(400).json(errors)
+    try {
+      const post = await postRepo.getPostByPostId(postId)
+      if (!post) {
+        res.status(404).json({ message: 'Post Does Not Exist' })
         return
       }
 

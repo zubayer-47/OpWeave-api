@@ -47,8 +47,7 @@ class PostRepo {
         body: true,
         image_url: true,
         hasPublished: true,
-        createdAt: true,
-        updatedAt: true
+        createdAt: true
       }
     })
   }
@@ -198,6 +197,45 @@ class PostRepo {
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit
+    })
+  }
+
+  /**
+   * getPostsWithUserId ->> Get posts by userId
+   */
+  public getPostByPostId(post_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id,
+        deletedAt: null,
+        isVisible: true,
+        hasPublished: true
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        body: true,
+        image_url: true,
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
+      }
     })
   }
 
