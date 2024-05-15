@@ -1,7 +1,7 @@
 import { MemberRole, Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
-import { MemberRoleType, MuteUnmuteStatusType, PaginationTypes } from 'src/types/custom'
+import { MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
 
 type getMemberRoleInCommunityWhereType =
   | { user_id: string; community_id: string; leavedAt: null }
@@ -198,12 +198,7 @@ class MemberRepo {
    * @param page page number
    * @param limit limit of each page
    */
-  public getMembersInCommunity(community_id: string, page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { joinedAt: 'asc' } }
-        : { orderBy: { joinedAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
+  public getMembersInCommunity(community_id: string, page: number, limit: number) {
     return this.member.findMany({
       where: {
         community_id
@@ -214,7 +209,9 @@ class MemberRepo {
         user_id: true,
         role: true
       },
-      ...paginationOptions
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { joinedAt: 'asc' }
     })
   }
 }

@@ -34,7 +34,7 @@ class UserController extends BaseController {
   }
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.params?.userId
+    const userId = req.user.userId
     const { page = 1, limit = 10 } = req.query
 
     const errors: ErrorType = {}
@@ -63,6 +63,11 @@ class UserController extends BaseController {
       // console.log({ userId })
       const errors: { [index: string]: string } = {}
       const { fullname, email, gender, password, bio } = req.body
+      const allowedProps = ['fullname', 'email', 'gender', 'password', 'bio']
+
+      const diffProps = Object.keys(req.body).filter((p) => !allowedProps.includes(p))
+
+      if (diffProps.length > 0) errors.message = `Invalid payload ${diffProps}`
 
       if (fullname && fullname.length < 4) errors.fullname = 'Fullname should contains 4 characters at least'
       else if (fullname && fullname.match(/[;]$/g)) errors.fullname = "You can't provide semicolon(;)"
@@ -90,7 +95,7 @@ class UserController extends BaseController {
         // check whether username exist or not
         const isEmailExist = await userRepo.isUnique(email, 'email')
 
-        if (isEmailExist) errors.username = 'This email already exist, try different email'
+        if (isEmailExist) errors.email = 'This email already exist, try different email'
       }
 
       const user = await userRepo.getCurrentUser(userId)
@@ -139,6 +144,7 @@ class UserController extends BaseController {
   }
 
   private _updateProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const file = req.file
 
     if (!file) {
@@ -152,20 +158,18 @@ class UserController extends BaseController {
     try {
       const b64 = Buffer.from(file.buffer).toString('base64')
       let dataURI = 'data:' + file.mimetype + ';base64,' + b64
-      const cldRes = await handleUpload(req.user.userId, dataURI)
+      const cldRes = await handleUpload(userId, dataURI)
 
-      // const updatedUser = await userRepo.updateUser(req.user.userId, {
+      // const updatedUser = await userRepo.updateUser(userId, {
       //   avatar: cldRes.secure_url
       // })
-      const updatedUser = await prismadb.user.update({
-        where: { user_id: req.user.userId },
+      await prismadb.user.update({
+        where: { user_id: userId },
         data: { avatar: cldRes.secure_url },
         select: {
           user_id: true
         }
       })
-
-      console.log({ updatedUser })
 
       res.status(200).json({
         message: 'File Successfully Saved',
@@ -184,13 +188,8 @@ class UserController extends BaseController {
     }
   }
 
-  private _deleteProfilePicture = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const {} = req.params
-    const {} = req.body
-    const {} = req.query
-    /**
-     * Validation
-     */
+  private _deleteProfilePicture = async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
+    // const userId = req.user.userId
     const errors: ErrorType = {}
     // here gose your validation rules
     if (Object.keys(errors).length) {
@@ -211,22 +210,22 @@ class UserController extends BaseController {
     this.router.get('/', this._auth, this._profile)
 
     // get current user's All posts with pagination.
-    this.router.get('/:userId/posts', this._auth, this._getPosts)
+    this.router.get('/posts', this._auth, this._getPosts)
 
     // update the user
-    this.router.patch('/:userId', this._auth, this._updateUser)
+    this.router.patch('/', this._auth, this._updateUser)
 
     // Retrieve the user's profile picture.
     // TODO: 21/1 make it
-    this.router.get('/:userId/profilePicture', this._auth, this._getProfilePicture)
+    this.router.get('/profilePicture', this._auth, this._getProfilePicture)
 
     // Update the user's profile picture.
     // TODO: 21/1 make it
-    this.router.put('/:userId/profilePicture', this._auth, upload.single('avatar'), this._updateProfilePicture)
+    this.router.put('/profilePicture', this._auth, upload.single('avatar'), this._updateProfilePicture)
 
     // Delete the user's profile picture.
     // TODO: 21/1 make it
-    this.router.delete('/:userId/profilePicture', this._auth, this._deleteProfilePicture)
+    this.router.delete('/profilePicture', this._auth, this._deleteProfilePicture)
 
     /**
      * ? GET /users: Get user's profile information.

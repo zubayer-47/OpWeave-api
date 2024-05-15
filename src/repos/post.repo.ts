@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
-import { PaginationTypes } from 'src/types/custom'
 
 class PostRepo {
   private post: Prisma.postDelegate<DefaultArgs>
@@ -32,7 +31,7 @@ class PostRepo {
    * @param post_id this should be postId
    * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
    */
-  public get(post_id: string, community_id) {
+  public get(post_id: string, community_id: string) {
     return this.post.findFirst({
       where: {
         post_id,
@@ -116,12 +115,7 @@ class PostRepo {
    * @param page optional filed
    * @param limit optional field
    */
-  public getMemberPosts(member_id: string, page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { createdAt: 'asc' } }
-        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
+  public getMemberPosts(member_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
         member_id,
@@ -139,9 +133,27 @@ class PostRepo {
         body: true,
         image_url: true,
         createdAt: true,
-        updatedAt: true
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
       },
-      ...paginationOptions
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: { createdAt: 'desc' }
     })
   }
 
@@ -196,13 +208,10 @@ class PostRepo {
         deletedAt: null
       },
       select: {
-        post_id: true,
         body: true,
-        image_url: true,
         member: {
           select: {
-            user_id: true,
-            role: true
+            user_id: true
           }
         }
       }
@@ -244,7 +253,7 @@ class PostRepo {
           }
         }
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit
     })
@@ -291,7 +300,7 @@ class PostRepo {
           }
         }
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit
     })
@@ -341,7 +350,7 @@ class PostRepo {
           }
         }
       },
-      orderBy: { createdAt: 'asc' },
+      orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit
     })

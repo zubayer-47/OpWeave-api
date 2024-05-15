@@ -10,17 +10,6 @@ export type UserAuthReq = {
   role?: Role
 }
 
-type OptionTypes = {
-  orderBy: { createdAt?: 'asc' | 'desc'; joinedAt?: 'asc' | 'desc' }
-  skip: number
-  take: number
-}
-export type PaginationTypes =
-  | OptionTypes
-  | {
-      orderBy: { createdAt?: 'asc' | 'desc'; joinedAt?: 'asc' | 'desc' }
-    }
-
 export type ErrorType = { [index: string]: string }
 
 export type MemberRoleType = Omit<Role, 'MEMBER'>

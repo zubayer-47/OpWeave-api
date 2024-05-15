@@ -153,7 +153,6 @@ class PostController {
     if (!errors.title && title.length < 3) errors.title = 'title should contains 3 characters at least'
 
     const postInfo = await postRepo.getPostIncludingUserId(postId)
-    console.log({ postInfo })
     if (!postInfo) errors.post = 'Post Not Exist'
 
     if (postInfo?.member.user_id !== userId && !isAuthority)

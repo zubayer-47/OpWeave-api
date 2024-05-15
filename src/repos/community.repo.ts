@@ -1,7 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
-import { PaginationTypes } from 'src/types/custom'
 
 class CommunityRepo {
   private community: Prisma.communityDelegate<DefaultArgs>
@@ -26,12 +25,7 @@ class CommunityRepo {
     })
   }
 
-  public getUserAssignedCommunities(user_id: string, page?: number, limit?: number) {
-    const paginationOptions: PaginationTypes =
-      !page || !limit
-        ? { orderBy: { createdAt: 'asc' } }
-        : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
+  public getUserAssignedCommunities(user_id: string, page: number, limit: number) {
     return this.community.findMany({
       where: {
         members: {
@@ -48,7 +42,9 @@ class CommunityRepo {
         rules: true,
         createdAt: true
       },
-      ...paginationOptions
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
     })
   }
 

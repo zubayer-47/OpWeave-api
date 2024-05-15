@@ -1,4 +1,3 @@
-import { $Enums } from '@prisma/client'
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
@@ -10,7 +9,7 @@ export default class MemberController {
   static _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
     const { communityId } = req.params
-    const { page, limit } = req.query
+    const { page = 1, limit = 10 } = req.query
 
     if (!communityId) errors.message = 'content missing'
 
@@ -22,15 +21,7 @@ export default class MemberController {
     try {
       const total = await memberRepo.numOfMembersInCommunity(communityId)
 
-      let members: {
-        member_id: string
-        user_id: string
-        community_id: string
-        role: $Enums.MemberRole
-      }[]
-
-      if (page && limit) members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
-      else members = await memberRepo.getMembersInCommunity(communityId)
+      const members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
 
       res.status(200).json({ members, total })
     } catch (error) {
@@ -144,7 +135,7 @@ export default class MemberController {
   }
 
   static _getCommunityPostsByMember = async (req: Request, res: Response, next: NextFunction) => {
-    const { page, limit } = req.query
+    const { page = 1, limit = 10 } = req.query
     const member_id = req.params?.memberId
 
     if (!member_id) {
@@ -153,12 +144,7 @@ export default class MemberController {
     }
     // TODO: 6/1 test this
     try {
-      let posts: unknown
-      if (page && limit) {
-        posts = await postRepo.getMemberPosts(member_id, +page, +limit)
-      } else {
-        posts = await postRepo.getMemberPosts(member_id)
-      }
+      const posts = await postRepo.getMemberPosts(member_id, +page, +limit)
 
       if (!posts) {
         res.status(400).json({ message: 'Something went wrong!' })
