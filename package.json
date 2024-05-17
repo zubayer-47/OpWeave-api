@@ -6,10 +6,10 @@
   "scripts": {
     "serve": "webpack --watch --env mode=development --config webpack.config.ts",
     "clean:dev": "rimraf build",
-    "clean:prod": "rimraf dist",
+    "clean:prod": "rimraf build",
     "build": "webpack --mode production --config webpack.config.ts",
     "dev": "nodemon build/index.js --watch build",
-    "prod": "nodemon dist/index.js --watch dist",
+    "prod": "nodemon build/index.js --watch build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prisma": {
