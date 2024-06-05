@@ -53,6 +53,7 @@ model rule {
   rule_id      String     @id @default(uuid())
   title        String     @unique
   body         String
+  order        Int
   community    community? @relation(fields: [community_id], references: [community_id])
   community_id String?
   createdAt    DateTime   @default(now())

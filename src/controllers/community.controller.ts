@@ -174,8 +174,7 @@ class CommunityController extends BaseController {
         community_id: communityId
       },
       select: {
-        community_id: true,
-        rules: true
+        community_id: true
       }
     })
     if (!community.community_id) errors.message = "Community doesn't exist"
@@ -186,8 +185,17 @@ class CommunityController extends BaseController {
     }
 
     try {
+      const rules = await prismadb.rule.findMany({
+        where: {
+          community_id: communityId
+        },
+        orderBy: {
+          order: 'asc'
+        }
+      })
+
       res.status(200).json({
-        rules: community.rules
+        rules
       })
     } catch (error) {
       next(error)

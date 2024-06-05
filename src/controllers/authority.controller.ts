@@ -4,7 +4,7 @@ import authorityRepo from 'src/repos/authority.repo'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
-import { ErrorType, MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
+import { ErrorType, MemberRoleType, MuteUnmuteStatusType, RuleType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class AuthorityController extends BaseController {
@@ -112,11 +112,54 @@ class AuthorityController extends BaseController {
     }
 
     try {
-      const createdRule = await communityRepo.createRule(community_id, title, body)
+      const maxRulesCount = await prismadb.rule.count({
+        where: {
+          community_id
+        }
+      })
+      const createdRule = await communityRepo.createRule(community_id, title, body, maxRulesCount)
 
       res.status(201).json({
         message: 'Rule created successfully',
-        rules: createdRule.rules
+        rules: createdRule
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _updateRulesOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const role = req.user.role
+    const community_id = req.body.community_id
+    const rules = req.body.rules as RuleType[]
+
+    const errors: ErrorType = {}
+
+    if (role === 'MEMBER') errors.message = 'You cannot access this route'
+
+    if (!community_id) errors.community_id = 'community_id is required!'
+    if (!Array.isArray(rules) || !rules.length) errors.message = 'rules key should be an Array of rules'
+
+    const isExistCommunity = await communityRepo.isExist(community_id, 'community_id')
+    if (!isExistCommunity.community_id) errors.message = "Community doesn't exist"
+
+    // Validate the uniqueness of order values in the rules array
+    const orderValues = rules.map((rule) => rule.order)
+    const uniqueOrderValues = new Set(orderValues)
+
+    if (uniqueOrderValues.size !== orderValues.length) errors.message = 'Order values must be unique.'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const updatedRules = await communityRepo.updateRules(rules)
+
+      res.status(200).json({
+        message: 'Rule updated successfully',
+        rules: updatedRules
       })
     } catch (error) {
       next(error)
@@ -354,6 +397,9 @@ class AuthorityController extends BaseController {
 
     // create community rule
     this.router.post('/rules', this._auth, this._checkRoles, this._createRules)
+
+    // update community rules order
+    this.router.patch('/rules/order', this._auth, this._checkRoles, this._updateRulesOrder)
 
     // toggle hide/unhide post
     this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)

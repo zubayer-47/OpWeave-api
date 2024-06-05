@@ -15,3 +15,13 @@ export type ErrorType = { [index: string]: string }
 export type MemberRoleType = Omit<Role, 'MEMBER'>
 
 export type MuteUnmuteStatusType = 'mute' | 'unmute'
+
+export type RuleType = {
+  rule_id: string
+  title: string
+  body: string
+  order: number
+  community_id: string
+  createdAt: string
+  updatedAt: string
+}

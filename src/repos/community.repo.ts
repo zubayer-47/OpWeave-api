@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
+import { RuleType } from 'src/types/custom'
 
 class CommunityRepo {
   private community: Prisma.communityDelegate<DefaultArgs>
@@ -103,28 +104,55 @@ class CommunityRepo {
   /**
    * createRule
    */
-  public createRule(community_id: string, title: string, body: string) {
-    return this.community.update({
-      where: {
-        community_id
-      },
+  public createRule(community_id: string, title: string, body: string, maxRulesCount) {
+    return prismadb.rule.create({
       data: {
-        rules: {
-          create: {
-            title,
-            body
-          }
-        }
-      },
-      select: {
-        community_id: true,
-        rules: {
-          where: {
-            title
-          }
-        }
+        community_id: community_id,
+        title,
+        body,
+        order: maxRulesCount + 1
       }
     })
+
+    // return this.community.update({
+    //   where: {
+    //     community_id
+    //   },
+    //   data: {
+    //     rules: {
+    //       create: {
+    //         title,
+    //         body
+    //       }
+    //     }
+    //   },
+    //   select: {
+    //     community_id: true,
+    //     rules: {
+    //       where: {
+    //         title
+    //       }
+    //     }
+    //   }
+    // })
+  }
+
+  /**
+   * updateRules
+   */
+  public updateRules(rules: RuleType[]) {
+    const updatePromises = rules.map((rule) =>
+      prismadb.rule.update({
+        where: {
+          rule_id: rule.rule_id
+        },
+        data: {
+          order: rule.order
+        }
+      })
+    )
+
+    return Promise.all(updatePromises)
   }
 }
 
