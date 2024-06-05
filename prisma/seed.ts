@@ -62,7 +62,6 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         name: 'Dev Community',
         bio: 'this is dev community',
-        rules: 'dev, technology, programming',
         avatar: 'http://www.gravatar.com/avatar?d=identicon',
         description:
           'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
@@ -72,7 +71,6 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         name: 'Unnoyon',
         bio: 'this is Unnoyon community',
-        rules: 'BD unnoyon, BD',
         avatar: 'http://www.gravatar.com/avatar?d=identicon',
         description:
           'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',
@@ -82,7 +80,6 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         name: 'Tech World',
         bio: 'News for Technology World',
-        rules: 'Only Bangladeshi and World-Wide news you should post',
         avatar: 'http://www.gravatar.com/avatar?d=identicon',
         description:
           'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nulla tempora velit, adipisci commodi error quasi illum iusto atque, fugiat maxime repudiandae autem reiciendis, totam et. Doloremque veritatis odit voluptatem quam. Aperiam ullam sint dolore reiciendis! Cumque, nobis expedita voluptatum hic recusandae itaque facere natus assumenda porro quaerat ut eligendi eos sapiente in rem ipsam! Natus assumenda, ex aut facilis, adipisci doloremque doloribus fuga iusto sequi exercitationem aliquid alias voluptatum aperiam laboriosam odit soluta neque eligendi velit fugiat quis officiis repellendus hic animi. Provident odit sapiente dolorem omnis? Maxime veritatis hic quam quo, cupiditate ea nemo laudantium, aut, provident quos esse.',

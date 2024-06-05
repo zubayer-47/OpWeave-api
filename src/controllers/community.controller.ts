@@ -74,11 +74,10 @@ class CommunityController extends BaseController {
     const errors: ErrorType = {}
     const userId = req.user?.userId
 
-    const { name, bio, rules, description } = req.body
+    const { name, bio, description } = req.body
 
     if (!name) errors.name = 'name is required'
     if (!bio) errors.bio = 'bio is required'
-    if (!rules) errors.rules = 'rules is required'
     if (!description) errors.description = 'description is required'
 
     // 2nd layer
@@ -108,7 +107,6 @@ class CommunityController extends BaseController {
         data: {
           name,
           bio,
-          rules: rules.toString(),
           avatar: 'http://www.gravatar.com/avatar?d=identicon',
           description
         },
@@ -119,7 +117,6 @@ class CommunityController extends BaseController {
       })
 
       com = community
-      console.log('community :', community)
 
       console.log('userId :', userId)
       // auto create member as admin of created community;
@@ -134,19 +131,20 @@ class CommunityController extends BaseController {
           member_id: true
         }
       })
-      console.log('member :', member)
 
-      const updateCreatedBy = await prismadb.community.update({
+      await prismadb.community.update({
         where: {
           community_id: community.community_id
         },
         data: {
           createdBy: member.member_id
+        },
+        select: {
+          community_id: true
         }
       })
 
-      console.log('updateCreatedBy :', updateCreatedBy)
-      res.status(201).json({ community_id: community.community_id, name, bio, rules, createdAt: community.createdAt })
+      res.status(201).json({ community_id: community.community_id, name, bio, createdAt: community.createdAt })
     } catch (error) {
       // if there is an error then remove the created community
 
@@ -162,6 +160,36 @@ class CommunityController extends BaseController {
         console.log('deletedCommunity :', deletedCommunity)
       }
 
+      next(error)
+    }
+  }
+
+  private _getRules = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { communityId } = req.params
+
+    const errors: ErrorType = {}
+
+    const community = await prismadb.community.findUnique({
+      where: {
+        community_id: communityId
+      },
+      select: {
+        community_id: true,
+        rules: true
+      }
+    })
+    if (!community.community_id) errors.message = "Community doesn't exist"
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      res.status(200).json({
+        rules: community.rules
+      })
+    } catch (error) {
       next(error)
     }
   }
@@ -221,6 +249,7 @@ class CommunityController extends BaseController {
     /**
      * ? Community:
      * ? /communities (GET, POST)
+     * ? /communities/rules (GET, POST, PATCH, DELETE)
      * ? /communities/:communityId (GET, PUT, DELETE)
      */
 
@@ -233,6 +262,9 @@ class CommunityController extends BaseController {
 
     // create community
     this.router.post('/', this._auth, this._createCommunity)
+
+    // get community rule
+    this.router.get('/:communityId/rules', this._auth, this._getRules)
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/:communityId', this._auth, this._checkRoles, this._communityInfo)

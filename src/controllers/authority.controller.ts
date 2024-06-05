@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import authorityRepo from 'src/repos/authority.repo'
+import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType, MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
@@ -79,6 +80,44 @@ class AuthorityController extends BaseController {
       const rejectedPost = await authorityRepo.rejectPost(post_id)
 
       res.status(200).json({ message: 'Post rejected successfully', post: { ...rejectedPost } })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _createRules = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const role = req.user.role
+    const { title, body, community_id } = req.body
+
+    const errors: ErrorType = {}
+
+    if (role === 'MEMBER') errors.message = 'You cannot access this route'
+
+    if (!community_id) errors.community_id = 'community_id is required!'
+    if (!title) errors.title = 'title is required!'
+    if (!body) errors.body = 'body is required!'
+
+    if (typeof title !== 'string') errors.title = 'title should be string!'
+    if (typeof body !== 'string') errors.body = 'body should be string!'
+
+    const isExistCommunity = await communityRepo.isExist(community_id, 'community_id')
+    if (!isExistCommunity.community_id) errors.message = "Community doesn't exist"
+
+    const duplicateRule = await communityRepo.findUniqueRule(community_id, title)
+    if (duplicateRule.rules.length > 0 && duplicateRule.rules[0].rule_id) errors.message = 'Title should be unique'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const createdRule = await communityRepo.createRule(community_id, title, body)
+
+      res.status(201).json({
+        message: 'Rule created successfully',
+        rules: createdRule.rules
+      })
     } catch (error) {
       next(error)
     }
@@ -312,6 +351,9 @@ class AuthorityController extends BaseController {
 
     // reject post
     this.router.delete('/reject', this._auth, this._checkRoles, this._rejectPost)
+
+    // create community rule
+    this.router.post('/rules', this._auth, this._checkRoles, this._createRules)
 
     // toggle hide/unhide post
     this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)

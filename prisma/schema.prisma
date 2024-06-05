@@ -35,7 +35,7 @@ model community {
   community_id String @id @default(uuid())
   name         String @unique
   bio          String
-  rules        String // discuss about it
+  rules        rule[]
   description  String
   avatar       String
 
@@ -47,6 +47,16 @@ model community {
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   // banned_member banned_member[]
+}
+
+model rule {
+  rule_id      String     @id @default(uuid())
+  title        String     @unique
+  body         String
+  community    community? @relation(fields: [community_id], references: [community_id])
+  community_id String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
 }
 
 model member {

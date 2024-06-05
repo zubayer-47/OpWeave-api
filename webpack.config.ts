@@ -3,6 +3,7 @@ import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import { Configuration } from 'webpack'
 import nodeExternals from 'webpack-node-externals'
 import WebpackShellPluginNext from 'webpack-shell-plugin-next'
+
 const getConfig = (_env: { [key: string]: string }, argv: { [key: string]: string }): Configuration => {
   require('dotenv').config({
     path: path.resolve(__dirname)

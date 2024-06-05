@@ -78,6 +78,54 @@ class CommunityRepo {
       take: limit
     })
   }
+
+  /**
+   *
+   * @param community_id
+   * @param title
+   * @returns array of single one rule
+   */
+  public findUniqueRule(community_id: string, title: string) {
+    return this.community.findFirst({
+      where: {
+        community_id
+      },
+      select: {
+        rules: {
+          where: {
+            title
+          }
+        }
+      }
+    })
+  }
+
+  /**
+   * createRule
+   */
+  public createRule(community_id: string, title: string, body: string) {
+    return this.community.update({
+      where: {
+        community_id
+      },
+      data: {
+        rules: {
+          create: {
+            title,
+            body
+          }
+        }
+      },
+      select: {
+        community_id: true,
+        rules: {
+          where: {
+            title
+          }
+        }
+      }
+    })
+  }
 }
 
 export default new CommunityRepo()
