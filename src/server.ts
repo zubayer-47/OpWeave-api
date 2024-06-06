@@ -14,7 +14,6 @@ import authController from './controllers/auth.controller'
 import authorityController from './controllers/authority.controller'
 import communityController from './controllers/community.controller'
 import userController from './controllers/user.controller'
-import corsOptions from './libs/cors'
 import { sysLog } from './libs/logger'
 
 class ExpressServer {
@@ -44,7 +43,8 @@ class ExpressServer {
     this.express.enable('trust proxy')
     this.express.set('port', process.env.PORT || 8000)
     // Core Middlewares
-    this.express.use(cors(corsOptions))
+    // this.express.use(cors(corsOptions))
+    this.express.use(cors())
     this.express.use(helmet())
     this.express.use(cookieParser())
     this.express.use(compression())
