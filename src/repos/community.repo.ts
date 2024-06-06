@@ -59,11 +59,6 @@ class CommunityRepo {
   }
 
   public async getCommunities(page: number, limit: number) {
-    // const paginationOptions: PaginationTypes =
-    //   !page || !limit
-    //     ? { orderBy: { createdAt: 'asc' } }
-    //     : { orderBy: { createdAt: 'asc' }, skip: (page - 1) * limit, take: limit }
-
     return await this.community.findMany({
       where: {
         deletedAt: null
@@ -72,6 +67,7 @@ class CommunityRepo {
         community_id: true,
         bio: true,
         name: true,
+        avatar: true,
         createdAt: true
       },
       orderBy: { createdAt: 'asc' },

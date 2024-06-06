@@ -27,18 +27,11 @@ class CommunityController extends BaseController {
     // }
 
     try {
-      let communities: {
-        community_id: string
-        name: string
-        bio: string
-        createdAt: Date
-      }[]
-
       const total = await communityRepo.totalCountOfCommunities()
 
       res.setHeader('X-Total-Count', total.toString())
 
-      communities = await communityRepo.getCommunities(+page, +limit)
+      const communities = await communityRepo.getCommunities(+page, +limit)
 
       res.status(200).json({ communities })
     } catch (error) {
