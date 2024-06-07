@@ -58,9 +58,14 @@ class CommunityRepo {
     })
   }
 
-  public async getCommunities(page: number, limit: number) {
+  public async getCommunities(user_id: string, page: number, limit: number) {
     return await this.community.findMany({
       where: {
+        members: {
+          none: {
+            user_id: user_id
+          }
+        },
         deletedAt: null
       },
       select: {

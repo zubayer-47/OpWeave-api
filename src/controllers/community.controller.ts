@@ -16,7 +16,7 @@ class CommunityController extends BaseController {
   }
 
   private _getCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    // TODO: 23/1 check all routes where pagination works to send total number of data;
+    const userId = req.user.userId
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
     // const errors: ErrorType = {}
@@ -31,7 +31,7 @@ class CommunityController extends BaseController {
 
       res.setHeader('X-Total-Count', total.toString())
 
-      const communities = await communityRepo.getCommunities(+page, +limit)
+      const communities = await communityRepo.getCommunities(userId, +page, +limit)
 
       res.status(200).json({ communities })
     } catch (error) {
