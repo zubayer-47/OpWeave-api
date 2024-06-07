@@ -77,7 +77,7 @@ class PostController {
     }
 
     try {
-      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
+      const member = await memberRepo.checkIfUserIsMember(communityId, userId)
       if (!member) {
         res.status(400).json({ message: 'something went wrong. try again.' })
         return

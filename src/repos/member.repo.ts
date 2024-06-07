@@ -3,10 +3,6 @@ import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
 import { MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
 
-type getMemberRoleInCommunityWhereType =
-  | { user_id: string; community_id: string; leavedAt: null }
-  | { user_id: string; community_id: string; isMuted: boolean; leavedAt: null }
-
 class MemberRepo {
   private member: Prisma.memberDelegate<DefaultArgs>
   constructor() {
@@ -59,35 +55,6 @@ class MemberRepo {
         },
         role: true,
         isMuted: true
-      }
-    })
-  }
-
-  /**
-   *
-   * @param user_id
-   * @param community_id
-   * @param checkIsMuted Optional
-   */
-  public getMemberRoleInCommunity(user_id: string, community_id: string, checkIsMuted?: boolean) {
-    const where: getMemberRoleInCommunityWhereType = !checkIsMuted
-      ? {
-          user_id,
-          community_id,
-          leavedAt: null
-        }
-      : {
-          user_id,
-          community_id,
-          isMuted: false,
-          leavedAt: null
-        }
-
-    return this.member.findFirst({
-      where,
-      select: {
-        member_id: true,
-        role: true
       }
     })
   }
@@ -207,11 +174,36 @@ class MemberRepo {
         community_id: true,
         member_id: true,
         user_id: true,
+        user: {
+          select: {
+            avatar: true,
+            fullname: true
+          }
+        },
         role: true
       },
       skip: (page - 1) * limit,
       take: limit,
       orderBy: { joinedAt: 'asc' }
+    })
+  }
+
+  /**
+   * Check if user is member of a community
+   * @param community_id
+   * @param user_id
+   * @returns member_id & role
+   */
+  public checkIfUserIsMember(community_id: string, user_id: string) {
+    return this.member.findFirst({
+      where: {
+        community_id,
+        user_id
+      },
+      select: {
+        member_id: true,
+        role: true
+      }
     })
   }
 }

@@ -13,6 +13,9 @@ export default class MemberController {
 
     if (!communityId) errors.message = 'content missing'
 
+    const community = await communityRepo.isExist(communityId, 'community_id')
+    if (!community) errors.message = 'Community invalid'
+
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
@@ -22,6 +25,8 @@ export default class MemberController {
       const total = await memberRepo.numOfMembersInCommunity(communityId)
 
       const members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
+
+      // TODO: 7/6 set total into headers
 
       res.status(200).json({ members, total })
     } catch (error) {
@@ -119,7 +124,7 @@ export default class MemberController {
     }
 
     // get member_id
-    const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
+    const member = await memberRepo.checkIfUserIsMember(communityId, userId)
 
     // if (Object.keys(errors).length) {
     //   res.status(400).json(errors)

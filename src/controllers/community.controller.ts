@@ -176,6 +176,7 @@ class CommunityController extends BaseController {
 
     try {
       const rules = await prismadb.rule.findMany({
+        relationLoadStrategy: 'join',
         where: {
           community_id: communityId
         },
@@ -203,16 +204,19 @@ class CommunityController extends BaseController {
     }
 
     try {
-      const member = await prismadb.member.findFirst({
-        where: {
-          user_id,
-          community_id: communityId
-        },
-        select: {
-          member_id: true,
-          role: true
-        }
-      })
+      const guestView = await communityRepo.getGuestView(communityId)
+
+      if (!guestView || !guestView.name) {
+        res.status(404).json({ message: 'Community Not Found' })
+        return
+      }
+
+      const member = await memberRepo.checkIfUserIsMember(communityId, user_id)
+
+      if (!member || !member.role) {
+        res.status(200).json({ message: 'you do not have permission to access this route', ...guestView })
+        return
+      }
 
       const communityInfo = await prismadb.community.findFirst({
         where: {
@@ -233,8 +237,6 @@ class CommunityController extends BaseController {
 
       res.setHeader('x-total-member-count', membersCount.toString())
       res.setHeader('x-total-post-count', postsCount.toString())
-
-      console.log(res.getHeaders())
 
       res.status(200).json({ ...communityInfo, member })
     } catch (error) {
@@ -264,7 +266,7 @@ class CommunityController extends BaseController {
     this.router.get('/:communityId/rules', this._auth, this._getRules)
 
     // community info (query: communityId) -> testing purpose route
-    this.router.get('/:communityId', this._auth, this._checkRoles, this._communityInfo)
+    this.router.get('/:communityId', this._auth, this._communityInfo)
 
     /**
      * ? Posts:
@@ -317,7 +319,7 @@ class CommunityController extends BaseController {
      */
 
     // Get a list of specific community members with pagination.
-    this.router.get('/:communityId/members', this._auth, this._checkRoles, MemberController._getMembers)
+    this.router.get('/:communityId/members', this._auth, MemberController._getMembers)
 
     // Add/Join a user to the community.
     this.router.post('/:communityId/members', this._auth, MemberController._joinMember)

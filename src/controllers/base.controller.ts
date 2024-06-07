@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
-import prismadb from 'src/libs/prismadb'
 import memberRepo from 'src/repos/member.repo'
 
 export default abstract class BaseController {
@@ -59,28 +58,10 @@ export default abstract class BaseController {
         return
       }
 
-      // TODO: 31/1 check this why using weirdest third param
-      // const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
-      const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
-
-      const community = await prismadb.community.findFirst({
-        where: {
-          community_id: communityId
-        },
-        select: {
-          name: true,
-          bio: true,
-          avatar: true
-        }
-      })
-
-      if (!community || !community.name) {
-        res.status(400).json({ message: 'Invalid Community ID' })
-        return
-      }
+      const member = await memberRepo.checkIfUserIsMember(communityId, userId)
 
       if (!member || !member.role) {
-        res.status(403).json({ message: 'you do not have permission to access this route', community })
+        res.status(403).json({ message: 'you do not have permission to access this route' })
         return
       }
 
@@ -91,4 +72,40 @@ export default abstract class BaseController {
     }
     next()
   }
+
+  // protected _checkRoles = async (req: Request, res: Response, next: NextFunction) => {
+  //   try {
+  //     const userId = req.user?.userId
+  //     // const postId = req.params?.postId
+  //     const communityId = req.params?.communityId || req.body?.community_id || req.query?.communityId
+
+  //     // const member_id = req.body?.member_id
+  //     // const method = req.method.toLowerCase()
+
+  //     if (!communityId) {
+  //       res.status(400).json({ message: 'content missing' })
+  //       return
+  //     }
+
+  //     const guestView = await communityRepo.getGuestView(communityId)
+
+  //     if (!guestView || !guestView.name) {
+  //       res.status(404).json({ message: 'Community Not Found' })
+  //       return
+  //     }
+
+  //     const member = await memberRepo.checkIfUserIsMember(communityId, userId)
+
+  //     if (!member || !member.role) {
+  //       res.status(200).json({ message: 'you do not have permission to access this route', ...guestView })
+  //       return
+  //     }
+
+  //     req.user.role = member.role
+  //   } catch (error) {
+  //     next(error)
+  //     return
+  //   }
+  //   next()
+  // }
 }

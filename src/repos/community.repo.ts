@@ -28,6 +28,7 @@ class CommunityRepo {
 
   public getUserAssignedCommunities(user_id: string, page: number, limit: number) {
     return this.community.findMany({
+      relationLoadStrategy: 'join',
       where: {
         members: {
           some: {
@@ -59,10 +60,12 @@ class CommunityRepo {
 
   public async getCommunities(user_id: string, page: number, limit: number) {
     return await this.community.findMany({
+      relationLoadStrategy: 'join',
       where: {
         members: {
           none: {
-            user_id: user_id
+            user_id: user_id,
+            leavedAt: null
           }
         },
         deletedAt: null
@@ -152,6 +155,23 @@ class CommunityRepo {
     )
 
     return Promise.all(updatePromises)
+  }
+
+  /**
+   * getGuestView
+   */
+  public getGuestView(community_id: string) {
+    return this.community.findFirst({
+      where: {
+        community_id
+      },
+      select: {
+        community_id: true,
+        name: true,
+        bio: true,
+        avatar: true
+      }
+    })
   }
 }
 
