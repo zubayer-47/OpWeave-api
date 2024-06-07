@@ -19,12 +19,6 @@ class CommunityController extends BaseController {
     const userId = req.user.userId
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
-    // const errors: ErrorType = {}
-    // // here gose your validation rules
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
 
     try {
       const total = await communityRepo.totalCountOfCommunities()
@@ -84,9 +78,11 @@ class CommunityController extends BaseController {
       return
     }
 
-    let com: {
+    let createdCommunity: {
       community_id: string
-      createdAt: Date
+      name: string
+      bio: string
+      avatar: string
     } | null = null
 
     try {
@@ -105,13 +101,14 @@ class CommunityController extends BaseController {
         },
         select: {
           community_id: true,
-          createdAt: true
+          name: true,
+          bio: true,
+          avatar: true
         }
       })
 
-      com = community
+      createdCommunity = community
 
-      console.log('userId :', userId)
       // auto create member as admin of created community;
       const member = await prismadb.member.create({
         data: {
@@ -137,14 +134,14 @@ class CommunityController extends BaseController {
         }
       })
 
-      res.status(201).json({ community_id: community.community_id, name, bio, createdAt: community.createdAt })
+      res.status(201).json({ ...community })
     } catch (error) {
       // if there is an error then remove the created community
 
-      if (com) {
+      if (createdCommunity) {
         const deletedCommunity = await prismadb.community.delete({
           where: {
-            community_id: com.community_id
+            community_id: createdCommunity.community_id
           },
           select: {
             community_id: true
@@ -224,7 +221,6 @@ class CommunityController extends BaseController {
         select: {
           community_id: true,
           name: true,
-          rules: true,
           bio: true,
           description: true,
           avatar: true,

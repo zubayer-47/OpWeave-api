@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
+import prismadb from 'src/libs/prismadb'
 import memberRepo from 'src/repos/member.repo'
 
 export default abstract class BaseController {
@@ -61,10 +62,25 @@ export default abstract class BaseController {
       // TODO: 31/1 check this why using weirdest third param
       // const member = await memberRepo.getMemberRoleInCommunity(userId, communityId, method !== 'get')
       const member = await memberRepo.getMemberRoleInCommunity(userId, communityId)
-      // console.log('member from role :', member)
+
+      const community = await prismadb.community.findFirst({
+        where: {
+          community_id: communityId
+        },
+        select: {
+          name: true,
+          bio: true,
+          avatar: true
+        }
+      })
+
+      if (!community || !community.name) {
+        res.status(400).json({ message: 'Invalid Community ID' })
+        return
+      }
 
       if (!member || !member.role) {
-        res.status(403).json({ message: 'you do not have permission to access this route' })
+        res.status(403).json({ message: 'you do not have permission to access this route', community })
         return
       }
 

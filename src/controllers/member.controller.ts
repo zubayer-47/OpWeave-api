@@ -62,7 +62,25 @@ export default class MemberController {
           }
         })
 
-        res.status(201).json({ message: 'Member Joined Successfully', member: joinedMember })
+        const joinedCommunity = await prismadb.community.findFirst({
+          where: {
+            community_id: communityId,
+            members: {
+              some: {
+                member_id: joinedMember.member_id
+              }
+            }
+          },
+          select: {
+            community_id: true,
+            bio: true,
+            name: true,
+            avatar: true,
+            createdAt: true
+          }
+        })
+
+        res.status(201).json({ ...joinedMember, ...joinedCommunity })
         return
       }
 

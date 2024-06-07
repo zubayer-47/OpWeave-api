@@ -38,10 +38,9 @@ class CommunityRepo {
       },
       select: {
         community_id: true,
-        name: true,
         bio: true,
-        rules: true,
-        createdAt: true
+        name: true,
+        avatar: true
       },
       orderBy: { createdAt: 'asc' },
       skip: (page - 1) * limit,
@@ -72,8 +71,7 @@ class CommunityRepo {
         community_id: true,
         bio: true,
         name: true,
-        avatar: true,
-        createdAt: true
+        avatar: true
       },
       orderBy: { createdAt: 'asc' },
       skip: (page - 1) * limit,
