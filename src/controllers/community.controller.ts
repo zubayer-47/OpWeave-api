@@ -213,7 +213,7 @@ class CommunityController extends BaseController {
 
       const member = await memberRepo.checkIfUserIsMember(communityId, user_id)
 
-      if (!member || !member.role) {
+      if (!member || !member.role || member.leavedAt) {
         res.status(200).json({ message: 'you do not have permission to access this route', ...guestView })
         return
       }
