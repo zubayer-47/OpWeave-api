@@ -238,7 +238,7 @@ class CommunityController extends BaseController {
       res.setHeader('x-total-member-count', membersCount.toString())
       res.setHeader('x-total-post-count', postsCount.toString())
 
-      res.status(200).json({ ...communityInfo, member })
+      res.status(200).json({ ...communityInfo, member_id: member.member_id, role: member.role })
     } catch (error) {
       next(error)
     }

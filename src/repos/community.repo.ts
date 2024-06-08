@@ -115,28 +115,6 @@ class CommunityRepo {
         order: maxRulesCount + 1
       }
     })
-
-    // return this.community.update({
-    //   where: {
-    //     community_id
-    //   },
-    //   data: {
-    //     rules: {
-    //       create: {
-    //         title,
-    //         body
-    //       }
-    //     }
-    //   },
-    //   select: {
-    //     community_id: true,
-    //     rules: {
-    //       where: {
-    //         title
-    //       }
-    //     }
-    //   }
-    // })
   }
 
   /**
@@ -170,6 +148,29 @@ class CommunityRepo {
         name: true,
         bio: true,
         avatar: true
+      }
+    })
+  }
+
+  /**
+   * getJoinedCommunity
+   */
+  public getJoinedCommunity(community_id: string, member_id: string) {
+    return this.community.findFirst({
+      where: {
+        community_id,
+        members: {
+          some: {
+            member_id
+          }
+        }
+      },
+      select: {
+        community_id: true,
+        bio: true,
+        name: true,
+        avatar: true
+        // createdAt: true
       }
     })
   }

@@ -60,32 +60,6 @@ class MemberRepo {
   }
 
   /**
-   * check member existence
-   * @param user_id this should be userId
-   * @param community_id this should be communityId
-   * @returns member_id community_id and role
-   */
-  public isExistWithLeavedAt(user_id: string, community_id: string) {
-    return this.member.findFirst({
-      where: {
-        user_id,
-        community_id
-      },
-      select: {
-        member_id: true,
-        community_id: true,
-        community: {
-          select: {
-            name: true
-          }
-        },
-        role: true,
-        leavedAt: true
-      }
-    })
-  }
-
-  /**
    *
    * @param {String} community_id Community ID
    * @returns {Promise<Number>}
@@ -202,7 +176,8 @@ class MemberRepo {
       },
       select: {
         member_id: true,
-        role: true
+        role: true,
+        leavedAt: true
       }
     })
   }

@@ -354,13 +354,14 @@ class PostRepo {
    */
   public getPostsInCommunity(community_id: string, page: number, limit: number) {
     return this.post.findMany({
+      relationLoadStrategy: 'join',
       where: {
         community_id,
         hasPublished: true,
         isVisible: true,
         deletedAt: null
         // member: {
-        //   leavedAt: null
+        //   user_id
         // }
       },
       select: {

@@ -44,7 +44,7 @@ export default class MemberController {
     if (!community) errors.community = 'Community does not exist'
 
     // check whether member exist or not already
-    const member = await memberRepo.isExistWithLeavedAt(userId, communityId)
+    const member = await memberRepo.checkIfUserIsMember(communityId, userId)
     console.log({ member })
     if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
 
@@ -61,31 +61,13 @@ export default class MemberController {
             community_id: communityId
           },
           select: {
-            community_id: true,
-            member_id: true,
-            role: true
+            member_id: true
           }
         })
 
-        const joinedCommunity = await prismadb.community.findFirst({
-          where: {
-            community_id: communityId,
-            members: {
-              some: {
-                member_id: joinedMember.member_id
-              }
-            }
-          },
-          select: {
-            community_id: true,
-            bio: true,
-            name: true,
-            avatar: true,
-            createdAt: true
-          }
-        })
+        const joinedCommunity = await communityRepo.getJoinedCommunity(communityId, joinedMember.member_id)
 
-        res.status(201).json({ ...joinedMember, ...joinedCommunity })
+        res.status(201).json({ message: 'Member Joined Successfully', ...joinedCommunity })
         return
       }
 
@@ -105,7 +87,9 @@ export default class MemberController {
         }
       })
 
-      res.status(201).json({ message: 'Member Joined Successfully', member: joinedMember })
+      const joinedCommunity = await communityRepo.getJoinedCommunity(communityId, joinedMember.member_id)
+
+      res.status(201).json({ message: 'Member Joined Successfully', ...joinedCommunity })
     } catch (error) {
       next(error)
     }
@@ -113,23 +97,23 @@ export default class MemberController {
 
   static _leaveMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user?.userId
-    const userRole = req.user?.role
+    // const userRole = req.user?.role
     const communityId = req.params?.communityId
 
-    // const errors: { [index: string]: string } = {}
+    const errors: ErrorType = {}
 
-    if (userRole === 'ADMIN') {
-      res.status(400).json({ message: 'You are the Admin of this community. you cannot perform leave action' })
-      return
-    }
-
-    // get member_id
     const member = await memberRepo.checkIfUserIsMember(communityId, userId)
 
-    // if (Object.keys(errors).length) {
-    //   res.status(400).json(errors)
-    //   return
-    // }
+    if (!member) errors.message = "You're not member of this community"
+
+    if (member.role === 'ADMIN') errors.message = 'You are the Admin of this community. you cannot perform leave action'
+
+    if (member.leavedAt) errors.message = 'Member already leaved'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
 
     try {
       // update leavedAt property of this member

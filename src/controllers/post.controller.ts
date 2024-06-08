@@ -10,6 +10,7 @@ import { v4 as uid } from 'uuid'
 
 class PostController {
   static _getCommunityPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const errors: ErrorType = {}
 
     const communityId = req.params?.communityId
@@ -24,6 +25,13 @@ class PostController {
 
     try {
       const total = await postRepo.numOfPostsInCommunity(communityId)
+
+      const member = await memberRepo.checkIfUserIsMember(communityId, userId)
+
+      if (!member) {
+        res.status(403).json({ message: "You don't have access in it" })
+        return
+      }
 
       const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
 
