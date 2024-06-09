@@ -35,6 +35,21 @@ class UserRepo {
     })
   }
 
+  public getUserByUserId(user_id: string) {
+    return this.user.findUnique({
+      where: {
+        user_id
+      },
+      select: {
+        user_id: true,
+        fullname: true,
+        username: true,
+        avatar: true,
+        bio: true
+      }
+    })
+  }
+
   /**
    * Check uniqueness through filterBy param
    * @param input this should be username or email

@@ -34,7 +34,7 @@ class UserController extends BaseController {
   }
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user.userId
+    const userId = req.params.userId
     const { page = 1, limit = 10 } = req.query
 
     const errors: ErrorType = {}
@@ -203,17 +203,34 @@ class UserController extends BaseController {
     }
   }
 
+  private _getUserByUserId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.params.userId
+
+    try {
+      const user = await userRepo.getUserByUserId(userId)
+
+      res.status(200).json({
+        ...user
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   /**
    * configure router
    */
   public configureRoutes() {
     this.router.get('/', this._auth, this._profile)
 
-    // get current user's All posts with pagination.
-    this.router.get('/posts', this._auth, this._getPosts)
-
     // update the user
     this.router.patch('/', this._auth, this._updateUser)
+
+    // get current user's All posts with pagination.
+    this.router.get('/:userId/posts', this._auth, this._getPosts)
+
+    // get user by username
+    this.router.get('/:userId', this._auth, this._getUserByUserId)
 
     // Retrieve the user's profile picture.
     // TODO: 21/1 make it

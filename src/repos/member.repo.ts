@@ -150,8 +150,9 @@ class MemberRepo {
         user_id: true,
         user: {
           select: {
-            avatar: true,
-            fullname: true
+            fullname: true,
+            username: true,
+            avatar: true
           }
         },
         role: true
