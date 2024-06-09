@@ -21,6 +21,7 @@ class PostRepo {
       },
       select: {
         post_id: true,
+        member_id: true,
         hasPublished: true
       }
     })
@@ -347,7 +348,6 @@ class PostRepo {
   /**
    * get community posts via pagination or all posts
    * @param community_id this should community_id
-   * @param member_id -> member_id but if next params exist -> falsy value
    * @param page optional filed
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
@@ -360,9 +360,6 @@ class PostRepo {
         hasPublished: true,
         isVisible: true,
         deletedAt: null
-        // member: {
-        //   user_id
-        // }
       },
       select: {
         post_id: true,
@@ -386,6 +383,48 @@ class PostRepo {
         community: {
           select: {
             name: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
+  /**
+   * get community posts via pagination or all posts
+   * @param community_id
+   * @param user_id
+   * @param page
+   * @param limit
+   */
+  public getCurrentUserPendingPosts(community_id: string, user_id: string, page: number, limit: number) {
+    return this.post.findMany({
+      relationLoadStrategy: 'join',
+      where: {
+        community_id,
+        member: {
+          user_id
+        },
+        hasPublished: false,
+        deletedAt: null
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        body: true,
+        image_url: true,
+        member: {
+          select: {
+            member_id: true,
+            user: {
+              select: {
+                user_id: true,
+                fullname: true,
+                avatar: true
+              }
+            }
           }
         }
       },
@@ -435,6 +474,22 @@ class PostRepo {
     return this.post.count({
       where: {
         community_id,
+        hasPublished: false,
+        deletedAt: null
+      }
+    })
+  }
+
+  /**
+   * currentUserPendingPostsCount
+   */
+  public currentUserPendingPostsCount(community_id: string, user_id: string) {
+    return this.post.count({
+      where: {
+        community_id,
+        member: {
+          user_id
+        },
         hasPublished: false,
         deletedAt: null
       }

@@ -36,7 +36,7 @@ class AuthorityController extends BaseController {
     }
 
     if (post.hasPublished) {
-      res.status(403).json('Post already approved')
+      res.status(403).json({ message: 'Post already approved' })
       return
     }
 

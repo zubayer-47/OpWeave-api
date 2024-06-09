@@ -311,6 +311,9 @@ class CommunityController extends BaseController {
     // Get all Pending to approval posts by administrators
     this.router.get('/:communityId/pending/posts', this._auth, this._checkRoles, PostController._getPendingPosts)
 
+    // get user's pending posts
+    this.router.get('/:communityId/me/pending/posts', this._auth, PostController._getCurrentUserPendingPosts)
+
     /**
      * ? Members:
      * ? GET /communities/:communityId/members: Get a list of community members.

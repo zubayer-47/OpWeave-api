@@ -25,6 +25,7 @@ class PostController {
 
     try {
       const total = await postRepo.numOfPostsInCommunity(communityId)
+      const totalPendingPost = await postRepo.currentUserPendingPostsCount(communityId, userId)
 
       const member = await memberRepo.checkIfUserIsMember(communityId, userId)
 
@@ -37,7 +38,7 @@ class PostController {
 
       res.setHeader('X-Total-Count', total.toString())
 
-      res.status(200).json({ posts })
+      res.status(200).json({ posts, totalPendingPost })
     } catch (error) {
       next(error)
     }
@@ -202,26 +203,19 @@ class PostController {
 
     if (!communityId || !postId) errors.message = 'content missing'
 
+    const postInfo = await postRepo.isExist(postId, communityId)
+    console.table(postInfo)
+    if (!postInfo) errors.message = 'Post not exist'
+
+    const memberInfo = await memberRepo.isExist(userId, communityId)
+    if (!memberInfo) errors.message = 'Member not exist'
+
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
       return
     }
 
     try {
-      const postInfo = await postRepo.get(postId, communityId)
-      // console.table({ postId, communityId })
-
-      if (!postInfo) {
-        res.status(403).json({ message: 'something went wrong. try again' })
-        return
-      }
-
-      const memberInfo = await memberRepo.isExist(userId, postInfo.community_id)
-
-      if (!memberInfo) {
-        res.status(500).json({ message: 'Request Failed! Please try again.' })
-      }
-
       // permanently delete post if request before admin's approve
       if (!postInfo.hasPublished) {
         await prismadb.post.delete({
@@ -316,6 +310,36 @@ class PostController {
       res.setHeader('x-total-count', totalPendingPosts.toString())
 
       res.status(200).json({ posts, ...member_role })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static _getCurrentUserPendingPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
+    const communityId = req.params?.communityId
+    const { page = 1, limit = 10 } = req.query
+
+    const errors: ErrorType = {}
+
+    const member = await memberRepo.checkIfUserIsMember(communityId, userId)
+    if (!member || !member.member_id || member.leavedAt) errors.message = 'You are not a member'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const pendingPosts = await postRepo.getCurrentUserPendingPosts(communityId, userId, +page, +limit)
+      const pendingPostCount = await postRepo.currentUserPendingPostsCount(communityId, userId)
+
+      // todo: 9/6 set pendingPostCount into header
+
+      res.status(200).json({
+        posts: pendingPosts,
+        total: pendingPostCount
+      })
     } catch (error) {
       next(error)
     }
