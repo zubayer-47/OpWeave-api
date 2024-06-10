@@ -121,7 +121,36 @@ class AuthorityController extends BaseController {
 
       res.status(201).json({
         message: 'Rule created successfully',
-        rules: createdRule
+        rule: createdRule
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _deleteRules = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const role = req.user.role
+    const ruleId = req.params.ruleId
+
+    const errors: ErrorType = {}
+
+    if (role === 'MEMBER') errors.message = 'You cannot access this route'
+
+    const isRuleExist = await authorityRepo.isRuleExist(ruleId)
+    if (!isRuleExist) errors.message = "Rule doesn't exist"
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const deletedRule = await authorityRepo.deleteRule(ruleId)
+      // const updatedRules = await communityRepo.updateRules(rules)
+
+      res.status(201).json({
+        message: 'Rule deleted successfully',
+        rule: { ...deletedRule }
       })
     } catch (error) {
       next(error)
@@ -397,6 +426,9 @@ class AuthorityController extends BaseController {
 
     // create community rule
     this.router.post('/rules', this._auth, this._checkRoles, this._createRules)
+
+    // delete community rule
+    this.router.delete('/rules/:communityId/:ruleId', this._auth, this._checkRoles, this._deleteRules)
 
     // update community rules order
     this.router.patch('/rules/order', this._auth, this._checkRoles, this._updateRulesOrder)

@@ -5,10 +5,12 @@ import prismadb from 'src/libs/prismadb'
 class AuthorityRepo {
   private member: Prisma.memberDelegate<DefaultArgs>
   private post: Prisma.postDelegate<DefaultArgs>
+  private rule: Prisma.ruleDelegate<DefaultArgs>
 
   constructor() {
     this.member = prismadb.member
     this.post = prismadb.post
+    this.rule = prismadb.rule
   }
 
   /**
@@ -105,6 +107,36 @@ class AuthorityRepo {
             avatar: true
           }
         }
+      }
+    })
+  }
+
+  /**
+   * isRuleExits
+   */
+  public isRuleExist(rule_id: string) {
+    return this.rule.findUnique({
+      where: {
+        rule_id
+      },
+      select: {
+        rule_id: true
+      }
+    })
+  }
+
+  /**
+   *
+   * @param rule_id
+   * @returns
+   */
+  public deleteRule(rule_id: string) {
+    return this.rule.delete({
+      where: {
+        rule_id
+      },
+      select: {
+        rule_id: true
       }
     })
   }
