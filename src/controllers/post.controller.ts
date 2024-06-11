@@ -29,7 +29,9 @@ class PostController {
 
       const member = await memberRepo.checkIfUserIsMember(communityId, userId)
 
-      if (!member) {
+      console.log(member, '----xz---')
+
+      if (!member || member.leavedAt) {
         res.status(403).json({ message: "You don't have access in it" })
         return
       }

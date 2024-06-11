@@ -139,7 +139,7 @@ class CommunityController extends BaseController {
       // if there is an error then remove the created community
 
       if (createdCommunity) {
-        const deletedCommunity = await prismadb.community.delete({
+        await prismadb.community.delete({
           where: {
             community_id: createdCommunity.community_id
           },
@@ -147,7 +147,7 @@ class CommunityController extends BaseController {
             community_id: true
           }
         })
-        console.log('deletedCommunity :', deletedCommunity)
+        // console.log('deletedCommunity :', deletedCommunity)
       }
 
       next(error)

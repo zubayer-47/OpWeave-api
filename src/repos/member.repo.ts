@@ -142,7 +142,8 @@ class MemberRepo {
   public getMembersInCommunity(community_id: string, page: number, limit: number) {
     return this.member.findMany({
       where: {
-        community_id
+        community_id,
+        leavedAt: null
       },
       select: {
         community_id: true,

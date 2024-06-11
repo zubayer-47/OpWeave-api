@@ -45,7 +45,7 @@ export default class MemberController {
 
     // check whether member exist or not already
     const member = await memberRepo.checkIfUserIsMember(communityId, userId)
-    console.log({ member })
+    // console.log({ member })
     if (member && !member?.leavedAt) errors.member = 'Member Already Exist'
 
     if (Object.keys(errors).length) {
