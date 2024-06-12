@@ -181,7 +181,7 @@ class CommunityController extends BaseController {
           community_id: communityId
         },
         orderBy: {
-          order: 'asc'
+          updatedAt: 'asc'
         }
       })
 

@@ -139,10 +139,12 @@ class MemberRepo {
    * @param page page number
    * @param limit limit of each page
    */
+  // public getMembersInCommunity(community_id: string, filterBy: 'all' | 'authority', page: number, limit: number) {
   public getMembersInCommunity(community_id: string, page: number, limit: number) {
     return this.member.findMany({
       where: {
         community_id,
+        // role: {},
         leavedAt: null
       },
       select: {

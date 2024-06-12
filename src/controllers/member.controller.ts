@@ -9,7 +9,7 @@ export default class MemberController {
   static _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const errors: ErrorType = {}
     const { communityId } = req.params
-    const { page = 1, limit = 10 } = req.query
+    const { page = 1, limit = 10, filterBy = 'all' } = req.query
 
     if (!communityId) errors.message = 'content missing'
 
@@ -25,6 +25,7 @@ export default class MemberController {
       const total = await memberRepo.numOfMembersInCommunity(communityId)
 
       const members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
+      // const members = await memberRepo.getMembersInCommunity(communityId, filterBy, +page, +limit)
 
       // TODO: 7/6 set total into headers
 

@@ -112,12 +112,7 @@ class AuthorityController extends BaseController {
     }
 
     try {
-      const maxRulesCount = await prismadb.rule.count({
-        where: {
-          community_id
-        }
-      })
-      const createdRule = await communityRepo.createRule(community_id, title, body, maxRulesCount)
+      const createdRule = await communityRepo.createRule(community_id, title, body)
 
       res.status(201).json({
         message: 'Rule created successfully',
@@ -157,7 +152,7 @@ class AuthorityController extends BaseController {
     }
   }
 
-  private _updateRulesOrder = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private _reorderRules = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const role = req.user.role
     const community_id = req.body.community_id
     const rules = req.body.rules as RuleType[]
@@ -173,10 +168,10 @@ class AuthorityController extends BaseController {
     if (!isExistCommunity.community_id) errors.message = "Community doesn't exist"
 
     // Validate the uniqueness of order values in the rules array
-    const orderValues = rules.map((rule) => rule.order)
-    const uniqueOrderValues = new Set(orderValues)
+    const titles = rules.map((rule) => rule.title)
+    const uniqueTitles = new Set(titles)
 
-    if (uniqueOrderValues.size !== orderValues.length) errors.message = 'Order values must be unique.'
+    if (uniqueTitles.size !== titles.length) errors.message = 'Rule must be unique.'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -430,8 +425,8 @@ class AuthorityController extends BaseController {
     // delete community rule
     this.router.delete('/rules/:communityId/:ruleId', this._auth, this._checkRoles, this._deleteRules)
 
-    // update community rules order
-    this.router.patch('/rules/order', this._auth, this._checkRoles, this._updateRulesOrder)
+    // update community rules reorder
+    this.router.patch('/rules/reorder', this._auth, this._checkRoles, this._reorderRules)
 
     // toggle hide/unhide post
     this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)

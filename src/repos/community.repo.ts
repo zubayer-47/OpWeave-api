@@ -106,13 +106,12 @@ class CommunityRepo {
   /**
    * createRule
    */
-  public createRule(community_id: string, title: string, body: string, maxRulesCount) {
+  public createRule(community_id: string, title: string, body: string) {
     return prismadb.rule.create({
       data: {
         community_id: community_id,
         title,
-        body,
-        order: maxRulesCount + 1
+        body
       }
     })
   }
@@ -127,7 +126,8 @@ class CommunityRepo {
           rule_id: rule.rule_id
         },
         data: {
-          order: rule.order
+          // updating any property to change updatedAt property to updated time
+          title: rule.title
         }
       })
     )
@@ -147,7 +147,9 @@ class CommunityRepo {
         community_id: true,
         name: true,
         bio: true,
-        avatar: true
+        description: true,
+        avatar: true,
+        createdAt: true
       }
     })
   }
