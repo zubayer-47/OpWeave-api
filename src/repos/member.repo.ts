@@ -1,7 +1,7 @@
 import { MemberRole, Prisma } from '@prisma/client'
 import { DefaultArgs } from '@prisma/client/runtime/library'
 import prismadb from 'src/libs/prismadb'
-import { MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
+import { FilterBy, MemberRoleType, MuteUnmuteStatusType } from 'src/types/custom'
 
 class MemberRepo {
   private member: Prisma.memberDelegate<DefaultArgs>
@@ -64,10 +64,24 @@ class MemberRepo {
    * @param {String} community_id Community ID
    * @returns {Promise<Number>}
    */
-  public numOfMembersInCommunity(community_id: string): Promise<number> {
+  public numOfMembersInCommunity(community_id: string, filterBy: FilterBy = 'all'): Promise<number> {
+    const where: Prisma.memberWhereInput =
+      filterBy === 'all'
+        ? {
+            // role: {
+            //   in: ['ADMIN', 'MEMBER', 'MODERATOR']
+            // }
+          }
+        : {
+            role: {
+              in: ['ADMIN', 'MODERATOR']
+            }
+          }
+
     return this.member.count({
       where: {
-        community_id
+        community_id,
+        ...where
       }
     })
   }
@@ -140,12 +154,21 @@ class MemberRepo {
    * @param limit limit of each page
    */
   // public getMembersInCommunity(community_id: string, filterBy: 'all' | 'authority', page: number, limit: number) {
-  public getMembersInCommunity(community_id: string, page: number, limit: number) {
+  public getMembersInCommunity(community_id: string, filterBy: FilterBy, page: number, limit: number) {
+    const where: Prisma.memberWhereInput =
+      filterBy === 'all'
+        ? {}
+        : {
+            role: {
+              in: ['ADMIN', 'MODERATOR']
+            }
+          }
+
     return this.member.findMany({
       where: {
         community_id,
-        // role: {},
-        leavedAt: null
+        leavedAt: null,
+        ...where
       },
       select: {
         community_id: true,

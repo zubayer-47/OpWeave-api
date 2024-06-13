@@ -25,3 +25,5 @@ export type RuleType = {
   createdAt: string
   updatedAt: string
 }
+
+export type FilterBy = 'all' | 'authority'

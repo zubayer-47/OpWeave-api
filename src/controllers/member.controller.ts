@@ -3,7 +3,7 @@ import prismadb from 'src/libs/prismadb'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
-import { ErrorType } from 'src/types/custom'
+import { ErrorType, FilterBy } from 'src/types/custom'
 
 export default class MemberController {
   static _getMembers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -22,9 +22,9 @@ export default class MemberController {
     }
 
     try {
-      const total = await memberRepo.numOfMembersInCommunity(communityId)
+      const total = await memberRepo.numOfMembersInCommunity(communityId, filterBy as FilterBy)
 
-      const members = await memberRepo.getMembersInCommunity(communityId, +page, +limit)
+      const members = await memberRepo.getMembersInCommunity(communityId, filterBy as FilterBy, +page, +limit)
       // const members = await memberRepo.getMembersInCommunity(communityId, filterBy, +page, +limit)
 
       // TODO: 7/6 set total into headers
