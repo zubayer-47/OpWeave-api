@@ -166,7 +166,8 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         member_id: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7',
         body: 'unnoyon community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -177,7 +178,8 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         member_id: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7',
         body: 'unnoyon community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -188,7 +190,8 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         member_id: 'd4397974-b70b-4f00-8e39-5719a8adf56d',
         body: 'unnoyon community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()
@@ -199,7 +202,8 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         member_id: '784ce74a-e5b8-4160-9309-74ae3b2332cc',
         body: 'DEv community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -210,7 +214,8 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         member_id: '784ce74a-e5b8-4160-9309-74ae3b2332cc',
         body: 'dev community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -221,7 +226,8 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         member_id: 'e8759b7f-7471-4adf-a251-73dd4e6ec79b',
         body: 'dev community description',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()
@@ -232,7 +238,8 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '715449ac-e120-4fab-9ed5-875670b095ef',
         body: 'React Updates to v19',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -243,7 +250,8 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '715449ac-e120-4fab-9ed5-875670b095ef',
         body: 'React Updates to v19',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -254,7 +262,8 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: '4352a883-63dd-4bfe-a5f2-26d59a9503d3',
         body: 'React Updates to v19',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -265,7 +274,8 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: 'a00bfa9e-1c15-4df3-aab5-224ad94910d8',
         body: 'React Updates to v19',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -276,7 +286,8 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         member_id: 'a00bfa9e-1c15-4df3-aab5-224ad94910d8',
         body: 'React Updates to v19',
-        image_url: 'http://www.gravatar.com/avatar?d=identicon',
+        image_url:
+          'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()

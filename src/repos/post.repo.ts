@@ -303,42 +303,37 @@ class PostRepo {
    * @param user_id
    * @param page
    * @param limit
-   * @returns list of posts
    */
   public getUserFeedPosts(user_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
-        member: {
-          user_id
-        },
-        deletedAt: null,
-        hasPublished: true
+        hasPublished: true,
+        isVisible: true,
+        deletedAt: null
       },
-      select: {
-        post_id: true,
-        community_id: true,
-        member_id: true,
-        body: true,
-        image_url: true,
-        createdAt: true,
-        updatedAt: true,
-        member: {
-          select: {
-            user: {
+
+      include: {
+        community: {
+          include: {
+            members: {
+              where: {
+                user_id,
+                leavedAt: null
+              },
               select: {
-                fullname: true,
-                username: true,
-                avatar: true
+                user: {
+                  select: {
+                    fullname: true,
+                    username: true,
+                    avatar: true
+                  }
+                }
               }
             }
           }
-        },
-        community: {
-          select: {
-            name: true
-          }
         }
       },
+
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
       take: limit

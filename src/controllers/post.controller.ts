@@ -80,7 +80,7 @@ class PostController {
     const { content } = req.body
     const file = req.file
 
-    if (!content) errors.content = 'Something is missing in content!'
+    if (!content && !file) errors.content = 'Something is missing in content!'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -354,8 +354,33 @@ class PostController {
     try {
       const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
 
+      const processedPosts = posts.map((post) => {
+        const hasJoined = post.community.members.length
+
+        const { hasPublished, deletedAt, deletedBy, isVisible, community, ...processPost } = post
+
+        const { name, members } = community
+
+        const member = members.length
+          ? {
+              user: {
+                fullname: members[0].user.fullname,
+                username: members[0].user.username,
+                avatar: members[0].user.avatar
+              }
+            }
+          : null
+
+        return {
+          ...processPost,
+          community: { name },
+          member,
+          hasJoined: !!hasJoined
+        }
+      })
+
       res.status(200).json({
-        posts
+        posts: processedPosts
       })
     } catch (error) {
       next(error)
