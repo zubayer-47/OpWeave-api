@@ -5,6 +5,7 @@ import prismadb from 'src/libs/prismadb'
 import { uploadWebPToCloudinary } from 'src/libs/uploadImage'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
+import reactRepo from 'src/repos/react.repo'
 import { ErrorType } from 'src/types/custom'
 import { v4 as uid } from 'uuid'
 
@@ -118,6 +119,71 @@ class PostController {
       })
 
       res.status(201).json({ ...post })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static _postReaction = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const user_id = req.user.userId
+    const post_id = req.body?.post_id
+    const errors: ErrorType = {}
+
+    if (!post_id) errors.message = 'content missing'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const post = await postRepo.findUniquePost(post_id)
+
+      if (!post) {
+        res.status(404).json({ message: 'Post Not Found' })
+        return
+      }
+
+      const existingReact = await reactRepo.getReact(post_id, user_id)
+
+      if (existingReact) {
+        const newReact = await reactRepo.toggleReactType(existingReact.react_id, existingReact.react_type)
+
+        const reactCount = await reactRepo.LikeCount()
+
+        res.status(200).json({
+          message: `Post successfully ${newReact.react_type.toLowerCase()}d!`,
+          count: reactCount
+        })
+        return
+      } else {
+        const member = await prismadb.member.findFirst({
+          where: {
+            user_id
+          },
+          select: {
+            member_id: true
+          }
+        })
+
+        await prismadb.react.create({
+          data: {
+            post_id,
+            member_id: member.member_id,
+            react_type: 'LIKE'
+          },
+          select: {
+            post_id: true
+          }
+        })
+
+        const reactCount = await reactRepo.LikeCount()
+
+        res.status(201).json({
+          message: 'Post successfully liked!',
+          count: reactCount
+        })
+      }
     } catch (error) {
       next(error)
     }

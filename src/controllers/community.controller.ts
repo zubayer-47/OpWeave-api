@@ -298,6 +298,8 @@ class CommunityController extends BaseController {
       PostController._createPost
     )
 
+    this.router.post('/posts/react', this._auth, PostController._postReaction)
+
     // Get details of a specific post in a community.
     this.router.get('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
 

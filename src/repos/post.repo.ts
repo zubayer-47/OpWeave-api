@@ -28,6 +28,20 @@ class PostRepo {
   }
 
   /**
+   * findUniquePost
+   */
+  public findUniquePost(post_id: string) {
+    return this.post.findUnique({
+      where: {
+        post_id
+      },
+      select: {
+        post_id: true
+      }
+    })
+  }
+
+  /**
    * get post by postId
    * @param post_id this should be postId
    * @returns post_id community_id member_id title body hasPublished createdAt updatedAt
