@@ -355,24 +355,20 @@ class PostController {
       const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
 
       const processedPosts = posts.map((post) => {
-        const hasJoined = post.member.user.user_id === userId
+        const hasJoined = post.community.members[0]?.user_id === userId
 
         const {
           hasPublished,
           deletedAt,
           deletedBy,
           isVisible,
-          member: {
-            user: { user_id, ...user }
-          },
+          community: { name },
           ...processPost
         } = post
 
         return {
           ...processPost,
-          member: {
-            user
-          },
+          community: { name },
           hasJoined
         }
       })

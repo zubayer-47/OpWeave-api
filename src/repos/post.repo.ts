@@ -304,7 +304,7 @@ class PostRepo {
    * @param page
    * @param limit
    */
-  public getUserFeedPosts(_user_id: string, page: number, limit: number) {
+  public getUserFeedPosts(user_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
         hasPublished: true,
@@ -313,25 +313,60 @@ class PostRepo {
       },
 
       include: {
+        community: {
+          select: {
+            name: true,
+            members: {
+              where: {
+                user_id,
+                leavedAt: null
+              },
+              select: {
+                user_id: true,
+                user: {
+                  select: {
+                    fullname: true,
+                    username: true,
+                    avatar: true
+                  }
+                }
+              }
+            }
+          }
+        },
         member: {
           select: {
             user: {
               select: {
-                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true
               }
             }
           }
-        },
-
-        community: {
-          select: {
-            name: true
-          }
         }
       },
+
+      // include: {
+      //   member: {
+      //     select: {
+      //       user: {
+      //         select: {
+      //           user_id: true,
+      //           fullname: true,
+      //           username: true,
+      //           avatar: true
+      //         }
+      //       }
+      //     }
+      //   },
+
+      // community: {
+      //   select: {
+      //     name: true
+      //   }
+      // }
+      // },
 
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
