@@ -166,7 +166,7 @@ model react {
   post    post   @relation(fields: [post_id], references: [post_id])
   post_id String
 
-  react_type ReactType
+  react_type ReactType @default(UNLIKE)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }

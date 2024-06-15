@@ -48,6 +48,7 @@ class PostController {
   }
 
   static _getPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const { communityId, postId } = req.params
 
     const errors: ErrorType = {}
@@ -60,7 +61,7 @@ class PostController {
     }
 
     try {
-      const post = await postRepo.getPostByPostId(postId)
+      const post = await postRepo.getPostByPostId(postId, userId)
       if (!post) {
         res.status(404).json({ message: 'Post Does Not Exist' })
         return
@@ -110,13 +111,16 @@ class PostController {
         })
       }
 
-      const post = await postRepo.createPost({
-        community_id: communityId,
-        member_id: member.member_id,
-        body: content,
-        image_url: uploadResult?.secure_url || null,
-        hasPublished: member.role !== 'MEMBER'
-      })
+      const post = await postRepo.createPost(
+        {
+          community_id: communityId,
+          member_id: member.member_id,
+          body: content,
+          image_url: uploadResult?.secure_url || null,
+          hasPublished: member.role !== 'MEMBER'
+        },
+        userId
+      )
 
       res.status(201).json({ ...post })
     } catch (error) {

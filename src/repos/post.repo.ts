@@ -73,7 +73,8 @@ class PostRepo {
   public async createPost(
     data:
       | (Prisma.Without<Prisma.postCreateInput, Prisma.postUncheckedCreateInput> & Prisma.postUncheckedCreateInput)
-      | (Prisma.Without<Prisma.postUncheckedCreateInput, Prisma.postCreateInput> & Prisma.postCreateInput)
+      | (Prisma.Without<Prisma.postUncheckedCreateInput, Prisma.postCreateInput> & Prisma.postCreateInput),
+    user_id: string
   ) {
     return await this.post.create({
       data,
@@ -85,6 +86,16 @@ class PostRepo {
         image_url: true,
         createdAt: true,
         updatedAt: true,
+        reacts: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            react_type: true
+          }
+        },
         member: {
           select: {
             user: {
@@ -218,7 +229,7 @@ class PostRepo {
   /**
    * getPostsWithUserId ->> Get posts by userId
    */
-  public getPostByPostId(post_id: string) {
+  public getPostByPostId(post_id: string, user_id: string) {
     return this.post.findFirst({
       where: {
         post_id,
@@ -232,6 +243,17 @@ class PostRepo {
         member_id: true,
         body: true,
         image_url: true,
+        reacts: {
+          where: {
+            post_id,
+            member: {
+              user_id
+            }
+          },
+          select: {
+            react_type: true
+          }
+        },
         createdAt: true,
         updatedAt: true,
         member: {
@@ -346,6 +368,17 @@ class PostRepo {
                 }
               }
             }
+          }
+        },
+
+        reacts: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            react_type: true
           }
         },
         member: {
