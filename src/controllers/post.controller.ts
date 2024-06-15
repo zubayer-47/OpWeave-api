@@ -29,13 +29,12 @@ class PostController {
       const totalPendingPost = await postRepo.currentUserPendingPostsCount(communityId, userId)
 
       const member = await memberRepo.checkIfUserIsMember(communityId, userId)
-
-      console.log(member, '----xz---')
-
       if (!member || member.leavedAt) {
         res.status(403).json({ message: "You don't have access in it" })
         return
       }
+
+      console.log(member.member_id, communityId)
 
       const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
 
@@ -131,9 +130,10 @@ class PostController {
   static _postReaction = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const user_id = req.user.userId
     const post_id = req.body?.post_id
+    const community_id = req.body?.community_id
     const errors: ErrorType = {}
 
-    if (!post_id) errors.message = 'content missing'
+    if (!post_id || !community_id) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -141,10 +141,10 @@ class PostController {
     }
 
     try {
-      const post = await postRepo.findUniquePost(post_id)
+      const post = await postRepo.findUniquePost(user_id, community_id, post_id)
 
       if (!post) {
-        res.status(404).json({ message: 'Post Not Found' })
+        res.status(403).json({ message: 'You are not allowed to react this post.' })
         return
       }
 

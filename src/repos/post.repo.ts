@@ -30,10 +30,14 @@ class PostRepo {
   /**
    * findUniquePost
    */
-  public findUniquePost(post_id: string) {
+  public findUniquePost(user_id: string, community_id: string, post_id: string) {
     return this.post.findUnique({
       where: {
-        post_id
+        post_id,
+        community_id,
+        member: {
+          user_id
+        }
       },
       select: {
         post_id: true
@@ -77,7 +81,15 @@ class PostRepo {
     user_id: string
   ) {
     return await this.post.create({
-      data,
+      data: {
+        ...data,
+        reacts: {
+          create: {
+            member_id: data.member_id,
+            react_type: 'UNLIKE'
+          }
+        }
+      },
       select: {
         post_id: true,
         community_id: true,
@@ -456,6 +468,15 @@ class PostRepo {
             }
           }
         },
+        // reacts: {
+        //   where: {
+        //     member_id
+        //   },
+        //   select: {
+        //     react_type: true
+        //   }
+        // },
+
         community: {
           select: {
             name: true

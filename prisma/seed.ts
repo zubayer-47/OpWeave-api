@@ -296,6 +296,25 @@ async function main() {
   })
 
   console.log({ posts })
+
+  const postReacts = await prisma.react.createMany({
+    data: [
+      {
+        post_id: '61a11155-42d4-4a14-aafa-34aecbd07f4c',
+        member_id: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7'
+      },
+      {
+        post_id: '56b93364-0ea9-49c6-9c63-4d3aec518d18',
+        member_id: '2d1badd9-6a2b-4711-bb3f-fbe8eaa0f4a7'
+      },
+      {
+        post_id: 'eff2d1a2-2381-4397-83e0-09d9abc10b00',
+        member_id: 'd4397974-b70b-4f00-8e39-5719a8adf56d'
+      }
+    ]
+  })
+
+  console.log({ postReacts })
 }
 
 main()
