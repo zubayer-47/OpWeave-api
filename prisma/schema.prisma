@@ -163,7 +163,7 @@ model react {
   member    member @relation(fields: [member_id], references: [member_id])
   member_id String
 
-  post    post   @relation(fields: [post_id], references: [post_id])
+  post    post   @relation(fields: [post_id], references: [post_id], onDelete: Cascade)
   post_id String
 
   react_type ReactType @default(UNLIKE)

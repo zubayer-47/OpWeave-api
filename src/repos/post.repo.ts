@@ -28,16 +28,19 @@ class PostRepo {
   }
 
   /**
-   * findUniquePost
+   *
+   * @param community_id
+   * @param post_id
+   * @returns
    */
-  public findUniquePost(user_id: string, community_id: string, post_id: string) {
+  public findUniquePost(community_id: string, post_id: string) {
     return this.post.findUnique({
       where: {
         post_id,
-        community_id,
-        member: {
-          user_id
-        }
+        community_id
+        // member: {
+        //   user_id
+        // }
       },
       select: {
         post_id: true
@@ -175,6 +178,7 @@ class PostRepo {
           select: {
             user: {
               select: {
+                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true
@@ -219,6 +223,7 @@ class PostRepo {
           select: {
             user: {
               select: {
+                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true
@@ -272,6 +277,7 @@ class PostRepo {
           select: {
             user: {
               select: {
+                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true
@@ -281,6 +287,14 @@ class PostRepo {
         },
         community: {
           select: {
+            members: {
+              where: {
+                user_id
+              },
+              select: {
+                role: true
+              }
+            },
             name: true
           }
         }
@@ -370,9 +384,9 @@ class PostRepo {
                 leavedAt: null
               },
               select: {
-                user_id: true,
                 user: {
                   select: {
+                    user_id: true,
                     fullname: true,
                     username: true,
                     avatar: true
@@ -440,7 +454,7 @@ class PostRepo {
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
    */
-  public getPostsInCommunity(community_id: string, page: number, limit: number) {
+  public getPostsInCommunity(community_id: string, user_id: string, page: number, limit: number) {
     return this.post.findMany({
       relationLoadStrategy: 'join',
       where: {
@@ -461,11 +475,25 @@ class PostRepo {
           select: {
             user: {
               select: {
+                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true
               }
             }
+          }
+        },
+
+        reacts: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            // post_id: true,
+            // react_id: true,
+            react_type: true
           }
         },
         // reacts: {

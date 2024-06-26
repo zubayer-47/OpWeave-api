@@ -34,9 +34,7 @@ class PostController {
         return
       }
 
-      console.log(member.member_id, communityId)
-
-      const posts = await postRepo.getPostsInCommunity(communityId, +page, +limit)
+      const posts = await postRepo.getPostsInCommunity(communityId, userId, +page, +limit)
 
       res.setHeader('X-Total-Count', total.toString())
 
@@ -140,8 +138,10 @@ class PostController {
       return
     }
 
+    // console.log(user_id, community_id, post_id)
+
     try {
-      const post = await postRepo.findUniquePost(user_id, community_id, post_id)
+      const post = await postRepo.findUniquePost(community_id, post_id)
 
       if (!post) {
         res.status(403).json({ message: 'You are not allowed to react this post.' })
@@ -425,7 +425,7 @@ class PostController {
       const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
 
       const processedPosts = posts.map((post) => {
-        const hasJoined = post.community.members[0]?.user_id === userId
+        const hasJoined = post.community.members[0]?.user.user_id === userId
 
         const {
           hasPublished,
