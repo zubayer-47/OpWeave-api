@@ -12,6 +12,7 @@ import { Server } from 'socket.io'
 import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 import authController from './controllers/auth.controller'
 import authorityController from './controllers/authority.controller'
+import commentController from './controllers/comment.controller'
 import communityController from './controllers/community.controller'
 import userController from './controllers/user.controller'
 import { sysLog } from './libs/logger'
@@ -65,6 +66,7 @@ class ExpressServer {
     // this.express.use('/api/v1/posts/', postController.router)
     // this.express.use('/api/v1/members/', memberController.router)
     this.express.use('/api/v1/authority/', authorityController.router)
+    this.express.use('/api/v1/comments/', commentController.router)
   }
 
   private _sockets() {

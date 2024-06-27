@@ -559,6 +559,30 @@ class PostRepo {
     })
   }
 
+  public getMemberRoleByPostId(post_id: string, user_id: string) {
+    return this.post.findFirst({
+      where: {
+        post_id
+      },
+
+      select: {
+        community: {
+          select: {
+            members: {
+              where: {
+                user_id,
+                leavedAt: null
+              },
+              select: {
+                role: true
+              }
+            }
+          }
+        }
+      }
+    })
+  }
+
   /**
    *
    * @param {String} community_id Community ID

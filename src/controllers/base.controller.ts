@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response, Router } from 'express'
 import { verifyToken } from 'src/libs'
 import memberRepo from 'src/repos/member.repo'
+import postRepo from 'src/repos/post.repo'
+import { ErrorType } from 'src/types/custom'
 
 export default abstract class BaseController {
   public router: Router
@@ -65,6 +67,29 @@ export default abstract class BaseController {
     } catch (error) {
       next(error)
       return
+    }
+    next()
+  }
+
+  protected _checkRolesWithPostId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
+    const postId = req.params?.postId
+
+    const errors: ErrorType = {}
+
+    if (!postId) errors.message = 'content missing'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const memberRole = await postRepo.getMemberRoleByPostId(postId, userId)
+
+      req.user.role = memberRole.community.members.length ? memberRole.community.members[0].role : null
+    } catch (error) {
+      next(error)
     }
     next()
   }

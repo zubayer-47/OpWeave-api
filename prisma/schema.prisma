@@ -74,10 +74,9 @@ model member {
   scopes  Scopes     @default(VIEWER)
   isMuted Boolean    @default(false)
 
-  posts         post[]
-  reacts        react[]
-  comments      comment[]
-  user_comments userComment[]
+  posts    post[]
+  reacts   react[]
+  comments comment[]
 
   joinedAt DateTime  @default(now())
   leavedAt DateTime?
@@ -171,32 +170,39 @@ model react {
   updatedAt  DateTime  @updatedAt
 }
 
+// model comment {
+//   comment_id String @id @default(uuid())
+
+//   member    member @relation(fields: [member_id], references: [member_id])
+//   member_id String
+
+//   post          post          @relation(fields: [post_id], references: [post_id])
+//   post_id       String
+//   user_comments userComment[]
+
+//   createdAt DateTime @default(now())
+//   updatedAt DateTime @updatedAt
+// }
+
 model comment {
-  comment_id String @id @default(uuid())
+  comment_id String    @id @default(uuid())
+  body       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  deletedAt  DateTime?
 
+  // Relations
   member    member @relation(fields: [member_id], references: [member_id])
   member_id String
 
-  post          post          @relation(fields: [post_id], references: [post_id])
-  post_id       String
-  user_comments userComment[]
+  post    post   @relation(fields: [post_id], references: [post_id])
+  post_id String
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
+  // Self-referential relation for replies
+  parent_comment    comment? @relation("CommentReplies", fields: [parent_comment_id], references: [comment_id])
+  parent_comment_id String?
 
-model userComment {
-  user_c_id String @id @default(uuid())
-
-  comment    comment @relation(fields: [comment_id], references: [comment_id])
-  comment_id String
-
-  member    member @relation(fields: [member_id], references: [member_id])
-  member_id String
-
-  content   String
-  status    CommentStatus @default(MAIN)
-  createdAt DateTime      @default(now())
+  replies comment[] @relation("CommentReplies")
 }
 
 enum CommentStatus {
