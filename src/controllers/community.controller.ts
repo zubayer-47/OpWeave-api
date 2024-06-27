@@ -301,7 +301,7 @@ class CommunityController extends BaseController {
     this.router.post('/posts/react', this._auth, PostController._postReaction)
 
     // Get details of a specific post in a community.
-    this.router.get('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._getPost)
+    this.router.get('/posts/:postId', this._auth, PostController._getPost)
 
     // Update a post in a specific community. ->> Only the post creator or authorized community members can modify the post.
     this.router.patch('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._updatePost)

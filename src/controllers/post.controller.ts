@@ -46,11 +46,11 @@ class PostController {
 
   static _getPost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.userId
-    const { communityId, postId } = req.params
+    const { postId } = req.params
 
     const errors: ErrorType = {}
 
-    if (!communityId || !postId) errors.message = 'content missing'
+    if (!postId) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
