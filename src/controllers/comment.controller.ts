@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
+import commentRepo from 'src/repos/comment.repo'
 import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
@@ -40,6 +41,13 @@ class CommentController extends BaseController {
           body,
           member_id,
           post_id: postId
+        },
+        select: {
+          comment_id: true,
+          member_id: true,
+          body: true,
+          createdAt: true,
+          updatedAt: true
         }
       })
 
@@ -81,40 +89,11 @@ class CommentController extends BaseController {
     const skip = (pageNumber - 1) * pageSizeNumber
 
     try {
-      const comments = await prismadb.comment.findMany({
-        where: {
-          post_id: postId,
-          parent_comment_id: null
-        },
-        select: {
-          comment_id: true,
-          body: true,
-          parent_comment_id: true,
-          createdAt: true,
-          updatedAt: true
-        },
-        skip: skip,
-        take: pageSizeNumber
-      })
+      const comments = await commentRepo.getComments(postId, skip, pageSizeNumber)
 
-      const commentsWithReplyCount = await Promise.all(
-        comments.map(async (comment) => {
-          const replyCount = await prismadb.comment.count({
-            where: {
-              parent_comment_id: comment.comment_id
-            }
-          })
+      const commentsWithReplyCount = await commentRepo.commentsIncludingReplyCounts(comments)
 
-          return {
-            ...comment,
-            replyCount
-          }
-        })
-      )
-
-      const totalComments = await prismadb.comment.count({
-        where: { post_id: postId, parent_comment_id: null }
-      })
+      const totalComments = await commentRepo.commentCounts(postId)
 
       res
         .status(200)
@@ -149,11 +128,7 @@ class CommentController extends BaseController {
     }
 
     try {
-      const comment = await prismadb.comment.findUnique({
-        where: {
-          comment_id: commentId
-        }
-      })
+      const comment = await commentRepo.getUniqueComment(commentId)
 
       if (!comment) {
         res.status(404).json({ message: 'Parent comment not found' })
@@ -186,7 +161,7 @@ class CommentController extends BaseController {
    * @returns {Object} 400 - Error if content missing
    * @returns {Object} 500 - Error message
    */
-  private _getCommentReply = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private _getCommentReplies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const commentId = req.params?.commentId
 
     const errors: ErrorType = {}
@@ -199,21 +174,7 @@ class CommentController extends BaseController {
     }
 
     try {
-      const replies = await prismadb.comment.findFirst({
-        where: {
-          comment_id: commentId,
-          parent_comment_id: null
-        },
-        select: {
-          replies: {
-            where: {
-              NOT: {
-                parent_comment_id: null
-              }
-            }
-          }
-        }
-      })
+      const replies = await commentRepo.getCommentReplies(commentId)
 
       res.status(200).json({ ...replies })
     } catch (error) {
@@ -226,7 +187,7 @@ class CommentController extends BaseController {
     this.router.get('/post/:postId', this._auth, this._getComments)
 
     //? GET: Get comment replies
-    this.router.get('/:commentId/reply', this._auth, this._getCommentReply)
+    this.router.get('/:commentId/reply', this._auth, this._getCommentReplies)
 
     //? POST: Create a new comment for a post
     this.router.post('/post/:postId', this._auth, this._checkRolesWithPostId, this._createComment)

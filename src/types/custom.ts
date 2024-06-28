@@ -1,3 +1,5 @@
+import { $Enums } from '@prisma/client'
+
 export type JWTType = {
   aud: string
   iat: number
@@ -27,3 +29,17 @@ export type RuleType = {
 }
 
 export type FilterBy = 'all' | 'authority'
+
+export type CommentType = {
+  comment_id: string
+  body: string
+  createdAt: Date
+  updatedAt: Date
+  parent_comment_id: string
+  member: {
+    role: $Enums.MemberRole
+    user: {
+      fullname: string
+    }
+  }
+}
