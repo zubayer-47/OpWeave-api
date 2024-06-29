@@ -29,6 +29,7 @@ class CommentRepo {
                 fullname: true
               }
             },
+            member_id: true,
             role: true
           }
         },
@@ -36,6 +37,7 @@ class CommentRepo {
         createdAt: true,
         updatedAt: true
       },
+      orderBy: { createdAt: 'asc' },
       skip: skip,
       take: pageSizeNumber
     })
@@ -85,12 +87,24 @@ class CommentRepo {
         comment_id,
         parent_comment_id: null
       },
+
+      // select: {
+      //   replies: {
+      //     select: {
+      //       comment_id: true,
+      //       member: {
+      //         select: {
+      //           user: {}
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
       select: {
         replies: {
           where: {
-            NOT: {
-              parent_comment_id: null
-            }
+            parent_comment_id: comment_id
           },
           select: {
             comment_id: true,
@@ -102,6 +116,7 @@ class CommentRepo {
                     fullname: true
                   }
                 },
+                member_id: true,
                 role: true
               }
             },

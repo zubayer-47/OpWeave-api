@@ -35,10 +35,10 @@ class UserRepo {
     })
   }
 
-  public getUserByUserId(user_id: string) {
+  public getUserByUsername(username: string) {
     return this.user.findUnique({
       where: {
-        user_id
+        username
       },
       select: {
         user_id: true,

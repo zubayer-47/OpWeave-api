@@ -26,6 +26,29 @@ class CommunityRepo {
     })
   }
 
+  public getUserProfileCommunities(username: string, page: number, limit: number) {
+    return this.community.findMany({
+      relationLoadStrategy: 'join',
+      where: {
+        members: {
+          some: {
+            user: { username },
+            leavedAt: null
+          }
+        }
+      },
+      select: {
+        community_id: true,
+        bio: true,
+        name: true,
+        avatar: true
+      },
+      orderBy: { createdAt: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
   public getUserAssignedCommunities(user_id: string, page: number, limit: number) {
     return this.community.findMany({
       relationLoadStrategy: 'join',

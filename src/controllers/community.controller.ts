@@ -57,6 +57,30 @@ class CommunityController extends BaseController {
     }
   }
 
+  private _getUserProfileCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const username = req.params?.username
+    const { page = 1, limit = 10 } = req.query
+
+    const total = await communityRepo.totalCountOfCommunities({
+      members: {
+        some: {
+          user: { username },
+          leavedAt: null
+        }
+      }
+    })
+
+    try {
+      const communities = await communityRepo.getUserProfileCommunities(username, +page, +limit)
+
+      res.setHeader('X-Total-Count', total.toString())
+
+      res.status(200).json({ communities })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   private _createCommunity = async (req: Request, res: Response, next: NextFunction) => {
     const errors: ErrorType = {}
     const userId = req.user?.userId
@@ -258,6 +282,9 @@ class CommunityController extends BaseController {
 
     // get all communities where current user is assigned with pagination
     this.router.get('/assigned', this._auth, this._getUserAssignedCommunities)
+
+    // get all communities where current user is assigned with pagination
+    this.router.get('/:username/assigned', this._auth, this._getUserProfileCommunities)
 
     // create community
     this.router.post('/', this._auth, this._createCommunity)

@@ -34,12 +34,12 @@ class UserController extends BaseController {
   }
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.params.userId
+    const username = req.params.username
     const { page = 1, limit = 10 } = req.query
 
     const errors: ErrorType = {}
 
-    if (!userId) errors.message = 'content missing'
+    if (!username) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -47,9 +47,9 @@ class UserController extends BaseController {
     }
 
     try {
-      const posts = await postRepo.getPostsByUserId(userId, +page, +limit)
+      const posts = await postRepo.getPostsByUsername(username, +page, +limit)
 
-      const total = await postRepo.numOfPostsOfUser(userId)
+      const total = await postRepo.numOfPostsOfUser(username)
 
       res.status(200).json({ posts, total })
     } catch (error) {
@@ -203,11 +203,11 @@ class UserController extends BaseController {
     }
   }
 
-  private _getUserByUserId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.params.userId
+  private _getUserByUsername = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const username = req.params.username
 
     try {
-      const user = await userRepo.getUserByUserId(userId)
+      const user = await userRepo.getUserByUsername(username)
 
       res.status(200).json({
         ...user
@@ -227,10 +227,10 @@ class UserController extends BaseController {
     this.router.patch('/', this._auth, this._updateUser)
 
     // get current user's All posts with pagination.
-    this.router.get('/:userId/posts', this._auth, this._getPosts)
+    this.router.get('/:username/posts', this._auth, this._getPosts)
 
     // get user by username
-    this.router.get('/:userId', this._auth, this._getUserByUserId)
+    this.router.get('/:username', this._auth, this._getUserByUsername)
 
     // Retrieve the user's profile picture.
     // TODO: 21/1 make it

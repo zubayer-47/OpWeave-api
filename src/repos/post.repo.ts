@@ -201,6 +201,51 @@ class PostRepo {
   /**
    * getPostsWithUserId ->> Get posts by userId
    */
+  public getPostsByUsername(username: string, page: number, limit: number) {
+    return this.post.findMany({
+      where: {
+        member: {
+          user: { username }
+        },
+        deletedAt: null,
+        isVisible: true,
+        hasPublished: true
+      },
+      select: {
+        post_id: true,
+        community_id: true,
+        member_id: true,
+        body: true,
+        image_url: true,
+        createdAt: true,
+        updatedAt: true,
+        member: {
+          select: {
+            user: {
+              select: {
+                user_id: true,
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
+          }
+        },
+        community: {
+          select: {
+            name: true
+          }
+        }
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit
+    })
+  }
+
+  /**
+   * getPostsWithUserId ->> Get posts by userId
+   */
   public getPostsByUserId(user_id: string, page: number, limit: number) {
     return this.post.findMany({
       where: {
@@ -603,11 +648,11 @@ class PostRepo {
    * @param {String} user_id user id
    * @returns {Promise<Number>}
    */
-  public numOfPostsOfUser(user_id: string): Promise<number> {
+  public numOfPostsOfUser(username: string): Promise<number> {
     return this.post.count({
       where: {
         member: {
-          user_id
+          user: { username }
         },
         deletedAt: null,
         isVisible: true,
