@@ -104,8 +104,10 @@ class CommentController extends BaseController {
 
       const commentsWithReplyCount = await Promise.all(
         comments.map(async (comment) => {
-          const isOwner = comment.member.member_id === requestedMember.members[0].member_id
-          const isAdmin = requestedMember.members[0].role !== 'MEMBER'
+          const isOwner = !requestedMember.members.length
+            ? false
+            : comment.member.member_id === requestedMember.members[0].member_id
+          const isAdmin = !requestedMember.members.length ? false : requestedMember.members[0].role !== 'MEMBER'
 
           const replyCount = await prismadb.comment.count({
             where: {
@@ -135,7 +137,7 @@ class CommentController extends BaseController {
    * @route POST /api/comments/:commentId/reply
    * @description Add a reply to an existing comment
    * @param {string} req.params.commentId - ID of the comment to reply to
-   * @param {string} req.body.memberId - ID of the member creating the reply
+   * @param {string} req.body.post_id - ID of the post to check validity
    * @param {string} req.body.body - Content of the reply
    * @returns {Object} 201 - Created reply object with response message
    * @returns {Object} 400 - Error if content missing
@@ -145,7 +147,7 @@ class CommentController extends BaseController {
   private _createCommentReply = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.userId
     const commentId = req.params?.commentId
-    const { body } = req.body
+    const { body, post_id } = req.body
 
     const errors: ErrorType = {}
 
@@ -157,13 +159,13 @@ class CommentController extends BaseController {
     }
 
     try {
-      const comment = await commentRepo.getUniqueComment(commentId)
-      if (!comment) {
-        res.status(404).json({ message: 'Parent comment not found' })
-        return
-      }
+      // const comment = await commentRepo.getUniqueComment(commentId)
+      // if (!comment) {
+      //   res.status(404).json({ message: 'Parent comment not found' })
+      //   return
+      // }
 
-      const member = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
+      const member = await communityRepo.getMemberByPostIdAndUserId(userId, post_id)
 
       if (!member.members.length) {
         res.status(400).json({ message: "You're not a member" })
@@ -174,7 +176,7 @@ class CommentController extends BaseController {
         data: {
           body,
           member_id: member.members[0].member_id,
-          post_id: comment.post_id,
+          post_id: post_id,
           parent_comment_id: commentId
         }
       })
@@ -210,10 +212,7 @@ class CommentController extends BaseController {
     }
 
     try {
-      const comment = await prismadb.comment.findFirst({
-        where: { comment_id: commentId },
-        select: { member_id: true, post_id: true }
-      })
+      const comment = await commentRepo.getUniqueComment(commentId)
 
       const requestedMember = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
 
@@ -297,7 +296,7 @@ class CommentController extends BaseController {
     this.router.post('/post/:postId', this._auth, this._checkRolesWithPostId, this._createComment)
 
     //? POST: Add a reply to a comment
-    this.router.post('/:commentId/reply', this._auth, this._createCommentReply)
+    this.router.post('/:commentId/reply', this._auth, this._checkRolesWithPostId, this._createCommentReply)
 
     //? POST: Add a reply to a comment
     this.router.delete('/:commentId', this._auth, this._deleteComment)

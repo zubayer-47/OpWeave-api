@@ -429,6 +429,7 @@ class PostRepo {
                 leavedAt: null
               },
               select: {
+                role: true,
                 user: {
                   select: {
                     user_id: true,
@@ -456,6 +457,7 @@ class PostRepo {
           select: {
             user: {
               select: {
+                user_id: true,
                 fullname: true,
                 username: true,
                 avatar: true

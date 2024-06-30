@@ -21,6 +21,7 @@ class CommentRepo {
       },
       select: {
         comment_id: true,
+        post_id: true,
         body: true,
         member: {
           select: {
@@ -69,20 +70,6 @@ class CommentRepo {
         comment_id,
         parent_comment_id: null
       },
-
-      // select: {
-      //   replies: {
-      //     select: {
-      //       comment_id: true,
-      //       member: {
-      //         select: {
-      //           user: {}
-      //         }
-      //       }
-      //     }
-      //   }
-      // }
-
       select: {
         replies: {
           where: {
@@ -90,6 +77,7 @@ class CommentRepo {
           },
           select: {
             comment_id: true,
+            post_id: true,
             body: true,
             member: {
               select: {
@@ -107,7 +95,8 @@ class CommentRepo {
             parent_comment_id: true,
             createdAt: true,
             updatedAt: true
-          }
+          },
+          orderBy: { createdAt: 'desc' }
         }
       }
     })

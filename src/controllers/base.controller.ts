@@ -73,7 +73,7 @@ export default abstract class BaseController {
 
   protected _checkRolesWithPostId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.userId
-    const postId = req.params?.postId
+    const postId = req.params?.postId || req.body?.post_id
 
     const errors: ErrorType = {}
 
