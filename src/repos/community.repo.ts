@@ -199,6 +199,37 @@ class CommunityRepo {
       }
     })
   }
+
+  /**
+   *
+   * @param user_id
+   * @param post_id
+   * @returns
+   */
+  public getMemberByPostIdAndUserId(user_id: string, post_id: string) {
+    return this.community.findFirst({
+      where: {
+        posts: {
+          some: {
+            post_id: post_id
+          }
+        }
+      },
+
+      select: {
+        members: {
+          where: {
+            user_id
+          },
+          select: {
+            member_id: true,
+            role: true,
+            user: { select: { username: true } }
+          }
+        }
+      }
+    })
+  }
 }
 
 export default new CommunityRepo()

@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import commentRepo from 'src/repos/comment.repo'
+import communityRepo from 'src/repos/community.repo'
 import { ErrorType } from 'src/types/custom'
 import BaseController from './base.controller'
 
@@ -22,13 +23,13 @@ class CommentController extends BaseController {
    */
   private _createComment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user.role
-    // const userId = req.user.userId
+    const userId = req.user.userId
     const postId = req.params?.postId
-    const { member_id, body } = req.body
+    const { body } = req.body
 
     const errors: ErrorType = {}
 
-    if (!userRole || !postId || !member_id || !body) errors.message = 'content missing'
+    if (!userRole || !postId || !body) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -36,10 +37,17 @@ class CommentController extends BaseController {
     }
 
     try {
+      const member = await communityRepo.getMemberByPostIdAndUserId(userId, postId)
+
+      if (!member.members.length) {
+        res.status(400).json({ message: "You're not a member" })
+        return
+      }
+
       const comment = await prismadb.comment.create({
         data: {
           body,
-          member_id,
+          member_id: member.members[0].member_id,
           post_id: postId
         },
         select: {
@@ -71,6 +79,7 @@ class CommentController extends BaseController {
    * @returns {Object} 500 - Error message
    */
   private _getComments = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const postId = req.params?.postId
     // const {} = req.body
     const { page = 1, limit = 10 } = req.query
@@ -91,7 +100,26 @@ class CommentController extends BaseController {
     try {
       const comments = await commentRepo.getComments(postId, skip, pageSizeNumber)
 
-      const commentsWithReplyCount = await commentRepo.commentsIncludingReplyCounts(comments)
+      const requestedMember = await communityRepo.getMemberByPostIdAndUserId(userId, postId)
+
+      const commentsWithReplyCount = await Promise.all(
+        comments.map(async (comment) => {
+          const isOwner = comment.member.member_id === requestedMember.members[0].member_id
+          const isAdmin = requestedMember.members[0].role !== 'MEMBER'
+
+          const replyCount = await prismadb.comment.count({
+            where: {
+              parent_comment_id: comment.comment_id
+            }
+          })
+
+          return {
+            ...comment,
+            replyCount,
+            hasAccess: isOwner || isAdmin
+          }
+        })
+      )
 
       const totalComments = await commentRepo.commentCounts(postId)
 
@@ -115,12 +143,13 @@ class CommentController extends BaseController {
    * @returns {Object} 500 - Error message
    */
   private _createCommentReply = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const commentId = req.params?.commentId
-    const { body, member_id } = req.body
+    const { body } = req.body
 
     const errors: ErrorType = {}
 
-    if (!commentId || !body || !member_id) errors.message = 'content missing'
+    if (!commentId || !body) errors.message = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)
@@ -129,16 +158,22 @@ class CommentController extends BaseController {
 
     try {
       const comment = await commentRepo.getUniqueComment(commentId)
-
       if (!comment) {
         res.status(404).json({ message: 'Parent comment not found' })
+        return
+      }
+
+      const member = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
+
+      if (!member.members.length) {
+        res.status(400).json({ message: "You're not a member" })
         return
       }
 
       const reply = await prismadb.comment.create({
         data: {
           body,
-          member_id,
+          member_id: member.members[0].member_id,
           post_id: comment.post_id,
           parent_comment_id: commentId
         }
@@ -162,6 +197,7 @@ class CommentController extends BaseController {
    * @returns {Object} 500 - Error message
    */
   private _getCommentReplies = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const commentId = req.params?.commentId
 
     const errors: ErrorType = {}
@@ -174,9 +210,77 @@ class CommentController extends BaseController {
     }
 
     try {
+      const comment = await prismadb.comment.findFirst({
+        where: { comment_id: commentId },
+        select: { member_id: true, post_id: true }
+      })
+
+      const requestedMember = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
+
       const replies = await commentRepo.getCommentReplies(commentId)
 
-      res.status(200).json({ ...replies })
+      const repliesWithHasAccess = replies.replies.map((reply) => {
+        const isOwner = reply.member.member_id === requestedMember.members[0].member_id
+        const isAdmin = requestedMember.members[0].role !== 'MEMBER'
+
+        return {
+          ...reply,
+          hasAccess: isOwner || isAdmin
+        }
+      })
+
+      res.status(200).json({ replies: repliesWithHasAccess })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  /**
+   * @route DELETE /api/comments/:commentId
+   * @description Delete a comment and its replies
+   * @param {string} req.params.commentId - ID of the comment to delete
+   * @returns {Object} 200 - Comment deleted successfully with response message
+   * @returns {Object} 400 - Error if content missing
+   * @returns {Object} 403 - Error if user does not have permission to delete the comment
+   * @returns {Object} 500 - Error message
+   */
+  private _deleteComment = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userRole = req.user.role
+    const userId = req.user.userId
+    const commentId = req.params?.commentId
+
+    const errors: ErrorType = {}
+
+    if (!commentId) errors.message = 'content missing'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const comment = await commentRepo.getUniqueComment(commentId)
+      if (!comment) {
+        res.status(404).json({ message: 'Comment not found' })
+        return
+      }
+
+      const member = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
+      const isAdmin = userRole !== 'MEMBER'
+      const isOwner = comment.member_id === member.members[0].member_id
+
+      if (!isAdmin && !isOwner) {
+        res.status(403).json({ message: 'You do not have permission to delete this comment' })
+        return
+      }
+
+      await prismadb.comment.deleteMany({
+        where: {
+          OR: [{ comment_id: commentId }, { parent_comment_id: commentId }]
+        }
+      })
+
+      res.status(200).json({ message: 'Comment deleted successfully' })
     } catch (error) {
       next(error)
     }
@@ -194,6 +298,9 @@ class CommentController extends BaseController {
 
     //? POST: Add a reply to a comment
     this.router.post('/:commentId/reply', this._auth, this._createCommentReply)
+
+    //? POST: Add a reply to a comment
+    this.router.delete('/:commentId', this._auth, this._deleteComment)
 
     //? DELETE: Delete a comment. It'll delete all replies as well. (Permanent deletion)
     // TODO: 28/6 check whether user is an administrator or normal member or comment owner or post owner

@@ -26,7 +26,9 @@ class CommentRepo {
           select: {
             user: {
               select: {
-                fullname: true
+                user_id: true,
+                fullname: true,
+                avatar: true
               }
             },
             member_id: true,
@@ -44,27 +46,6 @@ class CommentRepo {
   }
 
   /**
-   * commentsIncludingReplyCounts
-   */
-
-  public commentsIncludingReplyCounts(comments: CommentType[]) {
-    return Promise.all(
-      comments.map(async (comment) => {
-        const replyCount = await prismadb.comment.count({
-          where: {
-            parent_comment_id: comment.comment_id
-          }
-        })
-
-        return {
-          ...comment,
-          replyCount
-        }
-      })
-    )
-  }
-
-  /**
    * getUniqueComment
    */
   public getUniqueComment(comment_id: string) {
@@ -73,7 +54,8 @@ class CommentRepo {
         comment_id
       },
       select: {
-        post_id: true
+        post_id: true,
+        member_id: true
       }
     })
   }
@@ -113,7 +95,9 @@ class CommentRepo {
               select: {
                 user: {
                   select: {
-                    fullname: true
+                    user_id: true,
+                    fullname: true,
+                    avatar: true
                   }
                 },
                 member_id: true,

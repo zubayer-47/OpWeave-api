@@ -37,8 +37,11 @@ export type CommentType = {
   updatedAt: Date
   parent_comment_id: string
   member: {
+    member_id: string
     role: $Enums.MemberRole
     user: {
+      user_id: string
+      avatar: string
       fullname: string
     }
   }
