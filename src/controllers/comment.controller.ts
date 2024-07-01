@@ -159,11 +159,11 @@ class CommentController extends BaseController {
     }
 
     try {
-      // const comment = await commentRepo.getUniqueComment(commentId)
-      // if (!comment) {
-      //   res.status(404).json({ message: 'Parent comment not found' })
-      //   return
-      // }
+      const comment = await commentRepo.getUniqueComment(commentId)
+      if (!comment) {
+        res.status(404).json({ message: 'Parent comment not found' })
+        return
+      }
 
       const member = await communityRepo.getMemberByPostIdAndUserId(userId, post_id)
 
@@ -174,10 +174,10 @@ class CommentController extends BaseController {
 
       const reply = await prismadb.comment.create({
         data: {
+          parent_comment_id: commentId,
           body,
           member_id: member.members[0].member_id,
-          post_id: post_id,
-          parent_comment_id: commentId
+          post_id: post_id
         }
       })
 
@@ -213,6 +213,11 @@ class CommentController extends BaseController {
 
     try {
       const comment = await commentRepo.getUniqueComment(commentId)
+
+      if (!comment) {
+        res.status(404).json({ message: 'Reply not found' })
+        return
+      }
 
       const requestedMember = await communityRepo.getMemberByPostIdAndUserId(userId, comment.post_id)
 
@@ -273,9 +278,17 @@ class CommentController extends BaseController {
         return
       }
 
-      await prismadb.comment.deleteMany({
+      if (comment.replies.length) {
+        await prismadb.comment.deleteMany({
+          where: {
+            parent_comment_id: commentId
+          }
+        })
+      }
+
+      await prismadb.comment.delete({
         where: {
-          OR: [{ comment_id: commentId }, { parent_comment_id: commentId }]
+          comment_id: commentId
         }
       })
 

@@ -56,7 +56,12 @@ class CommentRepo {
       },
       select: {
         post_id: true,
-        member_id: true
+        member_id: true,
+        replies: {
+          where: {
+            parent_comment_id: comment_id
+          }
+        }
       }
     })
   }
@@ -96,7 +101,7 @@ class CommentRepo {
             createdAt: true,
             updatedAt: true
           },
-          orderBy: { createdAt: 'desc' }
+          orderBy: { createdAt: 'asc' }
         }
       }
     })
