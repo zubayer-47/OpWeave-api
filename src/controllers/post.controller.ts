@@ -64,7 +64,19 @@ class PostController {
         return
       }
 
-      res.status(200).json(post)
+      const isAdmin = post.community.members[0]?.role !== 'MEMBER'
+      const isOwner = post.member.user.user_id === userId
+      const hasJoined = !!post.community.members.length
+
+      const { ...processPost } = post
+
+      const responsePost = {
+        ...processPost,
+        hasAccess: isAdmin || isOwner,
+        hasJoined
+      }
+
+      res.status(200).json(responsePost)
     } catch (error) {
       next(error)
     }
@@ -434,13 +446,13 @@ class PostController {
           deletedAt,
           deletedBy,
           isVisible,
-          // community: { name },
+          community: { name },
           ...processPost
         } = post
 
         return {
           ...processPost,
-          // community: { name },
+          community: { name },
           hasAccess: isAdmin || isOwner,
           hasJoined
         }
