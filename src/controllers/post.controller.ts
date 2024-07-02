@@ -126,6 +126,7 @@ class PostController {
           member_id: member.member_id,
           body: content,
           image_url: uploadResult?.secure_url || null,
+          image_height: uploadResult?.height || null,
           hasPublished: member.role !== 'MEMBER'
         },
         userId
@@ -433,8 +434,28 @@ class PostController {
     const userId = req.user.userId
     const { page = 1, limit = 10 } = req.query
 
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
+
     try {
-      const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
+      const posts = await postRepo.getUserFeedPosts(userId, pageSizeNumber, skip)
+
+      const totalCount = await prismadb.post.count({
+        where: {
+          deletedAt: null,
+          hasPublished: true,
+          isVisible: true
+        }
+      })
+
+      const totalPages = Math.ceil(totalCount / pageSizeNumber)
+
+      const hasMore = totalPages > pageNumber
+
+      /**
+       * 20 / 10 = 2
+       */
 
       const processedPosts = posts.map((post) => {
         const isAdmin = post.community.members[0]?.role !== 'MEMBER'
@@ -458,8 +479,11 @@ class PostController {
         }
       })
 
+      res.setHeader('x-total-count', totalCount)
+
       res.status(200).json({
-        posts: processedPosts
+        posts: processedPosts,
+        hasMore
       })
     } catch (error) {
       next(error)

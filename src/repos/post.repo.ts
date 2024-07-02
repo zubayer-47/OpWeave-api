@@ -411,7 +411,7 @@ class PostRepo {
    * @param page
    * @param limit
    */
-  public getUserFeedPosts(user_id: string, page: number, limit: number) {
+  public getUserFeedPosts(user_id: string, limit: number, skip: number) {
     return this.post.findMany({
       where: {
         hasPublished: true,
@@ -489,7 +489,7 @@ class PostRepo {
       // },
 
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
+      skip,
       take: limit
     })
   }

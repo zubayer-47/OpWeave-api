@@ -95,6 +95,7 @@ model post {
 
   body         String
   image_url    String?
+  image_height Int?
   hasPublished Boolean
   isVisible    Boolean @default(true)
 

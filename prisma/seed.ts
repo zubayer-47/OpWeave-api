@@ -168,6 +168,7 @@ async function main() {
         body: 'unnoyon community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -180,6 +181,7 @@ async function main() {
         body: 'unnoyon community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -192,6 +194,7 @@ async function main() {
         body: 'unnoyon community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()
@@ -204,6 +207,7 @@ async function main() {
         body: 'DEv community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -216,6 +220,7 @@ async function main() {
         body: 'dev community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -228,6 +233,7 @@ async function main() {
         body: 'dev community description',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()
@@ -240,6 +246,7 @@ async function main() {
         body: 'React Updates to v19',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -252,6 +259,7 @@ async function main() {
         body: 'React Updates to v19',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -264,6 +272,7 @@ async function main() {
         body: 'React Updates to v19',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -276,6 +285,7 @@ async function main() {
         body: 'React Updates to v19',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: true,
         isVisible: true,
         createdAt: new Date()
@@ -288,6 +298,7 @@ async function main() {
         body: 'React Updates to v19',
         image_url:
           'https://res.cloudinary.com/dbexznqxq/image/upload/v1718295767/post/post-98e15b8a-f01e-4c2c-9435-87a6260dc2c1.webp',
+        // image_height: 1080,
         hasPublished: false,
         isVisible: true,
         createdAt: new Date()

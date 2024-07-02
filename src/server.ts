@@ -45,7 +45,7 @@ class ExpressServer {
     this.express.set('port', process.env.PORT || 8000)
     // Core Middlewares
     // this.express.use(cors(corsOptions))
-    this.express.use(cors())
+    this.express.use(cors({ exposedHeaders: '*' }))
     this.express.use(helmet())
     this.express.use(cookieParser())
     this.express.use(compression())
