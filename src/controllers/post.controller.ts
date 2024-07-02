@@ -436,6 +436,8 @@ class PostController {
     try {
       const posts = await postRepo.getUserFeedPosts(userId, +page, +limit)
 
+      const totalCount = await prismadb.post.count()
+
       const processedPosts = posts.map((post) => {
         const isAdmin = post.community.members[0]?.role !== 'MEMBER'
         const isOwner = post.member.user.user_id === userId
@@ -458,8 +460,11 @@ class PostController {
         }
       })
 
+      res.setHeader('x-total-count', totalCount)
+
       res.status(200).json({
         posts: processedPosts
+        // totalCount
       })
     } catch (error) {
       next(error)
