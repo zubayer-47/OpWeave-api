@@ -1,3 +1,4 @@
+import { MemberRestrictions } from '@prisma/client'
 import { NextFunction, Request, Response } from 'express'
 import prismadb from 'src/libs/prismadb'
 import authorityRepo from 'src/repos/authority.repo'
@@ -282,15 +283,15 @@ class AuthorityController extends BaseController {
       return
     }
 
-    if (member.isMuted && status === 'mute') {
+    if (member.restricts && MemberRestrictions.MUTE) {
       res.status(403).json({ message: 'This Member already muted' })
       return
     }
-
-    if (!member.isMuted && status === 'unmute') {
-      res.status(403).json({ message: 'This Member already unmuted' })
-      return
-    }
+    // TODO: 4/6
+    // if (!member.restricts && MemberRestrictions.PUBLIC) {
+    //   res.status(403).json({ message: 'This Member already unmuted' })
+    //   return
+    // }
 
     try {
       await memberRepo.toggleMuteMember(member_id, status)
@@ -391,12 +392,12 @@ class AuthorityController extends BaseController {
       return
     }
 
-    const createdBy = member.community.createdBy // member_id
+    // const createdBy = member.community.createdBy // member_id
 
-    if (createdBy === member.member_id) {
-      res.status(403).json({ message: 'Operation failed!' })
-      return
-    }
+    // if (createdBy === member.member_id) {
+    //   res.status(403).json({ message: 'Operation failed!' })
+    //   return
+    // }
 
     try {
       const updatedMember = await authorityRepo.removeAuthority(member_id)

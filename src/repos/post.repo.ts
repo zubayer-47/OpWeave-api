@@ -501,7 +501,7 @@ class PostRepo {
    * @param limit optional field
    * @returns community_id member_id title body createdAt updatedAt
    */
-  public getPostsInCommunity(community_id: string, user_id: string, page: number, limit: number) {
+  public getPostsInCommunity(community_id: string, user_id: string, limit: number, skip: number) {
     return this.post.findMany({
       relationLoadStrategy: 'join',
       where: {
@@ -510,22 +510,26 @@ class PostRepo {
         isVisible: true,
         deletedAt: null
       },
-      select: {
-        post_id: true,
-        community_id: true,
-        member_id: true,
-        body: true,
-        image_url: true,
-        createdAt: true,
-        updatedAt: true,
-        member: {
+
+      include: {
+        community: {
           select: {
-            user: {
+            name: true,
+            members: {
+              where: {
+                user_id,
+                leavedAt: null
+              },
               select: {
-                user_id: true,
-                fullname: true,
-                username: true,
-                avatar: true
+                role: true,
+                user: {
+                  select: {
+                    user_id: true,
+                    fullname: true,
+                    username: true,
+                    avatar: true
+                  }
+                }
               }
             }
           }
@@ -538,28 +542,92 @@ class PostRepo {
             }
           },
           select: {
-            // post_id: true,
-            // react_id: true,
             react_type: true
           }
         },
-        // reacts: {
-        //   where: {
-        //     member_id
-        //   },
-        //   select: {
-        //     react_type: true
-        //   }
-        // },
-
-        community: {
+        member: {
           select: {
-            name: true
+            user: {
+              select: {
+                user_id: true,
+                fullname: true,
+                username: true,
+                avatar: true
+              }
+            }
           }
         }
       },
+      // select: {
+      //   post_id: true,
+      //   community_id: true,
+      //   member_id: true,
+      //   body: true,
+      //   image_url: true,
+      //   createdAt: true,
+      //   updatedAt: true,
+      //   member: {
+      //     select: {
+      //       user: {
+      //         select: {
+      //           user_id: true,
+      //           fullname: true,
+      //           username: true,
+      //           avatar: true
+      //         }
+      //       }
+      //     }
+      //   },
+
+      //   /**
+      //    *  members: {
+      //         where: {
+      //           user_id,
+      //           leavedAt: null
+      //         },
+      //         select: {
+      //           role: true,
+      //           user: {
+      //             select: {
+      //               user_id: true,
+      //               fullname: true,
+      //               username: true,
+      //               avatar: true
+      //             }
+      //           }
+      //         }
+      //       }
+      //    */
+
+      //   reacts: {
+      //     where: {
+      //       member: {
+      //         user_id
+      //       }
+      //     },
+      //     select: {
+      //       // post_id: true,
+      //       // react_id: true,
+      //       react_type: true
+      //     }
+      //   },
+      //   // reacts: {
+      //   //   where: {
+      //   //     member_id
+      //   //   },
+      //   //   select: {
+      //   //     react_type: true
+      //   //   }
+      //   // },
+
+      //   community: {
+      //     select: {
+      //       name: true
+      //     }
+      //   }
+      // },
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
+      skip,
       take: limit
     })
   }

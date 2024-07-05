@@ -10,6 +10,66 @@ import { ErrorType } from 'src/types/custom'
 import { v4 as uid } from 'uuid'
 
 class PostController {
+  static _getUserFeedPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
+    const { page = 1, limit = 10 } = req.query
+
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
+
+    try {
+      const posts = await postRepo.getUserFeedPosts(userId, pageSizeNumber, skip)
+
+      const totalCount = await prismadb.post.count({
+        where: {
+          deletedAt: null,
+          hasPublished: true,
+          isVisible: true
+        }
+      })
+
+      const totalPages = Math.ceil(totalCount / pageSizeNumber)
+
+      const hasMore = totalPages > pageNumber
+
+      /**
+       * 20 / 10 = 2
+       */
+
+      const processedPosts = posts.map((post) => {
+        const isAdmin = post.community.members[0]?.role !== 'MEMBER'
+        const isOwner = post.member.user.user_id === userId
+        const hasJoined = !!post.community.members.length
+
+        const {
+          hasPublished,
+          deletedAt,
+          deletedBy,
+          isVisible,
+          community: { name },
+          ...processPost
+        } = post
+
+        return {
+          ...processPost,
+          community: { name },
+          hasAccess: isAdmin || isOwner,
+          hasJoined
+        }
+      })
+
+      res.setHeader('x-total-count', totalCount)
+
+      res.status(200).json({
+        posts: processedPosts,
+        hasMore
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   static _getCommunityPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.userId
     const errors: ErrorType = {}
@@ -24,8 +84,12 @@ class PostController {
       return
     }
 
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
+
     try {
-      const total = await postRepo.numOfPostsInCommunity(communityId)
+      const totalCount = await postRepo.numOfPostsInCommunity(communityId)
       const totalPendingPost = await postRepo.currentUserPendingPostsCount(communityId, userId)
 
       const member = await memberRepo.checkIfUserIsMember(communityId, userId)
@@ -34,11 +98,37 @@ class PostController {
         return
       }
 
-      const posts = await postRepo.getPostsInCommunity(communityId, userId, +page, +limit)
+      const posts = await postRepo.getPostsInCommunity(communityId, userId, pageSizeNumber, skip)
 
-      res.setHeader('X-Total-Count', total.toString())
+      const totalPages = Math.ceil(totalCount / pageSizeNumber)
 
-      res.status(200).json({ posts, totalPendingPost })
+      const hasMore = totalPages > pageNumber
+
+      const processedPosts = posts.map((post) => {
+        const isAdmin = post.community.members[0]?.role !== 'MEMBER'
+        const isOwner = post.member.user.user_id === userId
+        const hasJoined = !!post.community.members.length
+
+        const {
+          hasPublished,
+          deletedAt,
+          deletedBy,
+          isVisible,
+          community: { name },
+          ...processPost
+        } = post
+
+        return {
+          ...processPost,
+          community: { name },
+          hasAccess: isAdmin || isOwner,
+          hasJoined
+        }
+      })
+
+      res.setHeader('x-total-count', totalCount)
+
+      res.status(200).json({ posts: processedPosts, totalPendingPost, hasMore, totalCount })
     } catch (error) {
       next(error)
     }
@@ -424,66 +514,6 @@ class PostController {
       res.status(200).json({
         posts: pendingPosts,
         total: pendingPostCount
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-
-  static _getUserFeedPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userId = req.user.userId
-    const { page = 1, limit = 10 } = req.query
-
-    const pageNumber = parseInt(page as string, 10)
-    const pageSizeNumber = parseInt(limit as string, 10)
-    const skip = (pageNumber - 1) * pageSizeNumber
-
-    try {
-      const posts = await postRepo.getUserFeedPosts(userId, pageSizeNumber, skip)
-
-      const totalCount = await prismadb.post.count({
-        where: {
-          deletedAt: null,
-          hasPublished: true,
-          isVisible: true
-        }
-      })
-
-      const totalPages = Math.ceil(totalCount / pageSizeNumber)
-
-      const hasMore = totalPages > pageNumber
-
-      /**
-       * 20 / 10 = 2
-       */
-
-      const processedPosts = posts.map((post) => {
-        const isAdmin = post.community.members[0]?.role !== 'MEMBER'
-        const isOwner = post.member.user.user_id === userId
-        const hasJoined = !!post.community.members.length
-
-        const {
-          hasPublished,
-          deletedAt,
-          deletedBy,
-          isVisible,
-          community: { name },
-          ...processPost
-        } = post
-
-        return {
-          ...processPost,
-          community: { name },
-          hasAccess: isAdmin || isOwner,
-          hasJoined
-        }
-      })
-
-      res.setHeader('x-total-count', totalCount)
-
-      res.status(200).json({
-        posts: processedPosts,
-        hasMore
       })
     } catch (error) {
       next(error)

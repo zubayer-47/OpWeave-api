@@ -139,7 +139,7 @@ class CommunityController extends BaseController {
           user_id: userId,
           community_id: community.community_id,
           role: 'ADMIN',
-          scopes: 'ROOT'
+          // scopes: 'ROOT'
         },
         select: {
           member_id: true

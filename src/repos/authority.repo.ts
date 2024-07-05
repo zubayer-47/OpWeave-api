@@ -26,8 +26,8 @@ class AuthorityRepo {
       },
       select: {
         member_id: true,
-        role: true,
-        scopes: true
+        role: true
+        // scopes: true
       }
     })
   }

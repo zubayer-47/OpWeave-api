@@ -53,8 +53,9 @@ class MemberRepo {
             createdBy: true
           }
         },
-        role: true,
-        isMuted: true
+        restricts: true,
+        role: true
+        // isMuted: true
       }
     })
   }
@@ -116,21 +117,14 @@ class MemberRepo {
    *
    * @param member_id
    */
-  public toggleMuteMember(member_id: string, status: MuteUnmuteStatusType) {
-    const data =
-      status === 'mute'
-        ? {
-            isMuted: true
-          }
-        : {
-            isMuted: false
-          }
-
+  public toggleMuteMember(member_id: string, _status: MuteUnmuteStatusType) {
     return this.member.update({
       where: {
         member_id
       },
-      data,
+      data: {
+        restricts: 'MUTE'
+      },
       select: {
         member_id: true
       }

@@ -70,9 +70,10 @@ model member {
   community    community @relation(fields: [community_id], references: [community_id], onDelete: Cascade)
   community_id String
 
-  role    MemberRole @default(MEMBER)
-  scopes  Scopes     @default(VIEWER)
-  isMuted Boolean    @default(false)
+  role MemberRole @default(MEMBER)
+  // scopes Scopes     @default(VIEWER)
+
+  restricts MemberRestrictions @default(PUBLIC)
 
   posts    post[]
   reacts   react[]
@@ -204,6 +205,12 @@ model comment {
   parent_comment_id String?
 
   replies comment[] @relation("CommentReplies")
+}
+
+enum MemberRestrictions {
+  BAN
+  MUTE
+  PUBLIC
 }
 
 enum CommentStatus {

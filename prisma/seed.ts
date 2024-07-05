@@ -97,7 +97,7 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         user_id: 'ed318213-a230-425a-bc93-00dyw7ee58d6',
         role: 'ADMIN',
-        scopes: 'ROOT',
+        // scopes: 'ROOT',
         joinedAt: new Date()
       },
       {
@@ -106,7 +106,7 @@ async function main() {
         community_id: '1f613d5a-792e-4600-a1d3-a0e6aa6e236e',
         user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
         role: 'MEMBER',
-        scopes: 'VIEWER',
+        // scopes: 'VIEWER',
         joinedAt: new Date()
       },
       {
@@ -115,7 +115,7 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
         role: 'ADMIN',
-        scopes: 'ROOT',
+        // scopes: 'ROOT',
         joinedAt: new Date()
       },
       {
@@ -124,7 +124,7 @@ async function main() {
         community_id: 'c07131dd-bc6a-4927-aa5f-a3374988698d',
         user_id: '69a5a201-a855-412e-9f3e-8b8beba94194',
         role: 'MEMBER',
-        scopes: 'VIEWER',
+        // scopes: 'VIEWER',
         joinedAt: new Date()
       },
       {
@@ -133,7 +133,7 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: '69a5a201-a855-412e-9f3e-8b8beba94194',
         role: 'ADMIN',
-        scopes: 'ROOT',
+        // scopes: 'ROOT',
         joinedAt: new Date()
       },
       {
@@ -142,7 +142,7 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: '46a468d7-abf1-4ccc-89f5-9820cf899fde',
         role: 'MODERATOR',
-        scopes: 'EDITOR',
+        // scopes: 'EDITOR',
         joinedAt: new Date()
       },
       {
@@ -151,7 +151,7 @@ async function main() {
         community_id: 'f7992f85-e6df-4d9c-8bd0-2ab9fb8e61ed',
         user_id: 'f037ad18-1d82-414a-a764-b0048d742a7c',
         role: 'MEMBER',
-        scopes: 'VIEWER',
+        // scopes: 'VIEWER',
         joinedAt: new Date()
       }
     ]
