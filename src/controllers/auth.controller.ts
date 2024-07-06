@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcrypt'
+import crypto from 'crypto'
 import { NextFunction, Request, Response } from 'express'
 import { sign } from 'jsonwebtoken'
 import { emailReg } from 'src/libs'
@@ -127,9 +128,87 @@ class AuthController extends BaseController {
     }
   }
 
+  private _forgetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const { email } = req.body
+
+    const errors: ErrorType = {}
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      // Check if user exists
+      const user = await prismadb.user.findUnique({ where: { email } })
+      if (!user) {
+        res.status(404).json({ message: 'User not found' })
+        return
+      }
+
+      // Generate a token
+      const token = crypto.randomBytes(32).toString('hex')
+      const expiresAt = new Date(Date.now() + 3600 * 1000) // 1 hour from now
+
+      // Save token to database
+      await prismadb.passwordResetToken.create({
+        data: {
+          token,
+          user_id: user.user_id,
+          expiresAt
+        }
+      })
+
+      res.status(200).json({ token })
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  private _resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const errors: ErrorType = {}
+    const { token, password } = req.body
+
+    if (password && password.length < 8) errors.password = 'Password should contains 8 characters at least'
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const passwordResetToken = await prismadb.passwordResetToken.findUnique({
+        where: { token },
+        select: { expiresAt: true, token: true, id: true, user: { select: { user_id: true } } }
+      })
+
+      if (!passwordResetToken || passwordResetToken.expiresAt < new Date()) {
+        res.status(400).json({ message: 'Invalid or expired code' })
+        return
+      }
+
+      // Hash new password
+      const hashedPassword = await hash(password, 12)
+
+      await prismadb.user.update({
+        where: { user_id: passwordResetToken.user.user_id },
+        data: { password: hashedPassword }
+      })
+
+      // delete used token
+      await prismadb.passwordResetToken.delete({ where: { id: passwordResetToken.id } })
+
+      res.status(200).json({ message: 'Password reset successful' })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public configureRoutes(): void {
     this.router.post('/signup', this._create)
     this.router.post('/signin', this._login)
+    this.router.post('/forget-password', this._forgetPassword)
+    this.router.post('/reset-password', this._resetPassword)
 
     // this._showRoutes()
   }

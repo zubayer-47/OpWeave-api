@@ -24,12 +24,24 @@ model user {
 
   members member[]
 
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   // banned_member banned_member[]
+  passwordResetToken passwordResetToken[]
 
   @@index([username, email])
+}
+
+model passwordResetToken {
+  id    String @id @default(uuid())
+  token String @unique
+
+  user    user   @relation(fields: [user_id], references: [user_id])
+  user_id String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
 }
 
 model community {

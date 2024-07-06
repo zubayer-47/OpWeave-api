@@ -381,7 +381,8 @@ class PostRepo {
           select: {
             members: {
               where: {
-                user_id
+                user_id,
+                leavedAt: null
               },
               select: {
                 role: true
