@@ -128,7 +128,7 @@ class PostController {
 
       res.setHeader('x-total-count', totalCount)
 
-      res.status(200).json({ posts: processedPosts, totalPendingPost, hasMore, totalCount })
+      res.status(200).json({ posts: processedPosts, totalPendingPost, hasMore })
     } catch (error) {
       next(error)
     }

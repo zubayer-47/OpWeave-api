@@ -201,7 +201,7 @@ class PostRepo {
   /**
    * getPostsWithUserId ->> Get posts by userId
    */
-  public getPostsByUsername(username: string, page: number, limit: number) {
+  public getPostsByUsername(username: string, user_id: string, limit: number, skip: number) {
     return this.post.findMany({
       where: {
         member: {
@@ -211,14 +211,40 @@ class PostRepo {
         isVisible: true,
         hasPublished: true
       },
-      select: {
-        post_id: true,
-        community_id: true,
-        member_id: true,
-        body: true,
-        image_url: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
+        community: {
+          select: {
+            name: true,
+            members: {
+              where: {
+                user_id,
+                leavedAt: null
+              },
+              select: {
+                role: true,
+                user: {
+                  select: {
+                    user_id: true,
+                    fullname: true,
+                    username: true,
+                    avatar: true
+                  }
+                }
+              }
+            }
+          }
+        },
+
+        reacts: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            react_type: true
+          }
+        },
         member: {
           select: {
             user: {
@@ -230,15 +256,36 @@ class PostRepo {
               }
             }
           }
-        },
-        community: {
-          select: {
-            name: true
-          }
         }
       },
+      // select: {
+      //   post_id: true,
+      //   community_id: true,
+      //   member_id: true,
+      //   body: true,
+      //   image_url: true,
+      //   createdAt: true,
+      //   updatedAt: true,
+      //   member: {
+      //     select: {
+      //       user: {
+      //         select: {
+      //           user_id: true,
+      //           fullname: true,
+      //           username: true,
+      //           avatar: true
+      //         }
+      //       }
+      //     }
+      //   },
+      //   community: {
+      //     select: {
+      //       name: true
+      //     }
+      //   }
+      // },
       orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
+      skip,
       take: limit
     })
   }

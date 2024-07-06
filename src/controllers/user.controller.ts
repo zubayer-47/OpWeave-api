@@ -34,6 +34,7 @@ class UserController extends BaseController {
   }
 
   private _getPosts = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
     const username = req.params.username
     const { page = 1, limit = 10 } = req.query
 
@@ -46,12 +47,44 @@ class UserController extends BaseController {
       return
     }
 
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
+
     try {
-      const posts = await postRepo.getPostsByUsername(username, +page, +limit)
+      const posts = await postRepo.getPostsByUsername(username, userId, pageSizeNumber, skip)
 
-      const total = await postRepo.numOfPostsOfUser(username)
+      const totalCount = await postRepo.numOfPostsOfUser(username)
 
-      res.status(200).json({ posts, total })
+      const totalPages = Math.ceil(totalCount / pageSizeNumber)
+
+      const hasMore = totalPages > pageNumber
+
+      const processedPosts = posts.map((post) => {
+        const isAdmin = post.community.members[0]?.role !== 'MEMBER'
+        const isOwner = post.member.user.user_id === userId
+        const hasJoined = !!post.community.members.length
+
+        const {
+          hasPublished,
+          deletedAt,
+          deletedBy,
+          isVisible,
+          community: { name },
+          ...processPost
+        } = post
+
+        return {
+          ...processPost,
+          community: { name },
+          hasAccess: isAdmin || isOwner,
+          hasJoined
+        }
+      })
+
+      res.setHeader('x-total-count', totalCount)
+
+      res.status(200).json({ posts: processedPosts, hasMore })
     } catch (error) {
       next(error)
     }
