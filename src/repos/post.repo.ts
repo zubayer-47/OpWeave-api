@@ -235,6 +235,37 @@ class PostRepo {
           }
         },
 
+        comments: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            comment_id: true,
+            post_id: true,
+            body: true,
+            member: {
+              select: {
+                user: {
+                  select: {
+                    user_id: true,
+                    fullname: true,
+                    avatar: true
+                  }
+                },
+                member_id: true,
+                role: true
+              }
+            },
+            parent_comment_id: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: { createdAt: 'asc' },
+          take: 2
+        },
+
         reacts: {
           where: {
             member: {
@@ -613,6 +644,37 @@ class PostRepo {
               }
             }
           }
+        },
+
+        comments: {
+          where: {
+            member: {
+              user_id
+            }
+          },
+          select: {
+            comment_id: true,
+            post_id: true,
+            body: true,
+            member: {
+              select: {
+                user: {
+                  select: {
+                    user_id: true,
+                    fullname: true,
+                    avatar: true
+                  }
+                },
+                member_id: true,
+                role: true
+              }
+            },
+            parent_comment_id: true,
+            createdAt: true,
+            updatedAt: true
+          },
+          orderBy: { createdAt: 'asc' },
+          take: 2
         },
 
         reacts: {

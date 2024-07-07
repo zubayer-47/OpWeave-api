@@ -138,7 +138,7 @@ class CommunityController extends BaseController {
         data: {
           user_id: userId,
           community_id: community.community_id,
-          role: 'ADMIN',
+          role: 'ADMIN'
           // scopes: 'ROOT'
         },
         select: {
@@ -345,6 +345,13 @@ class CommunityController extends BaseController {
 
     /**
      * ? Members:
+     * ? GET /communities/:communityId/members: Get a list of community members.
+     * ? POST /communities/:communityId/members: Add a user to the community.
+     * ? DELETE /communities/:communityId/members/:userId: Remove a user from the community.
+     */
+
+    /**
+     * ? Post Bookmarks:
      * ? GET /communities/:communityId/members: Get a list of community members.
      * ? POST /communities/:communityId/members: Add a user to the community.
      * ? DELETE /communities/:communityId/members/:userId: Remove a user from the community.

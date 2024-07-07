@@ -29,6 +29,7 @@ model user {
   updatedAt          DateTime             @updatedAt
   // banned_member banned_member[]
   passwordResetToken passwordResetToken[]
+  bookmark           bookmark[]
 
   @@index([username, email])
 }
@@ -114,12 +115,27 @@ model post {
 
   reacts   react[]
   comments comment[]
+  bookmark bookmark[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   deletedAt DateTime?
   // TODO: 01/01 remove it
   deletedBy String? // store adminID/moderatorID/ownerID (memberID, userID)
+}
+
+model bookmark {
+  bookmark_id String @id @default(uuid())
+
+  user    user   @relation(fields: [user_id], references: [user_id])
+  user_id String
+
+  post    post   @relation(fields: [post_id], references: [post_id])
+  post_id String
+
+  createdAt DateTime @default(now())
+
+  @@unique([user_id, post_id])
 }
 
 model react {

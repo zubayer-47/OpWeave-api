@@ -14,6 +14,7 @@ import authController from './controllers/auth.controller'
 import authorityController from './controllers/authority.controller'
 import commentController from './controllers/comment.controller'
 import communityController from './controllers/community.controller'
+import posttwoController from './controllers/posttwo.controller'
 import userController from './controllers/user.controller'
 import { sysLog } from './libs/logger'
 
@@ -63,7 +64,8 @@ class ExpressServer {
     this.express.use('/api/v1/auth/', authController.router)
     this.express.use('/api/v1/users/', userController.router)
     this.express.use('/api/v1/communities/', communityController.router)
-    // this.express.use('/api/v1/posts/', postController.router)
+    // TODO: bring all posts into this route controller
+    this.express.use('/api/v1/posts/', posttwoController.router)
     // this.express.use('/api/v1/members/', memberController.router)
     this.express.use('/api/v1/authority/', authorityController.router)
     this.express.use('/api/v1/comments/', commentController.router)
