@@ -122,54 +122,6 @@ model post {
   deletedBy String? // store adminID/moderatorID/ownerID (memberID, userID)
 }
 
-// TODO: 4/1 analysis it with AI and fix it
-// model banned_member {
-//   ban_id String @id @default(uuid())
-
-//   member    member? @relation("member_id", fields: [member_id], references: [member_id])
-//   member_id String
-
-//   banner   member? @relation("bannedBy", fields: [bannedBy], references: [member_id])
-//   bannedBy String
-
-//   user        user?   @relation(fields: [userUser_id], references: [user_id])
-//   userUser_id String?
-
-//   community    community @relation(fields: [community_id], references: [community_id])
-//   community_id String
-
-//   ban_reason String
-//   ban_date   DateTime
-// }
-
-// example
-// model User {
-//   id        Int       @id @default(autoincrement())
-//   createdAt DateTime  @default(now())
-//   updatedAt DateTime  @updatedAt
-//   firstName String?
-//   lastName  String?
-//   email     String    @unique
-//   role      String    @default("user")
-//   picture   String?
-//   reporter  Absence[] @relation("reporter")
-//   requester Absence[] @relation("user")
-// }
-
-// model Absence {
-//   id         Int      @id @default(autoincrement())
-//   createdAt  DateTime @default(now())
-//   updatedAt  DateTime @updatedAt
-//   approved   Boolean  @default(false)
-//   user       User     @relation("user", fields: [userId], references: [id])
-//   userId     Int
-//   reporter   User     @relation("reporter", fields: [reporterId], references: [id])
-//   reporterId Int
-//   from       DateTime
-//   to         DateTime
-//   notes      String?
-// }
-
 model react {
   react_id String @id @default(uuid())
 
@@ -183,20 +135,6 @@ model react {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 }
-
-// model comment {
-//   comment_id String @id @default(uuid())
-
-//   member    member @relation(fields: [member_id], references: [member_id])
-//   member_id String
-
-//   post          post          @relation(fields: [post_id], references: [post_id])
-//   post_id       String
-//   user_comments userComment[]
-
-//   createdAt DateTime @default(now())
-//   updatedAt DateTime @updatedAt
-// }
 
 model comment {
   comment_id String    @id @default(uuid())
