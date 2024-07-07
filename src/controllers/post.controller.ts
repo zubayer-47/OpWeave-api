@@ -21,6 +21,8 @@ class PostController {
     try {
       const posts = await postRepo.getUserFeedPosts(userId, pageSizeNumber, skip)
 
+      // const post_matrix = await prismadb.pos
+
       const totalCount = await prismadb.post.count({
         where: {
           deletedAt: null,
