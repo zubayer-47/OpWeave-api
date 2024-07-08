@@ -235,6 +235,15 @@ class PostRepo {
           }
         },
 
+        bookmarks: {
+          where: {
+            user_id
+          },
+          select: {
+            bookmark_id: true
+          }
+        },
+
         comments: {
           where: {
             member: {
@@ -317,51 +326,6 @@ class PostRepo {
       // },
       orderBy: { createdAt: 'desc' },
       skip,
-      take: limit
-    })
-  }
-
-  /**
-   * getPostsWithUserId ->> Get posts by userId
-   */
-  public getPostsByUserId(user_id: string, page: number, limit: number) {
-    return this.post.findMany({
-      where: {
-        member: {
-          user_id
-        },
-        deletedAt: null,
-        isVisible: true,
-        hasPublished: true
-      },
-      select: {
-        post_id: true,
-        community_id: true,
-        member_id: true,
-        body: true,
-        image_url: true,
-        createdAt: true,
-        updatedAt: true,
-        member: {
-          select: {
-            user: {
-              select: {
-                user_id: true,
-                fullname: true,
-                username: true,
-                avatar: true
-              }
-            }
-          }
-        },
-        community: {
-          select: {
-            name: true
-          }
-        }
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
       take: limit
     })
   }
@@ -522,6 +486,15 @@ class PostRepo {
           }
         },
 
+        bookmarks: {
+          where: {
+            user_id
+          },
+          select: {
+            bookmark_id: true
+          }
+        },
+
         reacts: {
           where: {
             member: {
@@ -643,6 +616,15 @@ class PostRepo {
                 }
               }
             }
+          }
+        },
+
+        bookmarks: {
+          where: {
+            user_id
+          },
+          select: {
+            bookmark_id: true
           }
         },
 

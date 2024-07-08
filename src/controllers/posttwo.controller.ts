@@ -35,6 +35,7 @@ class PostTwoController extends BaseController {
           }
         },
         select: {
+          bookmark_id: true,
           post: {
             select: {
               post_id: true,
@@ -103,9 +104,30 @@ class PostTwoController extends BaseController {
 
       const hasMore = totalPages > pageNumber
 
+      const processedPosts = bookmarks.map((bookmark) => {
+        const isAdmin = bookmark.post.community.members[0]?.role !== 'MEMBER'
+        const isOwner = bookmark.post.member.user.username === username
+        const hasJoined = !!bookmark.post.community.members.length
+
+        const {
+          post: {
+            community: { name },
+            ...processPost
+          }
+        } = bookmark
+
+        return {
+          bookmark: { bookmark_id: bookmark.bookmark_id },
+          ...processPost,
+          community: { name },
+          hasAccess: isAdmin || isOwner,
+          hasJoined
+        }
+      })
+
       res.setHeader('x-total-count', totalCount)
 
-      res.status(201).json({ bookmarks, hasMore })
+      res.status(201).json({ bookmarks: processedPosts, hasMore })
     } catch (error) {
       next(error)
     }
@@ -115,10 +137,10 @@ class PostTwoController extends BaseController {
     const userId = req.user.userId
     const { post_id } = req.body
 
-    const errors: ErrorType = {}
+    let error: string = ''
 
-    if (!post_id) errors.message = 'content missing'
-    if (typeof post_id !== 'string') errors.message = 'post_id must be string'
+    if (!post_id) error = 'content missing'
+    if (typeof post_id !== 'string') error = 'post_id must be string'
 
     const post = await postRepo.postVisibility(post_id)
     if (!post) {
@@ -130,10 +152,10 @@ class PostTwoController extends BaseController {
       select: { bookmark_id: true }
     })
 
-    if (isExist) errors.message = 'This post already bookmarked'
+    if (isExist) error = 'This post already bookmarked'
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
+    if (error) {
+      res.status(400).json(error)
       return
     }
 
@@ -155,9 +177,9 @@ class PostTwoController extends BaseController {
     const userId = req.user.userId
     const bookmarkId = req.params?.bookmarkId
 
-    const errors: ErrorType = {}
+    let error: string = ''
 
-    if (!bookmarkId) errors.message = 'content missing'
+    if (!bookmarkId) error = 'content missing'
 
     const bookmark = await prismadb.bookmark.findUnique({
       where: {
@@ -169,17 +191,17 @@ class PostTwoController extends BaseController {
       }
     })
 
-    if (!bookmark) errors.message = "You don't have access in it"
+    if (!bookmark) error = "You don't have access in it"
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
+    if (error) {
+      res.status(400).json(error)
       return
     }
 
     try {
       await prismadb.bookmark.delete({ where: { bookmark_id: bookmarkId, user_id: userId } })
 
-      res.status(201).json({ message: 'Bookmark deleted successfully', bookmark_id: bookmark.bookmark_id })
+      res.status(200).json({ message: 'Bookmark deleted successfully', bookmark_id: bookmark.bookmark_id })
     } catch (error) {
       next(error)
     }

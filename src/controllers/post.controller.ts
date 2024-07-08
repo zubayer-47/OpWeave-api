@@ -44,11 +44,14 @@ class PostController {
         const isOwner = post.member.user.user_id === userId
         const hasJoined = !!post.community.members.length
 
+        const isBookmarked = post.bookmarks.length
+
         const {
           hasPublished,
           deletedAt,
           deletedBy,
           isVisible,
+          bookmarks,
           community: { name },
           ...processPost
         } = post
@@ -56,6 +59,7 @@ class PostController {
         return {
           ...processPost,
           community: { name },
+          bookmark: isBookmarked ? { bookmark_id: bookmarks[0].bookmark_id } : null,
           hasAccess: isAdmin || isOwner,
           hasJoined
         }
@@ -110,12 +114,14 @@ class PostController {
         const isAdmin = post.community.members[0]?.role !== 'MEMBER'
         const isOwner = post.member.user.user_id === userId
         const hasJoined = !!post.community.members.length
+        const isBookmarked = post.bookmarks.length
 
         const {
           hasPublished,
           deletedAt,
           deletedBy,
           isVisible,
+          bookmarks,
           community: { name },
           ...processPost
         } = post
@@ -123,6 +129,7 @@ class PostController {
         return {
           ...processPost,
           community: { name },
+          bookmark: isBookmarked ? { bookmark_id: bookmarks[0].bookmark_id } : null,
           hasAccess: isAdmin || isOwner,
           hasJoined
         }
