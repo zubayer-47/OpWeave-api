@@ -358,6 +358,14 @@ class PostRepo {
             react_type: true
           }
         },
+        _count: {
+          select: {
+            reacts: {
+              where: { react_type: 'LIKE' }
+            },
+            comments: {}
+          }
+        },
         createdAt: true,
         updatedAt: true,
         member: {
@@ -503,6 +511,15 @@ class PostRepo {
           },
           select: {
             react_type: true
+          }
+        },
+
+        _count: {
+          select: {
+            reacts: {
+              where: { react_type: 'LIKE' }
+            },
+            comments: {}
           }
         },
 
@@ -669,6 +686,16 @@ class PostRepo {
             react_type: true
           }
         },
+
+        _count: {
+          select: {
+            reacts: {
+              where: { react_type: 'LIKE' }
+            },
+            comments: {}
+          }
+        },
+
         member: {
           select: {
             user: {

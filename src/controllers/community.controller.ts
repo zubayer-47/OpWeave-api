@@ -17,15 +17,18 @@ class CommunityController extends BaseController {
 
   private _getCommunities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.userId
-    const page = Number(req.query.page) || 1
-    const limit = Number(req.query.limit) || 10
+    const { page = 1, limit = 10 } = req.query
+
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
 
     try {
       const total = await communityRepo.totalCountOfCommunities()
 
-      res.setHeader('X-Total-Count', total.toString())
+      res.setHeader('X-Total-Count', total)
 
-      const communities = await communityRepo.getCommunities(userId, +page, +limit)
+      const communities = await communityRepo.getCommunities(userId, pageSizeNumber, skip)
 
       res.status(200).json({ communities })
     } catch (error) {

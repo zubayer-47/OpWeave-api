@@ -35,10 +35,6 @@ class PostController {
 
       const hasMore = totalPages > pageNumber
 
-      /**
-       * 20 / 10 = 2
-       */
-
       const processedPosts = posts.map((post) => {
         const isAdmin = post.community.members[0]?.role !== 'MEMBER'
         const isOwner = post.member.user.user_id === userId

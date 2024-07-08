@@ -81,7 +81,7 @@ class CommunityRepo {
     })
   }
 
-  public async getCommunities(user_id: string, page: number, limit: number) {
+  public async getCommunities(user_id: string, limit: number, skip: number) {
     return await this.community.findMany({
       relationLoadStrategy: 'join',
       where: {
@@ -100,7 +100,7 @@ class CommunityRepo {
         avatar: true
       },
       orderBy: { createdAt: 'asc' },
-      skip: (page - 1) * limit,
+      skip,
       take: limit
     })
   }
