@@ -12,7 +12,7 @@ cloudinary.config({
 const storage = multer.memoryStorage()
 export const upload: Multer = multer({ storage })
 
-export async function handleUpload(userId: string, file) {
+export async function handleUpload(userId: string, file: string) {
   const fileName = generateConsistentHash(userId)
 
   const res = await cloudinary.uploader.upload(file, {

@@ -1,10 +1,13 @@
+import { UploadApiResponse } from 'cloudinary'
 import { NextFunction, Request, Response } from 'express'
+import sharp from 'sharp'
 import prismadb from 'src/libs/prismadb'
-import { upload } from 'src/libs/uploadImage'
+import { upload, uploadWebPToCloudinary } from 'src/libs/uploadImage'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
 import { ErrorType } from 'src/types/custom'
+import { v4 as uid } from 'uuid'
 import BaseController from './base.controller'
 import MemberController from './member.controller'
 import PostController from './post.controller'
@@ -271,6 +274,80 @@ class CommunityController extends BaseController {
     }
   }
 
+  private _updateLogo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user.userId
+    const userRole = req.user.role
+    const communityId = req.params?.communityId
+    const file = req.file
+
+    const errors: ErrorType = {}
+
+    if (!file) errors.message = 'content missing'
+
+    if (userRole === 'MEMBER') errors.message = "You don't have access in it"
+
+    if (Object.keys(errors).length) {
+      res.status(400).json(errors)
+      return
+    }
+
+    try {
+      const outputFileName = `logo-${uid()}` // Unique filename
+
+      let uploadResult: UploadApiResponse | null
+
+      if (file) {
+        const webpBuffer = await sharp(file.buffer)
+          .webp({ quality: 50 }) // Convert to WebP
+          .toBuffer()
+
+        uploadResult = await uploadWebPToCloudinary(webpBuffer, {
+          folder: 'community_logos',
+          public_id: outputFileName
+        })
+      }
+
+      const communityLogo = await prismadb.community.findUnique({
+        where: { community_id: communityId },
+        select: { avatar: true }
+      })
+
+      const updatedLogo = await prismadb.community.update({
+        where: {
+          community_id: communityId
+        },
+        data: {
+          avatar: uploadResult?.secure_url || communityLogo?.avatar
+        },
+        select: {
+          community_id: true,
+          name: true,
+          bio: true,
+          description: true,
+          avatar: true,
+          createdAt: true,
+          members: {
+            where: {
+              user_id: userId,
+              community_id: communityId
+            },
+            select: {
+              member_id: true,
+              role: true
+            }
+          }
+        }
+      })
+
+      res.status(200).json({
+        message: 'Community Logo Updated Successfully',
+        community: { ...updatedLogo, member_id: updatedLogo.members[0].member_id, role: updatedLogo.members[0].role }
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+
   public configureRoutes(): void {
     /**
      * ? Community:
@@ -297,6 +374,9 @@ class CommunityController extends BaseController {
 
     // community info (query: communityId) -> testing purpose route
     this.router.get('/:communityId', this._auth, this._communityInfo)
+
+    // update community logo
+    this.router.patch('/:communityId/logo', this._auth, this._checkRoles, upload.single('avatar'), this._updateLogo)
 
     /**
      * ? Posts:

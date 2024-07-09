@@ -186,7 +186,7 @@ class PostController {
     const { content } = req.body
     const file = req.file
 
-    if (!content && !file) errors.content = 'Something is missing in content!'
+    if (!content && !file) errors.content = 'content missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)

@@ -285,6 +285,16 @@ class PostRepo {
             react_type: true
           }
         },
+
+        _count: {
+          select: {
+            reacts: {
+              where: { react_type: 'LIKE' }
+            },
+            comments: {}
+          }
+        },
+
         member: {
           select: {
             user: {
