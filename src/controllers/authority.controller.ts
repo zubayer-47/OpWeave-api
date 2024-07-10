@@ -1,11 +1,11 @@
-import { MemberRestrictions } from '@prisma/client'
 import { NextFunction, Request, Response } from 'express'
+import { isActiveCommunity } from 'src/libs/isActiveCommunity'
 import prismadb from 'src/libs/prismadb'
 import authorityRepo from 'src/repos/authority.repo'
 import communityRepo from 'src/repos/community.repo'
 import memberRepo from 'src/repos/member.repo'
 import postRepo from 'src/repos/post.repo'
-import { ErrorType, MemberRoleType, MuteUnmuteStatusType, RuleType } from 'src/types/custom'
+import { ErrorType, MemberRoleType, RuleType } from 'src/types/custom'
 import BaseController from './base.controller'
 
 class AuthorityController extends BaseController {
@@ -259,67 +259,65 @@ class AuthorityController extends BaseController {
   }
 
   // TODO: incomplete
-  private _toggleMuteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const userRole = req.user?.role
-    const errors: ErrorType = {}
+  // private _toggleMuteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  //   const userRole = req.user?.role
+  //   const errors: ErrorType = {}
 
-    const member_id = req.body?.member_id
-    const community_id = req.body?.community_id
-    const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
+  //   const member_id = req.body?.member_id
+  //   const community_id = req.body?.community_id
+  //   const status = req.params?.status.toLowerCase() as MuteUnmuteStatusType
 
-    if (userRole === 'MEMBER') errors.role = 'You do not have access to do it'
+  //   if (userRole === 'MEMBER') errors.role = 'You do not have access to do it'
 
-    if (!member_id) errors.message = 'content missing'
+  //   if (!member_id) errors.message = 'content missing'
 
-    if (!['mute', 'unmute'].includes(status)) errors.status = 'status missing'
+  //   if (!['mute', 'unmute'].includes(status)) errors.status = 'status missing'
 
-    if (Object.keys(errors).length) {
-      res.status(400).json(errors)
-      return
-    }
+  //   if (Object.keys(errors).length) {
+  //     res.status(400).json(errors)
+  //     return
+  //   }
 
-    const member = await memberRepo.get(member_id, community_id)
-    // console.log({ member })
-    if (!member) {
-      res.status(400).json({ message: 'Something went wrong! please try again' })
-      return
-    }
+  //   const member = await memberRepo.get(member_id, community_id)
+  //   // console.log({ member })
+  //   if (!member) {
+  //     res.status(400).json({ message: 'Something went wrong! please try again' })
+  //     return
+  //   }
 
-    if (member.restricts && MemberRestrictions.MUTE) {
-      res.status(403).json({ message: 'This Member already muted' })
-      return
-    }
-    // TODO: 4/6
-    // if (!member.restricts && MemberRestrictions.PUBLIC) {
-    //   res.status(403).json({ message: 'This Member already unmuted' })
-    //   return
-    // }
+  //   if (member.restricts && MemberRestrictions.MUTE) {
+  //     res.status(403).json({ message: 'This Member already muted' })
+  //     return
+  //   }
+  //   // TODO: 4/6
+  //   // if (!member.restricts && MemberRestrictions.PUBLIC) {
+  //   //   res.status(403).json({ message: 'This Member already unmuted' })
+  //   //   return
+  //   // }
 
-    try {
-      await memberRepo.toggleMuteMember(member_id, status)
+  //   try {
+  //     await memberRepo.toggleMuteMember(member_id, status)
 
-      res.status(200).json({ message: `member successfully ${status}d`, member_id })
-    } catch (error) {
-      next(error)
-    }
-  }
+  //     res.status(200).json({ message: `member successfully ${status}d`, member_id })
+  //   } catch (error) {
+  //     next(error)
+  //   }
+  // }
 
-  // TODO: incomplete
+  // TODO: incomplete in Frontend
   private _toggleBanMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userId = req.user?.userId
     const userRole = req.user?.role
     const errors: ErrorType = {}
 
     const member_id = req.params?.memberId
-    const { community_id, ban_reason } = req.body
+    const { community_id } = req.body
 
     const status = req.params?.status.toLowerCase()
 
-    // member_id, community_id, ban_reason, bannedBy
-
     if (userRole === 'MEMBER') errors.member = 'You do not have access to do it'
 
-    if (!member_id || !community_id || !ban_reason) errors.message = 'content missing'
+    if (!member_id || !community_id) errors.message = 'content missing'
 
     if (!['ban', 'unban'].includes(status)) errors.message = 'Status missing'
 
@@ -335,8 +333,62 @@ class AuthorityController extends BaseController {
         return
       }
 
-      // TODO: 4/1 work with ban member after fixing banned_member table
-      // const statusInfo = await
+      const communityIsActive = await isActiveCommunity(community_id)
+
+      console.log({ communityIsActive })
+
+      // Get current date and time
+      let currentDate = new Date()
+      // Add 3 hours
+      currentDate.setHours(currentDate.getHours() + 3)
+      // Format to ISO-8601
+      let banUntil = currentDate.toISOString()
+
+      if (communityIsActive) {
+        // Update the member in the specified community
+        await prismadb.member.updateMany({
+          where: {
+            // user_id: userId,
+            member_id,
+            community_id
+          },
+          data: {
+            restricts: 'BAN',
+            banUntil
+          }
+        })
+
+        // Update all other members for this user
+        await prismadb.member.updateMany({
+          where: {
+            user_id: member.user_id,
+            community_id: {
+              not: community_id
+            }
+          },
+          data: {
+            restricts: 'BAN',
+            banUntil
+          }
+        })
+
+        res.status(200).json({ message: 'Ban successful from all of his communities' })
+        return
+      }
+
+      // Ban only in the specified community
+      await prismadb.member.updateMany({
+        where: {
+          member_id,
+          community_id
+        },
+        data: {
+          restricts: 'BAN',
+          banUntil
+        }
+      })
+
+      res.status(200).json({ message: 'Ban successful from this community' })
     } catch (error) {
       next(error)
     }
@@ -439,10 +491,9 @@ class AuthorityController extends BaseController {
     this.router.patch('/posts/:postId', this._auth, this._checkRoles, this._toggleHidePost)
 
     // toggle mute/unmute member
-    this.router.patch('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
+    // this.router.patch('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
 
-    // TODO: make it
-    this.router.patch('members/:memberId/:status', this._auth, this._checkRoles, this._toggleBanMember)
+    this.router.patch('/members/:memberId/:status', this._auth, this._checkRoles, this._toggleBanMember)
 
     // add moderator
     this.router.post('/:role', this._auth, this._checkRoles, this._addAuthority)

@@ -48,6 +48,7 @@ class MemberRepo {
       },
       select: {
         member_id: true,
+        user_id: true,
         community: {
           select: {
             createdBy: true

@@ -58,14 +58,14 @@ class ExpressServer {
 
   private _routes(): void {
     this.express.get('/', async (_req: Request, res: Response) => {
-      // const post_matrix =
-      //   await prismadb.$queryRaw`SELECT SUM(total_posts) AS total_post_count FROM post_analytic WHERE community_id = 'c07131dd-bc6a-4927-aa5f-a3374988698d'`
-
-      // console.log({ post_matrix })
-
       res.send('All Ok !')
     })
 
+    this.express.use((req, _res, next) => {
+      console.log(`${req.method} ${req.path}`)
+
+      next()
+    })
     this.express.use('/api/v1/auth/', authController.router)
     this.express.use('/api/v1/users/', userController.router)
     this.express.use('/api/v1/communities/', communityController.router)

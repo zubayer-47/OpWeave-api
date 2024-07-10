@@ -22,14 +22,14 @@ model user {
   avatar   String?
   bio      String?
 
-  members member[]
-
-  isActive           Boolean              @default(true)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
-  // banned_member banned_member[]
+  members            member[]
   passwordResetToken passwordResetToken[]
   bookmarks          bookmark[]
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // banned_member banned_member[]
 
   @@index([username, email])
 }
@@ -87,6 +87,7 @@ model member {
   // scopes Scopes     @default(VIEWER)
 
   restricts MemberRestrictions @default(PUBLIC)
+  banUntil  DateTime?
 
   posts    post[]
   reacts   react[]
@@ -94,8 +95,8 @@ model member {
 
   joinedAt DateTime  @default(now())
   leavedAt DateTime?
-  // banned_member banned_member[] @relation("member_id")
-  // bannedBy      banned_member[] @relation("bannedBy")
+
+  // isBanned Boolean   @default(false)
 }
 
 model post {
