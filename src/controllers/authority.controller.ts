@@ -191,6 +191,7 @@ class AuthorityController extends BaseController {
     }
   }
 
+  // TODO: incomplete
   private _toggleHidePost = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userId = req.user?.userId
     const userRole = req.user?.role
@@ -257,6 +258,7 @@ class AuthorityController extends BaseController {
     }
   }
 
+  // TODO: incomplete
   private _toggleMuteMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
     const errors: ErrorType = {}
@@ -302,6 +304,7 @@ class AuthorityController extends BaseController {
     }
   }
 
+  // TODO: incomplete
   private _toggleBanMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userId = req.user?.userId
     const userRole = req.user?.role
@@ -324,6 +327,7 @@ class AuthorityController extends BaseController {
       res.status(400).json(errors)
       return
     }
+
     try {
       const member = await memberRepo.get(member_id, community_id)
       if (!member) {
@@ -338,6 +342,7 @@ class AuthorityController extends BaseController {
     }
   }
 
+  // TODO: incomplete in Frontend
   private _addAuthority = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userRole = req.user?.role
     const errors: ErrorType = {}
@@ -368,6 +373,7 @@ class AuthorityController extends BaseController {
     }
   }
 
+  // TODO: incomplete in Frontend
   private _removeAuthority = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userRole = req.user?.role
 
