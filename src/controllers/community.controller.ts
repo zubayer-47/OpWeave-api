@@ -403,22 +403,35 @@ class CommunityController extends BaseController {
     this.router.post(
       '/:communityId/posts',
       this._auth,
+      this._checkBanStatus,
       this._checkRoles,
       upload.single('post_image'),
       PostController._createPost
     )
 
-    this.router.post('/posts/react', this._auth, PostController._postReaction)
+    this.router.post('/posts/react', this._auth, this._checkBanStatus, PostController._postReaction)
 
     // Get details of a specific post in a community.
     this.router.get('/posts/:postId', this._auth, PostController._getPost)
 
     // Update a post in a specific community. ->> Only the post creator or authorized community members can modify the post.
-    this.router.patch('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._updatePost)
+    this.router.patch(
+      '/:communityId/posts/:postId',
+      this._auth,
+      this._checkBanStatus,
+      this._checkRoles,
+      PostController._updatePost
+    )
 
     // Delete a post in a specific community. ->> Only the post creator or authorized community members can delete the post.
     // TODO: 21/1 verify it later
-    this.router.delete('/:communityId/posts/:postId', this._auth, this._checkRoles, PostController._deletePost)
+    this.router.delete(
+      '/:communityId/posts/:postId',
+      this._auth,
+      this._checkBanStatus,
+      this._checkRoles,
+      PostController._deletePost
+    )
 
     // Get all Pending to approval posts by administrators
     this.router.get('/:communityId/pending/posts', this._auth, this._checkRoles, PostController._getPendingPosts)
@@ -447,7 +460,13 @@ class CommunityController extends BaseController {
     this.router.post('/:communityId/members', this._auth, MemberController._joinMember)
 
     // Remove/Leave a user from the community.
-    this.router.delete('/:communityId/members', this._auth, this._checkRoles, MemberController._leaveMember)
+    this.router.delete(
+      '/:communityId/members',
+      this._auth,
+      this._checkBanStatus,
+      this._checkRoles,
+      MemberController._leaveMember
+    )
   }
 }
 

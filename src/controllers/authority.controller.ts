@@ -305,7 +305,7 @@ class AuthorityController extends BaseController {
   // }
 
   // TODO: incomplete in Frontend
-  private _toggleBanMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  private _banMember = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     // const userId = req.user?.userId
     const userRole = req.user?.role
     const errors: ErrorType = {}
@@ -326,13 +326,12 @@ class AuthorityController extends BaseController {
       return
     }
 
+    const member = await memberRepo.get(member_id, community_id)
+    if (!member) {
+      res.status(404).json({ message: 'Member Not Found!' })
+      return
+    }
     try {
-      const member = await memberRepo.get(member_id, community_id)
-      if (!member) {
-        res.status(404).json({ message: 'Member Not Found!' })
-        return
-      }
-
       const communityIsActive = await isActiveCommunity(community_id)
 
       console.log({ communityIsActive })
@@ -346,7 +345,7 @@ class AuthorityController extends BaseController {
 
       if (communityIsActive) {
         // Update the member in the specified community
-        await prismadb.member.updateMany({
+        await prismadb.member.update({
           where: {
             // user_id: userId,
             member_id,
@@ -392,6 +391,41 @@ class AuthorityController extends BaseController {
     } catch (error) {
       next(error)
     }
+
+    // } else if (status === 'unban') {
+    //   try {
+    //     await prismadb.member.update({
+    //       where: {
+    //         member_id,
+    //         community_id
+    //       },
+    //       data: {
+    //         restricts: 'PUBLIC',
+    //         banUntil: null
+    //       }
+    //     })
+
+    //     // Unban in all other communities if the ban period has expired
+    //     await prismadb.member.updateMany({
+    //       where: {
+    //         user_id: member.user_id,
+    //         community_id: {
+    //           not: community_id
+    //         },
+    //         restricts: 'BAN',
+    //         banUntil: {
+    //           lt: new Date()
+    //         }
+    //       },
+    //       data: {
+    //         restricts: 'PUBLIC',
+    //         banUntil: null
+    //       }
+    //     })
+    //   } catch (error) {
+    //     next(error)
+    //   }
+    // }
   }
 
   // TODO: incomplete in Frontend
@@ -493,7 +527,7 @@ class AuthorityController extends BaseController {
     // toggle mute/unmute member
     // this.router.patch('/members/:status', this._auth, this._checkRoles, this._toggleMuteMember)
 
-    this.router.patch('/members/:memberId/:status', this._auth, this._checkRoles, this._toggleBanMember)
+    this.router.patch('/members/:memberId/ban', this._auth, this._checkRoles, this._banMember)
 
     // add moderator
     this.router.post('/:role', this._auth, this._checkRoles, this._addAuthority)

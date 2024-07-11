@@ -60,12 +60,6 @@ class ExpressServer {
     this.express.get('/', async (_req: Request, res: Response) => {
       res.send('All Ok !')
     })
-
-    this.express.use((req, _res, next) => {
-      console.log(`${req.method} ${req.path}`)
-
-      next()
-    })
     this.express.use('/api/v1/auth/', authController.router)
     this.express.use('/api/v1/users/', userController.router)
     this.express.use('/api/v1/communities/', communityController.router)
