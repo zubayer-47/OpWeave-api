@@ -176,6 +176,8 @@ class MemberRepo {
             avatar: true
           }
         },
+        restricts: true,
+        banUntil: true,
         role: true
       },
       skip: (page - 1) * limit,

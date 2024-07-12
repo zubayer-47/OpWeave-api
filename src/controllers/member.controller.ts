@@ -24,6 +24,7 @@ export default class MemberController {
     try {
       const total = await memberRepo.numOfMembersInCommunity(communityId, filterBy as FilterBy)
 
+      // const currentUserRole =
       const members = await memberRepo.getMembersInCommunity(communityId, filterBy as FilterBy, +page, +limit)
       // const members = await memberRepo.getMembersInCommunity(communityId, filterBy, +page, +limit)
 

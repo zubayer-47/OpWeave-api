@@ -306,10 +306,16 @@ class CommentController extends BaseController {
     this.router.get('/:commentId/reply', this._auth, this._getCommentReplies)
 
     //? POST: Create a new comment for a post
-    this.router.post('/post/:postId', this._auth, this._checkRolesWithPostId, this._createComment)
+    this.router.post('/post/:postId', this._auth, this._checkBanStatus, this._checkRolesWithPostId, this._createComment)
 
     //? POST: Add a reply to a comment
-    this.router.post('/:commentId/reply', this._auth, this._checkRolesWithPostId, this._createCommentReply)
+    this.router.post(
+      '/:commentId/reply',
+      this._auth,
+      this._checkBanStatus,
+      this._checkRolesWithPostId,
+      this._createCommentReply
+    )
 
     //? POST: Add a reply to a comment
     this.router.delete('/:commentId', this._auth, this._deleteComment)

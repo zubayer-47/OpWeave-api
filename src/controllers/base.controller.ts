@@ -119,7 +119,7 @@ export default abstract class BaseController {
       console.log(member, new Date() < new Date(member.banUntil), '--checkBanStatus')
 
       if (member.restricts === 'BAN' && member.banUntil && new Date() < new Date(member.banUntil)) {
-        res.status(403).json({ message: 'You are banned from interacting with this community.' })
+        res.status(403).json({ message: 'You are banned to interact with this community.' })
         return
       }
 

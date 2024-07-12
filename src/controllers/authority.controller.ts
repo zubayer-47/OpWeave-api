@@ -313,13 +313,13 @@ class AuthorityController extends BaseController {
     const member_id = req.params?.memberId
     const { community_id } = req.body
 
-    const status = req.params?.status.toLowerCase()
+    // const status = req.params?.status.toLowerCase()
 
     if (userRole === 'MEMBER') errors.member = 'You do not have access to do it'
 
     if (!member_id || !community_id) errors.message = 'content missing'
 
-    if (!['ban', 'unban'].includes(status)) errors.message = 'Status missing'
+    // if (!['ban', 'unban'].includes(status)) errors.message = 'Status missing'
 
     if (Object.keys(errors).length) {
       res.status(400).json(errors)

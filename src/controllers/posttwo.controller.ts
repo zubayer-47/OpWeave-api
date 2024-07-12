@@ -90,6 +90,14 @@ class PostTwoController extends BaseController {
                     }
                   }
                 }
+              },
+              _count: {
+                select: {
+                  reacts: {
+                    where: { react_type: 'LIKE' }
+                  },
+                  comments: {}
+                }
               }
             }
           }
