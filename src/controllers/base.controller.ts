@@ -106,6 +106,7 @@ export default abstract class BaseController {
           community_id: communityId
         },
         select: {
+          member_id: true,
           restricts: true,
           banUntil: true
         }
@@ -116,11 +117,38 @@ export default abstract class BaseController {
         return
       }
 
-      console.log(member, new Date() < new Date(member.banUntil), '--checkBanStatus')
+      console.log(member.banUntil, '==')
+      if (member.restricts === 'BAN' && member.banUntil) {
+        console.log(new Date() < new Date(member.banUntil))
+        if (new Date() < new Date(member.banUntil)) {
+          res.status(403).json({ message: 'You are banned to interact with this community.' })
+          return
+        }
 
-      if (member.restricts === 'BAN' && member.banUntil && new Date() < new Date(member.banUntil)) {
-        res.status(403).json({ message: 'You are banned to interact with this community.' })
-        return
+        await prismadb.member.update({
+          where: {
+            community_id: communityId,
+            member_id: member.member_id
+          },
+          data: {
+            restricts: 'PUBLIC',
+            banUntil: null
+          }
+        })
+
+        // const assignedCommunities = await prismadb.member.findMany({
+        //   where: {
+        //     user_id: userId,
+        //     leavedAt: null,
+        //     restricts: 'BAN',
+        //     banUntil: {
+        //       gte: new Date()
+        //     }
+        //   },
+        //   select: {
+        //     member_id: true
+        //   }
+        // })
       }
 
       next()
