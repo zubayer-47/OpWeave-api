@@ -117,9 +117,7 @@ export default abstract class BaseController {
         return
       }
 
-      console.log(member.banUntil, '==')
       if (member.restricts === 'BAN' && member.banUntil) {
-        console.log(new Date() < new Date(member.banUntil))
         if (new Date() < new Date(member.banUntil)) {
           res.status(403).json({ message: 'You are banned to interact with this community.' })
           return
@@ -128,27 +126,14 @@ export default abstract class BaseController {
         await prismadb.member.update({
           where: {
             community_id: communityId,
-            member_id: member.member_id
+            member_id: member.member_id,
+            restricts: 'BAN'
           },
           data: {
             restricts: 'PUBLIC',
             banUntil: null
           }
         })
-
-        // const assignedCommunities = await prismadb.member.findMany({
-        //   where: {
-        //     user_id: userId,
-        //     leavedAt: null,
-        //     restricts: 'BAN',
-        //     banUntil: {
-        //       gte: new Date()
-        //     }
-        //   },
-        //   select: {
-        //     member_id: true
-        //   }
-        // })
       }
 
       next()

@@ -21,16 +21,21 @@ export default class MemberController {
       return
     }
 
+    const pageNumber = parseInt(page as string, 10)
+    const pageSizeNumber = parseInt(limit as string, 10)
+    const skip = (pageNumber - 1) * pageSizeNumber
+
     try {
       const total = await memberRepo.numOfMembersInCommunity(communityId, filterBy as FilterBy)
 
-      // const currentUserRole =
-      const members = await memberRepo.getMembersInCommunity(communityId, filterBy as FilterBy, +page, +limit)
-      // const members = await memberRepo.getMembersInCommunity(communityId, filterBy, +page, +limit)
+      const members = await memberRepo.getMembersInCommunity(communityId, filterBy as FilterBy, pageSizeNumber, skip)
 
-      // TODO: 7/6 set total into headers
+      const totalPages = Math.ceil(total / pageSizeNumber)
+      const hasMore = totalPages > pageNumber
 
-      res.status(200).json({ members, total })
+      res.setHeader('x-total-count', total)
+
+      res.status(200).json({ members, hasMore })
     } catch (error) {
       next(error)
     }

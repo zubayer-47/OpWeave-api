@@ -149,7 +149,7 @@ class MemberRepo {
    * @param limit limit of each page
    */
   // public getMembersInCommunity(community_id: string, filterBy: 'all' | 'authority', page: number, limit: number) {
-  public getMembersInCommunity(community_id: string, filterBy: FilterBy, page: number, limit: number) {
+  public getMembersInCommunity(community_id: string, filterBy: FilterBy, limit: number, skip) {
     const where: Prisma.memberWhereInput =
       filterBy === 'all'
         ? {}
@@ -160,6 +160,7 @@ class MemberRepo {
           }
 
     return this.member.findMany({
+      relationLoadStrategy: 'join',
       where: {
         community_id,
         leavedAt: null,
@@ -180,7 +181,7 @@ class MemberRepo {
         banUntil: true,
         role: true
       },
-      skip: (page - 1) * limit,
+      skip,
       take: limit,
       orderBy: { joinedAt: 'asc' }
     })
