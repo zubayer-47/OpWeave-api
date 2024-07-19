@@ -2,7 +2,7 @@ import path from 'path'
 import TsconfigPathsPlugin from 'tsconfig-paths-webpack-plugin'
 import { Configuration } from 'webpack'
 import nodeExternals from 'webpack-node-externals'
-// import WebpackShellPluginNext from 'webpack-shell-plugin-next'
+import WebpackShellPluginNext from 'webpack-shell-plugin-next'
 
 const getConfig = (_env: { [key: string]: string }, argv: { [key: string]: string }): Configuration => {
   require('dotenv').config({
@@ -14,18 +14,18 @@ const getConfig = (_env: { [key: string]: string }, argv: { [key: string]: strin
     mode: argv.mode === 'production' ? 'production' : 'development',
     externals: [nodeExternals()],
     plugins: [
-      // new WebpackShellPluginNext({
-      //   onBuildStart: {
-      //     scripts: ['npm run clean:dev && npm run clean:prod'],
-      //     blocking: true,
-      //     parallel: false
-      //   },
-      //   onBuildEnd: {
-      //     scripts: ['npm run dev'],
-      //     blocking: false,
-      //     parallel: true
-      //   }
-      // })
+      new WebpackShellPluginNext({
+        onBuildStart: {
+          scripts: ['npm run clean:dev && npm run clean:prod'],
+          blocking: true,
+          parallel: false
+        },
+        onBuildEnd: {
+          scripts: ['npm run dev'],
+          blocking: false,
+          parallel: true
+        }
+      })
     ],
     module: {
       rules: [

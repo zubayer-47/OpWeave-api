@@ -112,12 +112,12 @@ export default abstract class BaseController {
         }
       })
 
-      if (!member) {
-        res.status(404).json({ message: 'Member not found' })
-        return
-      }
+      // if (!member) {
+      //   res.status(404).json({ message: 'Member not found' })
+      //   return
+      // }
 
-      if (member.restricts === 'BAN' && member.banUntil) {
+      if (member && member.restricts === 'BAN' && member.banUntil) {
         if (new Date() < new Date(member.banUntil)) {
           res.status(403).json({ message: 'You are banned to interact with this community.' })
           return

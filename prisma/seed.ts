@@ -342,7 +342,8 @@ async function main() {
           email: faker.internet.email(),
           password: '$2b$12$qMdY.IVBatUdDNNVxL2vxOShufXqP6JVih0J/xFPlYUkm/7TfZLsW',
           gender: 'MALE',
-          avatar: faker.image.avatar(),
+          // avatar: faker.image.avatar(),
+          avatar: 'http://localhost:5173/src/assets/profile.webp',
           bio: faker.lorem.sentence(),
           isActive: faker.datatype.boolean()
         }
@@ -360,7 +361,8 @@ async function main() {
           email: faker.internet.email(),
           password: '$2b$12$qMdY.IVBatUdDNNVxL2vxOShufXqP6JVih0J/xFPlYUkm/7TfZLsW',
           gender: 'MALE',
-          avatar: faker.image.avatar(),
+          // avatar: faker.image.avatar(),
+          avatar: 'http://localhost:5173/src/assets/profile2.jpg',
           bio: faker.lorem.sentence(),
           isActive: faker.datatype.boolean()
         }
@@ -375,7 +377,8 @@ async function main() {
         data: {
           name: faker.company.name(),
           bio: faker.lorem.words({ min: 1, max: 3 }),
-          avatar: faker.image.avatar(),
+          // avatar: faker.image.avatar(),
+          avatar: 'http://localhost:5173/src/assets/default.jpg',
           description: faker.lorem.paragraph()
         }
       })
@@ -422,7 +425,7 @@ async function main() {
           community_id: community.community_id,
           member_id: member.member_id,
           body: faker.lorem.paragraph(),
-          image_url: faker.image.avatar(),
+          image_url: 'http://localhost:5173/src/assets/profile.webp',
           hasPublished: true
           // isVisible: true,
         }
