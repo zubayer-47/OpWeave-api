@@ -331,6 +331,7 @@ class AuthorityController extends BaseController {
       res.status(404).json({ message: 'Member Not Found!' })
       return
     }
+
     try {
       const communityIsActive = await isActiveCommunity(community_id)
 

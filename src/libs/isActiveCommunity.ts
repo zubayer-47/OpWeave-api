@@ -16,7 +16,7 @@ export const isActiveCommunity = async (community_id: string) => {
       const totalPostCount = parseInt(postCount[0].total_post_count as string, 10)
       const active_member_count = parseInt(members[0].active_member as string, 10)
 
-      console.log({ totalPostCount, active_member_count, totalMemberCount })
+      // console.log({ totalPostCount, active_member_count, totalMemberCount })
 
       if (totalMemberCount >= 50 && totalPostCount >= 20) {
         const postPercentage = (active_member_count * 100) / totalMemberCount
