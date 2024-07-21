@@ -390,6 +390,16 @@ class PostRepo {
             }
           }
         },
+
+        bookmarks: {
+          where: {
+            user_id
+          },
+          select: {
+            bookmark_id: true
+          }
+        },
+
         community: {
           select: {
             members: {

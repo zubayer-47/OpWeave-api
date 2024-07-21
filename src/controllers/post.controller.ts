@@ -162,11 +162,13 @@ class PostController {
       const isAdmin = post.community.members[0]?.role !== 'MEMBER'
       const isOwner = post.member.user.user_id === userId
       const hasJoined = !!post.community.members.length
+      const isBookmarked = post.bookmarks.length
 
       const { ...processPost } = post
 
       const responsePost = {
         ...processPost,
+        bookmark: isBookmarked ? { bookmark_id: post.bookmarks[0].bookmark_id } : null,
         hasAccess: isAdmin || isOwner,
         hasJoined
       }
