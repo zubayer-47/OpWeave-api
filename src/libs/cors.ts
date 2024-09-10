@@ -1,5 +1,5 @@
 import cors from 'cors'
-export const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173']
+export const allowedOrigins = ['http://localhost:3000', 'http://localhost:5173', 'https://opweave.vercel.app']
 
 const corsOptions: cors.CorsOptions = {
   origin: function (origin: any, callback: Function) {
