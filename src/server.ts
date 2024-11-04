@@ -7,27 +7,24 @@ import hpp from 'hpp'
 import { Server as HttpServer, createServer } from 'http'
 import { HttpTerminator, createHttpTerminator } from 'http-terminator'
 import path from 'path'
-import { Server } from 'socket.io'
 
-import { DefaultEventsMap } from 'socket.io/dist/typed-events'
 import authController from './controllers/auth.controller'
 import authorityController from './controllers/authority.controller'
 import commentController from './controllers/comment.controller'
 import communityController from './controllers/community.controller'
 import posttwoController from './controllers/posttwo.controller'
 import userController from './controllers/user.controller'
+import corsOptions from './libs/cors'
 import { sysLog } from './libs/logger'
 
 class ExpressServer {
   public express: express.Application
   public server: HttpServer
-  public io: Server<DefaultEventsMap, DefaultEventsMap, DefaultEventsMap, any>
   public httpTerminator: HttpTerminator
 
   constructor() {
     this.express = express()
     this.server = createServer(this.express)
-    this.io = new Server(this.server)
     // this.io = new Server(this.server, {
     //   cors: {
     //     origin: 'http://localhost:5173/'
@@ -36,7 +33,6 @@ class ExpressServer {
     this.httpTerminator = createHttpTerminator({ server: this.server })
     this._configure()
     this._routes()
-    this._sockets()
     this._errorRoutes()
   }
 
@@ -45,8 +41,8 @@ class ExpressServer {
     this.express.enable('trust proxy')
     this.express.set('port', process.env.PORT || 8000)
     // Core Middlewares
-    // this.express.use(cors(corsOptions))
-    this.express.use(cors({ exposedHeaders: '*' }))
+    this.express.use(cors(corsOptions))
+    // this.express.use(cors({ exposedHeaders: '*' }))
     this.express.use(helmet())
     this.express.use(cookieParser())
     this.express.use(compression())
@@ -68,13 +64,6 @@ class ExpressServer {
     // this.express.use('/api/v1/members/', memberController.router)
     this.express.use('/api/v1/authority/', authorityController.router)
     this.express.use('/api/v1/comments/', commentController.router)
-  }
-
-  private _sockets() {
-    console.log('first')
-    this.io.on('connection', (socket) => {
-      console.log('client connected: ', socket.id)
-    })
   }
 
   private _errorRoutes(): void {

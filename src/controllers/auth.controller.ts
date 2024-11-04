@@ -83,8 +83,9 @@ class AuthController extends BaseController {
       })
 
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
-        expiresIn: '24h'
+        expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXP}d`
       })
+
       // set token to response cookie
       setJWT(token, res)
       // response the final data
@@ -117,7 +118,7 @@ class AuthController extends BaseController {
 
       const { password: pwd, ...data } = await userRepo.getCurrentUser(user.user_id)
       const token = sign({ aud: user?.user_id, iat: Math.floor(Date.now() / 1000) - 30 }, process.env?.JWT_SECRET, {
-        expiresIn: '24h'
+        expiresIn: `${process.env.JWT_ACCESS_TOKEN_EXP}d`
       })
       // set token to response cookie
       setJWT(token, res)
